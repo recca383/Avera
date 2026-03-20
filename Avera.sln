@@ -1,9 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37111.16 d17.14
+VisualStudioVersion = 17.14.37111.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avera.WebApi", "Avera.WebApi\Avera.WebApi.csproj", "{B004B66A-CBB2-4D72-98FB-823D83451EA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avera.Application", "Avera.Application\Avera.Application.csproj", "{AABF7FFE-2B66-4737-D6A5-512D927ED0FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avera.Domain", "Avera.Domain\Avera.Domain.csproj", "{B6DB31A3-9441-F850-F6C9-F0BE3A5FD41D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avera.Infrastructure", "Avera.Infrastructure\Avera.Infrastructure.csproj", "{20B39CDE-90C8-5B1F-D7EC-86A63684AE93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedKernel", "SharedKernel\SharedKernel.csproj", "{E68FA0BA-F0A4-F704-5156-C748B031AB9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +23,22 @@ Global
 		{B004B66A-CBB2-4D72-98FB-823D83451EA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B004B66A-CBB2-4D72-98FB-823D83451EA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B004B66A-CBB2-4D72-98FB-823D83451EA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AABF7FFE-2B66-4737-D6A5-512D927ED0FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AABF7FFE-2B66-4737-D6A5-512D927ED0FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AABF7FFE-2B66-4737-D6A5-512D927ED0FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AABF7FFE-2B66-4737-D6A5-512D927ED0FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6DB31A3-9441-F850-F6C9-F0BE3A5FD41D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6DB31A3-9441-F850-F6C9-F0BE3A5FD41D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6DB31A3-9441-F850-F6C9-F0BE3A5FD41D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6DB31A3-9441-F850-F6C9-F0BE3A5FD41D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20B39CDE-90C8-5B1F-D7EC-86A63684AE93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20B39CDE-90C8-5B1F-D7EC-86A63684AE93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20B39CDE-90C8-5B1F-D7EC-86A63684AE93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20B39CDE-90C8-5B1F-D7EC-86A63684AE93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E68FA0BA-F0A4-F704-5156-C748B031AB9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68FA0BA-F0A4-F704-5156-C748B031AB9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68FA0BA-F0A4-F704-5156-C748B031AB9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68FA0BA-F0A4-F704-5156-C748B031AB9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
