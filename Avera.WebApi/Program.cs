@@ -19,9 +19,9 @@ builder.Services.AddAuthorization();
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure();
+    .AddInfrastructure(builder.Configuration);
 
-builder.Services.AddEnpoints(Assembly.GetExecutingAssembly());
+builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
