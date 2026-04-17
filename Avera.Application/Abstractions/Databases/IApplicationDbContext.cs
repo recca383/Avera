@@ -3,8 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avera.Domain.Application.CaseImages;
+using Avera.Domain.Application.Cases;
+using Avera.Domain.Application.ExportedReports;
+using Avera.Domain.Application.Notifications;
+using Avera.Domain.Identity.ShareLinks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Avera.Application.Abstractions.Databases
 {
-    public interface IApplicationDbContext;
+    public interface IApplicationDbContext
+    {
+        DbSet<Case> Cases { get; set; }
+        DbSet<CaseImage> CaseImages { get; set; }
+        DbSet<ExportedReport> ExportedReports {get; set; }
+        DbSet<ShareLink> ShareLinks { get; set; }
+        DbSet<Notification> Notifications { get; set; }
+
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    }
 }
