@@ -6,5 +6,8 @@ using System.Threading.Tasks;
 
 namespace Avera.Application.Abstractions.Databases
 {
-    public interface IIdentityDbContext;
+    public interface IApplicationIdentityDbContext
+    {
+        
+    }
 }
