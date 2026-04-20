@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Avera.Domain.Identity.Roles
 {
-    public sealed class Role : IdentityRole
+    public sealed class Role : IdentityRole<Guid>
     {
     }
 }
