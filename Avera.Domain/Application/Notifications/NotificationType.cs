@@ -1,6 +1,6 @@
 ﻿namespace Avera.Domain.Application.Notifications
 {
-    public class NotificationType
+    public enum NotificationType
     {
     }
 }
