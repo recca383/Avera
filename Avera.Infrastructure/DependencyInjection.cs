@@ -1,5 +1,7 @@
-﻿using Avera.Infrastructure.Time;
+﻿using Avera.Infrastructure.Database.Application;
+using Avera.Infrastructure.Time;
 using Infrastructure.DomainEvents;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
@@ -25,7 +27,11 @@ namespace Avera.Infrastructure
 
         private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
-            
+            string? applicationConnectionString = configuration.GetConnectionString("ApplicationDB");
+            string? identityConnectionString = configuration.GetConnectionString("IdentityDB");
+
+            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(applicationConnectionString));
+            //services.AddDbContext<Ident
 
             return services;
         }
