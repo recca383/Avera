@@ -1,3 +1,5 @@
+using Avera.Domain.Identity.TenantSubscriptions;
+
 namespace Avera.Domain.Identity.SubscriptionPlans
 {
     public class SubscriptionPlan
@@ -13,5 +15,8 @@ namespace Avera.Domain.Identity.SubscriptionPlans
         public bool HasPrioritySupport { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set;}
+
+        // Navigation Properties
+        public List<TenantSubscription> TenantSubscriptions { get; set; } = new();
     }
 }
