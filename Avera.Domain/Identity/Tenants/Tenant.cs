@@ -12,7 +12,7 @@ namespace Avera.Domain.Identity.Tenants
         public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
-        public TenantSubscription TenantSubscription { get; set; } = new();
+        public List<TenantSubscription> TenantSubscriptions { get; set; } = new();
         public List<User> Users { get; set; } = new();
         public List<ShareLink> ShareLinks { get; set; } = new();
     }
