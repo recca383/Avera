@@ -1,4 +1,6 @@
-﻿using Avera.Infrastructure.Database.Application;
+﻿using Avera.Application.Abstractions.Databases;
+using Avera.Infrastructure.Database.Application;
+using Avera.Infrastructure.Database.Identity;
 using Avera.Infrastructure.Time;
 using Infrastructure.DomainEvents;
 using Microsoft.EntityFrameworkCore;
@@ -30,8 +32,8 @@ namespace Avera.Infrastructure
             string? applicationConnectionString = configuration.GetConnectionString("ApplicationDB");
             string? identityConnectionString = configuration.GetConnectionString("IdentityDB");
 
-            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(applicationConnectionString));
-            //services.AddDbContext<Ident
+            services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options => options.UseSqlServer(applicationConnectionString));
+            services.AddDbContext<IApplicationIdentityDbContext, ApplicationIdentityDbContext>(options => options.UseSqlServer(identityConnectionString));
 
             return services;
         }
