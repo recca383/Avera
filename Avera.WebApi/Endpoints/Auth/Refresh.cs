@@ -8,7 +8,9 @@ namespace Avera.WebApi.Endpoints.Auth
             routeBuilder.MapPost("/auth/refresh", () =>
             {
 
-            });
+            })
+           . WithTags(Tags.Auth)
+            ;
         }
     }
 }

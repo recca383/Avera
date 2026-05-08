@@ -8,7 +8,9 @@ namespace Avera.WebApi.Endpoints.Auth
             routeBuilder.MapPost("/auth/verify-email", ()=>
             {
 
-            });
+            })
+           . WithTags(Tags.Auth)
+            ;
         }
     }
 }

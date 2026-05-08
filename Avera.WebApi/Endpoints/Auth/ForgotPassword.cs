@@ -11,7 +11,8 @@ namespace Avera.WebApi.Endpoints.Auth
             {
                 
             })
-            .WithOpenApi();
+           . WithTags(Tags.Auth)
+           ;
         }
     }
 }
