@@ -13,6 +13,10 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Avera.WebApi/Avera.WebApi.csproj", "Avera.WebApi/"]
+COPY ["Avera.Infrastructure/Avera.Infrastructure.csproj", "Avera.Infrastructure/"]
+COPY ["Avera.Application/Avera.Infrastructure.csproj", "Avera.Application/"]
+COPY ["Avera.Domain/Avera.Domain.csproj", "Avera.Domain/"]
+COPY ["Avera.SharedKernel/Avera.SharedKernel.csproj", "Avera/SharedKernel/"]
 RUN dotnet restore "./Avera.WebApi/Avera.WebApi.csproj"
 COPY . .
 WORKDIR "/src/Avera.WebApi"
