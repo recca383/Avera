@@ -9,14 +9,18 @@ using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.Notifications;
 using Avera.Domain.Identity.ShareLinks;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.TenantSubscriptions;
+using Avera.Domain.Identity.Users;
 using Infrastructure.Database;
 using Infrastructure.DomainEvents;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using SharedKernel;
 
 namespace Avera.Infrastructure.Database.Application
 {
-    internal class ApplicationDbContext(DbContextOptions options,
+    internal class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
      IDomainEventsDispatcher domainEventsDispatcher)
     : DbContext(options), IApplicationDbContext
     {
@@ -28,9 +32,16 @@ namespace Avera.Infrastructure.Database.Application
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly,
+            type => type.Namespace == "Avera.Infrastructure.Database.Application.Configurations");
             
-            modelBuilder.HasDefaultSchema(Schemas.Default);
+            //modelBuilder.HasDefaultSchema(Schemas.Default);
+
+            modelBuilder.Ignore<User>();
+            modelBuilder.Ignore<ShareLink>();
+            modelBuilder.Ignore<Tenant>();
+            modelBuilder.Ignore<TenantSubscription>();
+
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

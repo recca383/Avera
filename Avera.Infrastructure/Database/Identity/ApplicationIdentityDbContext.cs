@@ -4,8 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avera.Application.Abstractions.Databases;
+using Avera.Domain.Application.CaseImages;
+using Avera.Domain.Application.Cases;
+using Avera.Domain.Application.ExportedReports;
+using Avera.Domain.Application.Notifications;
 using Avera.Domain.Identity.RoleClaims;
 using Avera.Domain.Identity.Roles;
+using Avera.Domain.Identity.ShareLinks;
 using Avera.Domain.Identity.SubscriptionPlans;
 using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.TenantSubscriptions;
@@ -22,22 +27,29 @@ using SharedKernel;
 
 namespace Avera.Infrastructure.Database.Identity
 {
-    public sealed class ApplicationIdentityDbContext(
+    internal sealed class ApplicationIdentityDbContext(
         DbContextOptions<ApplicationIdentityDbContext> options,
         IDomainEventsDispatcher domainEventsDispatcher)
         : IdentityDbContext<User, Role, Guid, UserClaim, UserRole, UserLogin, RoleClaim, UserToken>(options), IApplicationIdentityDbContext
     {
-        DbSet<Tenant> IApplicationIdentityDbContext.Tenants { get; set; }
-        DbSet<TenantSubscription> IApplicationIdentityDbContext.TenantSubscriptions { get; set; }
-        DbSet<SubscriptionPlan> IApplicationIdentityDbContext.SubscriptionPlans { get; set; }
+        public DbSet<Tenant> Tenants { get; set; }
+        public DbSet<TenantSubscription> TenantSubscriptions { get; set; }
+        public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+        public DbSet<ShareLink> ShareLinks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationIdentityDbContext).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationIdentityDbContext).Assembly,
+             type => type.Namespace == "Avera.Infrastructure.Database.Identity.Configurations");
             
-            modelBuilder.HasDefaultSchema(Schemas.Default);
+            //modelBuilder.HasDefaultSchema(Schemas.Default);
+
+            modelBuilder.Ignore<Case>();
+            modelBuilder.Ignore<CaseImage>();
+            modelBuilder.Ignore<ExportedReport>();
+            modelBuilder.Ignore<Notification>();
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
