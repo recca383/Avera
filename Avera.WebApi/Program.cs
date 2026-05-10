@@ -9,13 +9,16 @@ using Avera.Infrastructure;
 using Avera.WebApi;
 using Scalar.AspNetCore;
 using System.Reflection;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddAuthorization();
+
+builder.Configuration.AddAzureKeyVault(
+    new Uri(builder.Configuration["KeyVault:Uri"]!),
+    new DefaultAzureCredential()
+);
 
 builder.Services
     .AddApplication()
@@ -25,6 +28,7 @@ builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
 
 app.MapEndpoints();
 // Configure the HTTP request pipeline.
