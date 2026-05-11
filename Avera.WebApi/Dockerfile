@@ -14,9 +14,9 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Avera.WebApi/Avera.WebApi.csproj", "Avera.WebApi/"]
 COPY ["Avera.Infrastructure/Avera.Infrastructure.csproj", "Avera.Infrastructure/"]
-COPY ["Avera.Application/Avera.Infrastructure.csproj", "Avera.Application/"]
+COPY ["Avera.Application/Avera.Application.csproj", "Avera.Application/"]
 COPY ["Avera.Domain/Avera.Domain.csproj", "Avera.Domain/"]
-COPY ["Avera.SharedKernel/Avera.SharedKernel.csproj", "Avera/SharedKernel/"]
+COPY ["SharedKernel/SharedKernel.csproj", "SharedKernel/"]
 RUN dotnet restore "./Avera.WebApi/Avera.WebApi.csproj"
 COPY . .
 WORKDIR "/src/Avera.WebApi"
