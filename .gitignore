@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # Secrets
 Avera.WebApi/Secrets/appsettings.secrets.json
+Avera.Infrastructure/Database/Migrations/*
