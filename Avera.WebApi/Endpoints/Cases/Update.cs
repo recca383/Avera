@@ -1,15 +1,13 @@
 
-using SharedKernel;
-
 namespace Avera.WebApi.Endpoints.Cases
 {
-    internal sealed class Get : IEndpoint
+    internal sealed class Update : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapGet("cases", ()=>
+            routeBuilder.MapPatch("cases/{id:guid}", ()=>
             {
-                return Results.Ok("GET CASES");
+                
             })
            . WithTags(Tags.Cases)
             ;
