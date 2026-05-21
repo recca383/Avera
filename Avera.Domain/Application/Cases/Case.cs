@@ -14,11 +14,11 @@ namespace Avera.Domain.Application.Cases
         public Guid Id { get; set; }
         public string CaseCode { get; set; } = string.Empty;
         public string SubjectName { get; set; } = "No Subject";
-        public DocumentType Type { get; set; }
+        public AnalysisType AnalysisType { get; set; }
         public Priority Priority { get; set; }
         public string Notes { get; set; } = string.Empty;
         public Status Status { get; set; }
-        public Verdict Verdict { get; set; }
+        public bool Verdict { get; set; }
         public DateTime DeletedAt { get; set; }
         public DateTime CreatedAt { get; set; }
 

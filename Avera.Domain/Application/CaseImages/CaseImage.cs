@@ -10,10 +10,14 @@ namespace Avera.Domain.Application.CaseImages
     public sealed class CaseImage
     {
         public Guid Id { get; set; }
+        public int Index { get; set;}
+        public string MimeType { get; set; } = "image/jpeg";
+        public float Size { get; set; }
         public ImageType Type { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
-        public string StorageKey { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
+        public string BlobFileName { get; set; } = string.Empty;
+        public DateTime UploadedAt { get; set; }
+        public Guid UploadedById { get; set; }
+        public bool IsDeleted { get; set; }
 
         // Navigation Properties 
         public Case? Case { get; set; }
