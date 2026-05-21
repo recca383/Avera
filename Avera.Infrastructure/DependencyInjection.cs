@@ -1,9 +1,12 @@
-﻿using Avera.Application.Abstractions.Databases;
+﻿using Avera.Application.Abstractions.Authentication;
+using Avera.Application.Abstractions.Databases;
+using Avera.Infrastructure.Authentication;
 using Avera.Infrastructure.Database.Application;
 using Avera.Infrastructure.Database.Identity;
 using Avera.Infrastructure.Time;
 using Infrastructure.DomainEvents;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
@@ -29,11 +32,29 @@ namespace Avera.Infrastructure
 
         private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
-            string? applicationConnectionString = configuration.GetConnectionString("ApplicationDB");
-            string? identityConnectionString = configuration.GetConnectionString("IdentityDB");
+            System.Console.WriteLine("Loading Configuration...");
+            string? applicationConnectionString = configuration["ApplicationDbConnectionString"];
+            string? identityConnectionString = configuration["ApplicationIdentityDbConnectionString"];
 
-            services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options => options.UseSqlServer(applicationConnectionString));
-            services.AddDbContext<IApplicationIdentityDbContext, ApplicationIdentityDbContext>(options => options.UseSqlServer(identityConnectionString));
+            services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
+             options.UseSqlServer(applicationConnectionString, sqlServerOptionsAction: sqlOptions =>
+             {
+                 sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount:3,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd:null
+                 );
+             }));
+
+            services.AddDbContext<IApplicationIdentityDbContext, ApplicationIdentityDbContext>(options =>
+             options.UseSqlServer(identityConnectionString, sqlServerOptionsAction: sqlOptions =>
+             {
+                 sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount:3,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd:null
+                 );
+             }));
 
             return services;
         }
@@ -45,7 +66,8 @@ namespace Avera.Infrastructure
 
         private static IServiceCollection AddAuthenticationInternal(this IServiceCollection services, IConfiguration configuration)
         {
-
+            services.AddHttpContextAccessor();
+            services.AddScoped<IUserContext, UserContext>();
 
             return services;
         }

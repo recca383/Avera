@@ -12,7 +12,7 @@ namespace Avera.Infrastructure.Database.Application.Configurations
             builder.HasKey(ci => ci.Id);
             
             builder.HasIndex(ci => ci.CaseId);
-            builder.HasIndex(ci => ci.CreatedAt);
+            builder.HasIndex(ci => ci.UploadedAt);
             
             builder.HasOne<Case>(ci => ci.Case)
                 .WithMany(c => c.CaseImages)
