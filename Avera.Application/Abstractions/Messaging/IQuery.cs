@@ -1,4 +1,4 @@
-namespace Avera.Application.Messaging
+namespace Avera.Application.Abstractions.Messaging
 {
     public interface IQuery<TResponse>;
 }

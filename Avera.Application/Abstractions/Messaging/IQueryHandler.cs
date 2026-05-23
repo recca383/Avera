@@ -1,6 +1,6 @@
 using SharedKernel;
 
-namespace Avera.Application.Messaging
+namespace Avera.Application.Abstractions.Messaging
 {
     public interface IQueryHandler<TQuery, TResponse> where TQuery : IQuery<TResponse>
     {
