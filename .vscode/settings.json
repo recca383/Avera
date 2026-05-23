@@ -1,6 +1,10 @@
 {
     "cSpell.words": [
         "Avera",
-        "nvarchar"
+        "averablobcontainer",
+        "Npgsql",
+        "numofcases",
+        "nvarchar",
+        "Serilog"
     ]
 }
