@@ -1,13 +1,21 @@
 
+using Avera.Application.Abstractions.Messaging;
+using Avera.Application.Abstractions.ML.Health;
+using Avera.Application.ML.Health;
+using Avera.WebApi.Extensions;
+using Avera.WebApi.Infrastructure;
+
 namespace Avera.WebApi.Endpoints.ML
 {
     internal sealed class Health : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapGet("ml/health", ()=>
+            routeBuilder.MapGet("ml/health", async (ICommandHandler<GetMLHealthCommand, GetMLHealthResponse> handler) =>
             {
-                
+                var result = await handler.Handle(new GetMLHealthCommand(), CancellationToken.None);
+
+                return result.Match(Results.Ok,CustomResults.Problem);
             })
             .WithTags(Tags.ML);
         }
