@@ -1,9 +1,6 @@
-using Avera.Application.Messaging;
+using Avera.Application.Abstractions.Messaging;
 
 namespace Avera.Application.Cases.GetById
 {
-    public sealed class GetCaseByIdQuery : IQuery<GetCaseByIdQueryResult>
-    {
-        public Guid CaseId { get; set; }
-    }
+    public sealed record GetCaseByIdQuery(Guid CaseId) : IQuery<GetCaseByIdQueryResult>;
 }
