@@ -1,4 +1,4 @@
-using Avera.Application.Messaging;
+using Avera.Application.Abstractions.Messaging;
 using Avera.Domain.Application.Cases;
 
 namespace Avera.Application.PatchStatus

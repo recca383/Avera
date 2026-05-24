@@ -1,4 +1,4 @@
-using Avera.Application.Messaging;
+using Avera.Application.Abstractions.Messaging;
 
 namespace Avera.Application.PatchIsViewed
 {
