@@ -1,14 +1,14 @@
-using Avera.Application.Messaging;
 using Avera.Application.Cases.Get;
 using SharedKernel;
 using Avera.Application.Abstractions.Databases;
 using Avera.Domain.Application.Cases;
 using Avera.Application.CaseImages;
 using Microsoft.EntityFrameworkCore;
+using Avera.Application.Abstractions.Messaging;
 
 namespace Avera.Application.Cases.Get
 {
-    public class GetCaseQueryHandler(IApplicationDbContext applicationDbContext) : IQueryHandler<GetCasesQuery, GetCasesQueryResult>
+    internal class GetCaseQueryHandler(IApplicationDbContext applicationDbContext) : IQueryHandler<GetCasesQuery, GetCasesQueryResult>
     {
         public async Task<Result<GetCasesQueryResult>> Handle(GetCasesQuery query, CancellationToken cancellationToken)
         {
@@ -32,24 +32,26 @@ namespace Avera.Application.Cases.Get
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(c => new CaseDto
-                {
-                    Id = c.Id,
-                    CaseCode = c.CaseCode,
-                    SubjectName = c.SubjectName,
-                    Examiner = c.User != null ? c.User.UserName! : "Unknown",
-                    Priority = c.Priority,
-                    CreatedAt = c.CreatedAt
-                });
+                (
+                    c.Id,
+                    c.CaseCode,
+                    c.SubjectName,
+                    c.User != null ? c.User.UserName! : "Unknown",
+                    c.Priority,
+                    c.CreatedAt,
+                    c.Status,
+                    c.AnalysisType,
+                    false
+                ));
 
             List<CaseDto> pagedCasesList = await pagedCases.ToListAsync(cancellationToken);
 
-            GetCasesQueryResult? result = new GetCasesQueryResult
-            {
-                Cases = pagedCasesList,
-                TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
-            };
+            GetCasesQueryResult? result = new(
+                 Cases: pagedCasesList,
+                 TotalCount: totalCount,
+                 Page: page,
+                 PageSize: pageSize
+            );
 
             return Result.Success(result);
         }
