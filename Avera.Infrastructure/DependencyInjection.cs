@@ -1,8 +1,12 @@
 ﻿using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
+using Avera.Application.Abstractions.ML;
+using Avera.Application.Abstractions.Storage;
 using Avera.Infrastructure.Authentication;
 using Avera.Infrastructure.Database.Application;
 using Avera.Infrastructure.Database.Identity;
+using Avera.Infrastructure.ML;
+using Avera.Infrastructure.Storage;
 using Avera.Infrastructure.Time;
 using Infrastructure.DomainEvents;
 using Microsoft.EntityFrameworkCore;
@@ -16,14 +20,16 @@ namespace Avera.Infrastructure
     public static class DependencyInjection
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration) =>
-            services.AddServices()
+            services.AddServices(configuration)
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
             .AddAuthorizationInternal();
 
-        private static IServiceCollection AddServices(this IServiceCollection services)
+        private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddScoped<IMLService, MLService>();    
+            services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
@@ -37,24 +43,10 @@ namespace Avera.Infrastructure
             string? identityConnectionString = configuration["ApplicationIdentityDbConnectionString"];
 
             services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
-             options.UseSqlServer(applicationConnectionString, sqlServerOptionsAction: sqlOptions =>
-             {
-                 sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount:3,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd:null
-                 );
-             }));
+             options.UseNpgsql(applicationConnectionString));
 
             services.AddDbContext<IApplicationIdentityDbContext, ApplicationIdentityDbContext>(options =>
-             options.UseSqlServer(identityConnectionString, sqlServerOptionsAction: sqlOptions =>
-             {
-                 sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount:3,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd:null
-                 );
-             }));
+             options.UseNpgsql(identityConnectionString));
 
             return services;
         }

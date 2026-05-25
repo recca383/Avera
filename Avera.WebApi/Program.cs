@@ -1,12 +1,6 @@
 using Avera.WebApi.Extensions;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Abstractions;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
 using Avera.Application;
 using Avera.Infrastructure;
-using Avera.WebApi;
 using Scalar.AspNetCore;
 using System.Reflection;
 using Azure.Identity;
@@ -19,7 +13,7 @@ builder.Configuration.AddAzureKeyVault(
     new Uri(builder.Configuration["KeyVault:Uri"]!),
     new DefaultAzureCredential()
 );
-
+builder.Services.AddHttpClient();
 builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
