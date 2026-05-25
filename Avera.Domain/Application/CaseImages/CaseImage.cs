@@ -11,6 +11,7 @@ namespace Avera.Domain.Application.CaseImages
     {
         public Guid Id { get; set; }
         public int Index { get; set;}
+        
         public string MimeType { get; set; } = "image/jpeg";
         public float Size { get; set; }
         public ImageType Type { get; set; }
@@ -20,8 +21,15 @@ namespace Avera.Domain.Application.CaseImages
         public bool IsDeleted { get; set; }
 
         // Navigation Properties 
-        public Case? Case { get; set; }
+        public Case Case{ get; set; } = null!;
         public Guid CaseId { get; set; }
+
+        public string FileName => Type switch 
+        {
+            ImageType.Suspected => $"F{Index}.jpg",
+            ImageType.Reference => $"G{Index}.jpg",
+            _ => throw new InvalidOperationException("Invalid image type")
+        };
     
     }
 }

@@ -1,7 +1,7 @@
 
 namespace Avera.WebApi.Endpoints.ML
 {
-    internal sealed class Results : IEndpoint
+    internal sealed class ViewResults : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
