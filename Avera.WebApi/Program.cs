@@ -20,11 +20,13 @@ builder.Services
 
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 builder.Services.AddOpenApi();
-
+builder.Services.AddAntiforgery();
 var app = builder.Build();
 
 
 app.MapEndpoints();
+
+app.UseAntiforgery();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

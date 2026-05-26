@@ -1,5 +1,6 @@
 using System.Reflection.Metadata;
 using Avera.Application.Abstractions.Storage;
+using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -26,14 +27,13 @@ namespace Avera.Infrastructure.Storage
         
         public Task DeleteAsync(string fileUrl, CancellationToken cancellationToken = default)
         {
-            var blobName = Path.GetFileName(fileUrl);
-
-            return _containerClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+            var blobClient = _containerClient.GetBlobClient(fileUrl);
+            return blobClient.DeleteAsync(cancellationToken: cancellationToken);
         }
 
         public async Task<Stream?> DownloadAsync(string fileUrl, CancellationToken cancellationToken = default)
         {
-            var blobClient = _containerClient.GetBlobClient(Path.GetFileName(fileUrl));
+            var blobClient = _containerClient.GetBlobClient(fileUrl);
 
             if (!await blobClient.ExistsAsync(cancellationToken))
             {
