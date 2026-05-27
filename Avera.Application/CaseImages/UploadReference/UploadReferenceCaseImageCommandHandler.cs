@@ -1,0 +1,64 @@
+using Avera.Application.Abstractions.Databases;
+using Avera.Application.Abstractions.Messaging;
+using Avera.Application.Abstractions.Storage;
+using Avera.Domain.Application.CaseImages;
+using Avera.Domain.Application.Cases;
+using Microsoft.Extensions.Logging;
+using SharedKernel;
+
+namespace Avera.Application.CaseImages.UploadReference
+{
+    internal sealed class UploadReferenceCaseImageCommandHandler
+    (IApplicationDbContext applicationDbContext,
+    IBlobStorageService blobStorage,
+    ILogger<UploadReferenceCaseImageCommandHandler> logger) : ICommandHandler<UploadReferenceCaseImageCommand, Guid>
+    {
+        public async Task<Result<Guid>> Handle(UploadReferenceCaseImageCommand command, CancellationToken cancellationToken)
+        {
+            logger.LogInformation("Handling UploadReferenceCaseImageCommand for Case with ID {CaseId}", command.CaseId);
+            var selectedCase = applicationDbContext.Cases.Find(command.CaseId);
+
+            if (selectedCase is null)
+            {
+                logger.LogWarning("Case with ID {CaseId} not found", command.CaseId);
+                return Result.Failure<Guid>(CaseErrors.CaseNotFound);
+            }
+
+            var newImage = new CaseImage
+            {
+                Id = Guid.NewGuid(),
+                MimeType = command.MimeType,
+                CaseId = command.CaseId,
+                Case = selectedCase,
+                Index = command.Index,
+                Type = ImageType.Reference,
+                Size = command.Size,
+                UploadedAt = DateTime.UtcNow,
+            };
+
+            try
+            {
+                logger.LogInformation("Uploading image for Case with ID {CaseId} to blob storage", command.CaseId);
+                await blobStorage.UploadFileAsync(
+                    command.File,
+                    newImage.BlobName,
+                    command.MimeType,
+                    cancellationToken
+                );
+
+                applicationDbContext.CaseImages.Add(newImage);
+                selectedCase.CaseImages.Add(newImage);
+                await applicationDbContext.SaveChangesAsync(cancellationToken);
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to upload image for Case with ID {CaseId}", command.CaseId);
+                return Result.Failure<Guid>(CaseImageErrors.ImageUploadFailed);
+            }
+
+
+            return Result.Success(newImage.Id);
+        }
+    }
+}
