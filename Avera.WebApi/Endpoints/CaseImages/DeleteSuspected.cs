@@ -27,7 +27,9 @@ namespace Avera.WebApi.Endpoints.CaseImages
                 var result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(Results.NoContent, CustomResults.Problem);
-            });
+            })
+            .WithTags(Tags.CaseImages)
+            .WithSummary("Delete a suspected image from a case");
         }
     }
 }

@@ -36,9 +36,9 @@ namespace Avera.WebApi.Endpoints.CaseImages
                 
                 return result.Match(Results.Ok, CustomResults.Problem);
             })
-            .DisableAntiforgery(); // Development Purpose Only - Remove Before Production;
-
-            //.WithTags(Tags.CaseImages);
+            .DisableAntiforgery()
+            .WithTags(Tags.CaseImages)
+            .WithSummary("Upload a suspected image for a case"); // Development Purpose Only - Remove Before Production;
         }
     }
 }

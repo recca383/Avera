@@ -29,7 +29,9 @@ namespace Avera.WebApi.Endpoints.CaseImages
                 return result.Match(
                     onsuccess => Results.Stream(result.Value.ImageStream),
                     CustomResults.Problem);
-            });
+            })
+            .WithTags(Tags.CaseImages)
+            .WithSummary("Get a suspected image by index");
         }
     }
 }
