@@ -4,6 +4,7 @@ namespace Avera.WebApi.Endpoints
     {
         public static string Auth = "Authentications";
         public static string Cases = "Cases";
+        public static string CaseImages = "Case Images";
         public static string Export = "Exported Files";
         public static string ML = "ML Inferences";
         public static string Notifications = "Notifications";
