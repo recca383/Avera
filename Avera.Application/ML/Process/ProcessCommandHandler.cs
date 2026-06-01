@@ -3,6 +3,7 @@ using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Abstractions.ML;
 using Avera.Domain.Application.CaseImages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
@@ -16,12 +17,15 @@ namespace Avera.Application.ML.Process
         public async Task<Result<ProcessResponse>> Handle(ProcessCommand command, CancellationToken cancellationToken)
         {
             logger.LogInformation("Processing ML for Case with Id: {CaseId}", command.CaseId);
-            var selectedCase = await dbContext.Cases.FindAsync(new object[] { command.CaseId }, cancellationToken);
+            var selectedCase = await dbContext.Cases
+                                                    .Include(c => c.CaseImages)
+                                                    .FirstOrDefaultAsync(c => c.Id == command.CaseId
+                                                        , cancellationToken);
 
             logger.LogInformation("Selected Case with Id: {CaseId} has {NumberOfImages} images", selectedCase!.Id, selectedCase.CaseImages.Count);
             var processRequest = new ProcessRequest(
                 CaseName: selectedCase!.CaseCode,
-                OutputBlobName: $"{selectedCase.Id}.json",
+                OutputBlobName: "output.json",
                 QuestionedImageUrl: selectedCase.CaseImages
                                     .Where(ci => ci.Type == ImageType.Suspected)
                                     .Select(ci => ci.FileName)

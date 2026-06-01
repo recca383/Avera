@@ -30,28 +30,20 @@ namespace Avera.Infrastructure.ML
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<GetMLHealthResponse>(cancellationToken);
+            return await response.Content.ReadFromJsonAsync<GetMLHealthResponse>(cancellationToken)
+                   ?? throw new InvalidOperationException("Failed to deserialize ML health response.");
         }
 
         public async Task<ProcessResponse> ProcessAsync(ProcessRequest request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Sending process request for Case with Name: {CaseName}", request.CaseName);
-            var testrequest = new ProcessRequest(
-                CaseName: "Case-0001",
-                OutputBlobName: "testcase.json",
-                QuestionedImageUrl: "F1.png",
-                ReferenceImageUrls: new List<string> { 
-                    "G1.png",
-                    "G2.png",
-                    "G3.png",
-                    "G4.png"}
-            );
             
-            var response = await _httpClient.PostAsJsonAsync("/process", testrequest, cancellationToken);
+            var response = await _httpClient.PostAsJsonAsync("/process", request, cancellationToken);
 
             response.EnsureSuccessStatusCode();
             _logger.LogInformation("Received process response for Case with Name: {CaseName} with status: {Status}", request.CaseName, response.StatusCode);
-            return await response.Content.ReadFromJsonAsync<ProcessResponse>(cancellationToken);
+            return await response.Content.ReadFromJsonAsync<ProcessResponse>(cancellationToken) ?? 
+                   throw new InvalidOperationException("Failed to deserialize ML process response.");
         }
     }
 }
