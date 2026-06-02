@@ -27,5 +27,8 @@ namespace Avera.Domain.Application.Cases
         public Guid UserId { get; set; }
         public List<CaseImage> CaseImages { get; set; } = new();
         public List<ExportedReport> ExportedReports { get; set; } = new();
+
+        // Static Properties
+        public static string OutputBlob => $"output.json";
     }
 }
