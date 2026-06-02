@@ -22,5 +22,10 @@ namespace Avera.Domain.Application.Cases
             "case_already_at_status",
             "The case is already at the specified status.",
             ErrorType.Conflict);
+
+        public static CaseErrors MLResultsNotFound => new CaseErrors(
+            "ml_results_not_found",
+            "ML results for the specified case were not found.",
+            ErrorType.NotFound);
     }
 }
