@@ -28,7 +28,7 @@ namespace Avera.Infrastructure.Storage
         public Task DeleteAsync(string fileUrl, CancellationToken cancellationToken = default)
         {
             var blobClient = _containerClient.GetBlobClient(fileUrl);
-            return blobClient.DeleteAsync(cancellationToken: cancellationToken);
+            return blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
         }
 
         public async Task<Stream?> DownloadAsync(string fileUrl, CancellationToken cancellationToken = default)
