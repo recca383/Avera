@@ -10,7 +10,7 @@ namespace Avera.WebApi.Endpoints.ML
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapPost("cases/{caseId:guid}/analysis", async (
+            routeBuilder.MapGet("cases/{caseId:guid}/analysis", async (
                 Guid caseId,
                 ICommandHandler<ProcessCommand, ProcessResponse> commandHandler,
                 CancellationToken cancellationToken
@@ -22,7 +22,8 @@ namespace Avera.WebApi.Endpoints.ML
 
                 return result.Match(Results.Ok, CustomResults.Problem);
             })
-            .WithTags(Tags.ML);
+            .WithTags(Tags.ML)
+            .WithSummary("Analyze a case using ML");
         }
     }
 }
