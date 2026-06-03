@@ -21,8 +21,8 @@ namespace Avera.WebApi.Endpoints.Cases
 
                 return result.Match(Results.Ok, CustomResults.Problem);
             })
-           . WithTags(Tags.Cases)
-           .WithName("Get By Id")
+           .WithTags(Tags.Cases)
+           .WithSummary("Get a case by its ID")
             ;
         }
     }
