@@ -22,8 +22,9 @@ namespace Avera.WebApi.Endpoints.Cases
 
                 return result.Match(Results.NoContent, CustomResults.Problem);
             })
-           .WithTags(Tags.Cases)
-           .WithName("Delete")
+            .WithTags(Tags.Cases)
+            .WithSummary("Delete an existing case")
+
             ;
         }
     }
