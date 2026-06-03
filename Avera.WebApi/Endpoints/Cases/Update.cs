@@ -34,7 +34,8 @@ namespace Avera.WebApi.Endpoints.Cases
 
                 return result.Match(Results.Ok, CustomResults.Problem);
             })
-           . WithTags(Tags.Cases)
+            .WithTags(Tags.Cases)
+            .WithSummary("Update an existing case")
             ;
         }
     }
