@@ -5,6 +5,7 @@
         "averablobcontainer",
         "bbox",
         "Gradcam",
+        "Hmac",
         "Npgsql",
         "numofcases",
         "nvarchar",
