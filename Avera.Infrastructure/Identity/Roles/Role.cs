@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Avera.Domain.Identity.RoleClaims
+namespace Avera.Infrastructure.Identity.Roles
 {
-    public sealed class RoleClaim : IdentityRoleClaim<Guid>
+    public sealed class Role : IdentityRole<Guid>
     {
     }
 }

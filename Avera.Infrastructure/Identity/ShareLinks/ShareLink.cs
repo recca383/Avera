@@ -4,9 +4,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Avera.Domain.Identity.Tenants;
+using Avera.Infrastructure.Identity.Tenants;
 
-namespace Avera.Domain.Identity.ShareLinks
+namespace Avera.Infrastructure.Identity.ShareLinks
 {
     public sealed class ShareLink
     {
