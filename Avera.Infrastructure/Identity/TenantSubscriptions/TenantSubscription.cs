@@ -1,7 +1,7 @@
-using Avera.Domain.Identity.SubscriptionPlans;
-using Avera.Domain.Identity.Tenants;
+using Avera.Infrastructure.Identity.SubscriptionPlans;
+using Avera.Infrastructure.Identity.Tenants;
 
-namespace Avera.Domain.Identity.TenantSubscriptions
+namespace Avera.Infrastructure.Identity.TenantSubscriptions
 {
     public class TenantSubscription
     {

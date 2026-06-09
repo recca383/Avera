@@ -1,9 +1,8 @@
+using Avera.Infrastructure.Identity.ShareLinks;
+using Avera.Infrastructure.Identity.TenantSubscriptions;
+using Avera.Infrastructure.Identity.Users;
 
-using Avera.Domain.Identity.ShareLinks;
-using Avera.Domain.Identity.TenantSubscriptions;
-using Avera.Domain.Identity.Users;
-
-namespace Avera.Domain.Identity.Tenants
+namespace Avera.Infrastructure.Identity.Tenants
 {
     public class Tenant{
         public Guid Id { get; set; }
