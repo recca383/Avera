@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Avera.Domain.Identity.Users
+namespace Avera.Infrastructure.Identity.Users
 {
     internal class UserErrors
     {
