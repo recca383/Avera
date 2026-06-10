@@ -1,25 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avera.Application.Abstractions.Databases;
-using Avera.Domain.Application.CaseImages;
+﻿using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.Notifications;
-using Avera.Domain.Identity.RoleClaims;
-using Avera.Domain.Identity.Roles;
-using Avera.Domain.Identity.ShareLinks;
-using Avera.Domain.Identity.SubscriptionPlans;
-using Avera.Domain.Identity.Tenants;
-using Avera.Domain.Identity.TenantSubscriptions;
-using Avera.Domain.Identity.UserClaims;
-using Avera.Domain.Identity.UserLogins;
-using Avera.Domain.Identity.UserRoles;
-using Avera.Domain.Identity.Users;
-using Avera.Domain.Identity.UserTokens;
-using Infrastructure.Database;
+using Avera.Infrastructure.Identity;
+using Avera.Infrastructure.Identity.Roles;
+using Avera.Infrastructure.Identity.ShareLinks;
+using Avera.Infrastructure.Identity.SubscriptionPlans;
+using Avera.Infrastructure.Identity.Tenants;
+using Avera.Infrastructure.Identity.TenantSubscriptions;
+using Avera.Infrastructure.Identity.Users;
 using Infrastructure.DomainEvents;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,10 +16,10 @@ using SharedKernel;
 
 namespace Avera.Infrastructure.Database.Identity
 {
-    internal sealed class ApplicationIdentityDbContext(
-        DbContextOptions<ApplicationIdentityDbContext> options,
+    internal sealed class IdentityDbContext(
+        DbContextOptions<IdentityDbContext> options,
         IDomainEventsDispatcher domainEventsDispatcher)
-        : IdentityDbContext<User, Role, Guid, UserClaim, UserRole, UserLogin, RoleClaim, UserToken>(options), IApplicationIdentityDbContext
+        : IdentityDbContext<User, Role, Guid>(options)
     {
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<TenantSubscription> TenantSubscriptions { get; set; }
@@ -41,7 +30,7 @@ namespace Avera.Infrastructure.Database.Identity
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationIdentityDbContext).Assembly,
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly,
              type => type.Namespace == "Avera.Infrastructure.Database.Identity.Configurations");
             
             //modelBuilder.HasDefaultSchema(Schemas.Default);
