@@ -1,5 +1,5 @@
 using Avera.Domain.Application.Notifications;
-using Avera.Domain.Identity.Users;
+using Avera.Infrastructure.Identity.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,9 +13,6 @@ namespace Avera.Infrastructure.Database.Application.Configurations
 
             builder.HasIndex(n => n.CreatedAt);
 
-            builder.HasOne<User>(n => n.User)
-                .WithMany(u => u.Notifications)
-                .HasForeignKey(n => n.UserId);
         }
     }
 }
