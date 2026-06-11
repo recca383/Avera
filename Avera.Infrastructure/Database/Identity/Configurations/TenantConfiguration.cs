@@ -1,6 +1,5 @@
-using Avera.Domain.Identity.ShareLinks;
-using Avera.Domain.Identity.Tenants;
-using Avera.Domain.Identity.TenantSubscriptions;
+using Avera.Infrastructure.Identity.ShareLinks;
+using Avera.Infrastructure.Identity.Tenants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
