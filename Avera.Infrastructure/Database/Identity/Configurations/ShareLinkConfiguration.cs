@@ -1,4 +1,4 @@
-using Avera.Domain.Identity.ShareLinks;
+using Avera.Infrastructure.Identity.ShareLinks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
