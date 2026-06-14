@@ -27,7 +27,7 @@ namespace Avera.Application.Cases.Get
 
             int page = query.Page ?? 1;
             int pageSize = query.PageSize ?? 10;
-
+            
             var pagedCases = cases
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -36,7 +36,7 @@ namespace Avera.Application.Cases.Get
                     c.Id,
                     c.CaseCode,
                     c.SubjectName,
-                    c.User != null ? c.User.UserName! : "Unknown",
+                    //c.User != null ? c.User.UserName! : "Unknown",
                     c.Priority,
                     c.CreatedAt,
                     c.Status,

@@ -17,7 +17,7 @@ namespace Avera.Application.Cases.GetById
                             c.Id,
                             c.CaseCode,
                             c.SubjectName,
-                            c.User != null ? c.User.UserName! : "Unknown",
+                            //c.User != null ? c.User.UserName! : "Unknown",
                             c.Priority,
                             c.CreatedAt,
                             c.Status,
