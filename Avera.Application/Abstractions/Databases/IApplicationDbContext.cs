@@ -8,7 +8,6 @@ using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.Notifications;
 using Avera.Domain.Application.OverlayImages;
-using Avera.Domain.Identity.ShareLinks;
 using Microsoft.EntityFrameworkCore;
 
 namespace Avera.Application.Abstractions.Databases
@@ -18,7 +17,6 @@ namespace Avera.Application.Abstractions.Databases
         DbSet<Case> Cases { get; set; }
         DbSet<CaseImage> CaseImages { get; set; }
         DbSet<ExportedReport> ExportedReports {get; set; }
-        DbSet<ShareLink> ShareLinks { get; set; }
         DbSet<Notification> Notifications { get; set; }
         DbSet<GradCamImage> GradCamImages { get; set; }
 
