@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Avera.Application.Abstractions.Authentication;
 using Microsoft.AspNetCore.Http;
 
@@ -20,6 +22,25 @@ namespace Avera.Infrastructure.Authentication
                 .GetTenantId() ??
                 throw new ApplicationException("Tenant context is unavailable");
 
+        public string Email => 
+            httpContextAccessor
+                .HttpContext?
+                .User
+                .GetEmail() ??
+                throw new ApplicationException("Email context is unavailable");
 
+        public bool IsAuthenticated => 
+            httpContextAccessor
+                .HttpContext?
+                .User
+                .IsAuthenticated() ??
+                throw new ApplicationException("Authentication context is unavailable");
+
+        public IReadOnlyCollection<string> Roles => 
+            httpContextAccessor
+                .HttpContext?
+                .User
+                .GetRoles() ??
+                throw new ApplicationException("Roles context is unavailable");
     }
 }
