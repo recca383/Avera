@@ -12,9 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
 builder.Configuration.AddAzureKeyVault(
     new Uri(builder.Configuration["KeyVault:Uri"]!),
     new DefaultAzureCredential()
