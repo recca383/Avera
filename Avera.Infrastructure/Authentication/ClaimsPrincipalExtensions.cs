@@ -21,5 +21,24 @@ namespace Avera.Infrastructure.Authentication
                 parsedTenantId :
                 throw new ApplicationException("Tenant id is unavailable");
         }
+
+        public static string GetEmail(this ClaimsPrincipal? principal)
+        {
+            string? email = principal?.FindFirstValue(ClaimTypes.Email);
+
+            return email ?? throw new ApplicationException("Email is unavailable");
+        }
+
+        public static bool IsAuthenticated(this ClaimsPrincipal? principal)
+        {
+            return principal?.Identity?.IsAuthenticated ?? false;
+        }
+
+        public static IReadOnlyCollection<string> GetRoles(this ClaimsPrincipal? principal)
+        {
+            return principal?.FindAll(ClaimTypes.Role)
+                .Select(claim => claim.Value)
+                .ToList() ?? new List<string>();
+        }
     }
 }
