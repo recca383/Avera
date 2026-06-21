@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Avera.Infrastructure.Authorization
 {
-    internal sealed class PermissionProvider(IIdentityDbContext context)
+    internal sealed class PermissionProvider()
     {
          public async Task<Role> GetRoleWithPermission(Guid userId)
         {
