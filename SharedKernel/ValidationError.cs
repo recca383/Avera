@@ -1,11 +1,11 @@
 ﻿namespace SharedKernel;
 
-public sealed record ValidationError : Error
+public record ValidationError : Error
 {
-    public ValidationError(Error[] errors)
+    public ValidationError(Error[] errors, string? code = null, string? description = null)
         : base(
-            "Validation.General",
-            "One or more validation errors occurred",
+            code ?? "Validation.General",
+            description ?? "One or more validation errors occurred",
             ErrorType.Validation)
     {
         Errors = errors;
