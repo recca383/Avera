@@ -12,5 +12,6 @@ namespace Avera.Application.Abstractions.Authentication
         string Email { get; }
         bool IsAuthenticated { get; }
         IReadOnlyCollection<string> Roles { get; }
+        string SecurityStamp { get; }
     }
 }
