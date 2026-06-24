@@ -18,7 +18,7 @@ namespace Avera.Application.Abstractions.Authentication
         Task<Result> LogoutAsync(
             Guid userId,
             CancellationToken cancellationToken = default);
-
+        
         Task<Result> ForgotPasswordAsync(
             string email,
             CancellationToken cancellationToken = default);
@@ -28,5 +28,20 @@ namespace Avera.Application.Abstractions.Authentication
             string token,
             string password,
             CancellationToken cancellationToken = default);
+
+        Task<Result> SendInviteCodeAsync(
+            CancellationToken cancellationToken = default);
+        
+        Task<Result> JoinInviteCodeAsync(
+            Guid userId,
+            string inviteCode,
+            CancellationToken cancellationToken = default);
+        
+        Task<Result> ChangePasswordAsync(
+            Guid userId,
+            string currentPassword,
+            string newPassword,
+            CancellationToken cancellationToken = default);
+
     }
 }
