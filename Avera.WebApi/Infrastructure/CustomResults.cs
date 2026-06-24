@@ -21,6 +21,8 @@ public static class CustomResults
         static string GetTitle(Error error) =>
             error.Type switch
             {
+                ErrorType.Validation when error is ValidationError validationError && validationError.Errors.Length > 0 =>
+                    validationError.Errors[0].Code,
                 ErrorType.Validation => error.Code,
                 ErrorType.Problem => error.Code,
                 ErrorType.NotFound => error.Code,
@@ -31,6 +33,8 @@ public static class CustomResults
         static string GetDetail(Error error) =>
             error.Type switch
             {
+                ErrorType.Validation when error is ValidationError validationError && validationError.Errors.Length > 0 =>
+                    validationError.Errors[0].Description,
                 ErrorType.Validation => error.Description,
                 ErrorType.Problem => error.Description,
                 ErrorType.NotFound => error.Description,
