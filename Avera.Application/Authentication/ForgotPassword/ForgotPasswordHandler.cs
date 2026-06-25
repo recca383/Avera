@@ -12,17 +12,7 @@ namespace Avera.Application.Authentication.ForgotPassword
     {
         public async Task<Result> Handle(ForgotPasswordCommand command, CancellationToken cancellationToken)
         {
-            try
-            {
-                await authenticationServices.ForgotPasswordAsync(command.Email, cancellationToken);
-
-                return Result.Success();
-            }
-            catch (System.Exception)
-            {
-                return Result.Failure<ForgotPasswordHandler>(ForgotPasswordCommandError.ForgotPasswordError);
-                
-            }
+                return await authenticationServices.ForgotPasswordAsync(command.Email, cancellationToken);
         }
     }
 }
