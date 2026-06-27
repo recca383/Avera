@@ -16,19 +16,10 @@ namespace Avera.Application.Authentication.Register
                     command.Password,
                     command.Role
                 );
-            try
-            {
-                await authenticationServices.RegisterAsync(
-                    request,
-                    cancellationToken
-                );
-
-                return Result.Success();
-            }
-            catch(Exception)
-            {
-                return Result.Failure<RegisterCommandHandler>(RegisterCommandError.RegisterError);
-            }
+            return await authenticationServices.RegisterAsync(
+                request,
+                cancellationToken
+            );
         }
     }
 }
