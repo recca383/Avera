@@ -12,17 +12,7 @@ namespace Avera.Application.Authentication.Logout
     {
         public async Task<Result> Handle(LogoutCommand command, CancellationToken cancellationToken)
         {
-            try
-            {
-                await authenticationServices.LogoutAsync(userContext.UserId);
-
-                return Result.Success();
-            }
-            catch (System.Exception)
-            {
-                
-                return Result.Failure<LogoutCommandHandler>(LogoutCommandError.LogoutError);
-            }
+                return await authenticationServices.LogoutAsync(userContext.UserId, cancellationToken);
         }
     }
 }
