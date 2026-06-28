@@ -12,17 +12,10 @@ namespace Avera.Application.Authentication.ResetPassword
     {
         public async Task<Result> Handle(ResetPasswordCommand command, CancellationToken cancellationToken)
         {
-            try
-            {
                 var userId = userContext.UserId;
 
-                await authenticationService.ResetPasswordAsync(userId, command.Token, command.Password, cancellationToken);
-                return Result.Success();
-            }
-            catch (Exception)
-            {
-                return Result.Failure(ResetPasswordCommandError.InvalidToken());
-            }
+                return  await authenticationService.ResetPasswordAsync(userId, command.Token, command.Password, cancellationToken);
+                
         }
     }
 }
