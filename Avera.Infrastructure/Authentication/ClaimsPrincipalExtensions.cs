@@ -1,13 +1,15 @@
 using System.Security.Claims;
+using Serilog;
 
 namespace Avera.Infrastructure.Authentication
 {
     internal static class ClaimsPrincipalExtensions
-    {
+    {        
          public static Guid GetUserId(this ClaimsPrincipal? principal)
         {
             string? userId = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            
             return Guid.TryParse(userId, out Guid parsedUserId)?
                 parsedUserId :
                 throw new ApplicationException("User id is unavailable");
@@ -39,6 +41,11 @@ namespace Avera.Infrastructure.Authentication
             return principal?.FindAll(ClaimTypes.Role)
                 .Select(claim => claim.Value)
                 .ToList() ?? new List<string>();
+        }
+
+        public static string GetSecurityStamp(this ClaimsPrincipal? principal)
+        {
+            return principal?.FindFirstValue("SecurityStamp")!;
         }
     }
 }
