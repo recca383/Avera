@@ -11,7 +11,6 @@ namespace Avera.WebApi.Endpoints.Cases
     {
         private sealed record Request(
             string SubjectName,
-            Guid Examiner,
             Priority Priority,
             AnalysisType AnalysisType
         );
@@ -19,20 +18,22 @@ namespace Avera.WebApi.Endpoints.Cases
         {
             routeBuilder.MapPost("cases", async(
                 Request request,
-                ICommandHandler<CreateCaseCommand> handler,
+                ICommandHandler<CreateCaseCommand, Case> handler,
                 CancellationToken cancellationToken
             )=>
             {
                 var command = new CreateCaseCommand(
                     request.SubjectName,
-                    request.Examiner,
                     request.Priority,
                     request.AnalysisType
                 );
 
                 var result = await handler.Handle(command, cancellationToken);
 
-                return result.Match(Results.Created, CustomResults.Problem);
+                var locationUri = $"cases/{result.Value.Id}";
+                return result.Match(
+                    onSuccess => Results.Created(locationUri, result.Value),
+                    CustomResults.Problem);
             })
            .WithTags(Tags.Cases)
            .WithSummary("Create a new case")

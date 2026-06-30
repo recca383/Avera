@@ -9,17 +9,17 @@ namespace Avera.Application.Cases.Create
 {
     public sealed class CreateCaseCommandHandler(
         IApplicationDbContext dbContext,
-        ILogger<CreateCaseCommandHandler> logger) : ICommandHandler<CreateCaseCommand>
+        ILogger<CreateCaseCommandHandler> logger) : ICommandHandler<CreateCaseCommand, Case>
     {
-        public async Task<Result> Handle(CreateCaseCommand command, CancellationToken cancellationToken)
+        public async Task<Result<Case>> Handle(CreateCaseCommand command, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Creating a new case for subject: {SubjectName} by examiner: {ExaminerId}", command.SubjectName, command.ExaminerId);
+            logger.LogInformation("Creating a new case for subject: {SubjectName}", command.SubjectName);
             var newCase = new Case()
             {
                 Id = Guid.NewGuid(),
                 CaseCode = GenerateCaseCode(),
                 SubjectName = command.SubjectName,
-                UserId = command.ExaminerId,
+                UserId = Guid.Empty, // Temporary
                 AnalysisType = command.AnalysisType,
                 Priority = command.Priority,
                 Notes = "",
@@ -30,7 +30,7 @@ namespace Avera.Application.Cases.Create
             if (await dbContext.Cases.AnyAsync(c => c.CaseCode == newCase.CaseCode, cancellationToken))
             {
                 logger.LogWarning("A case with code: {CaseCode} already exists", newCase.CaseCode);
-                return Result.Failure(CaseErrors.CaseAlreadyExists);
+                return Result.Failure<Case>(CaseErrors.CaseAlreadyExists);
             }
             
             logger.LogInformation("Adding new case to database: {CaseCode}", newCase.CaseCode);
@@ -43,7 +43,7 @@ namespace Avera.Application.Cases.Create
 
             logger.LogInformation("Case created successfully with ID: {CaseId}", newCase.Id);
             
-            return Result.Success();
+            return Result.Success(newCase);
         }
 
         private string GenerateCaseCode()

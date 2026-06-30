@@ -6,9 +6,8 @@ namespace Avera.Application.Cases.Create
     public sealed record CreateCaseCommand
     (
             string SubjectName,
-            Guid ExaminerId,
             Priority Priority,
             AnalysisType AnalysisType
-    ) : ICommand;
+    ) : ICommand<Case>;
     
 }
