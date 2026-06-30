@@ -3,16 +3,20 @@
 using Avera.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Avera.Infrastructure.Authorization
 {
     internal sealed class PermissionAuthorizationHandler(IServiceScopeFactory serviceScopeFactory)
     : AuthorizationHandler<PermissionRequirement>
     {
+        private readonly static ILogger logger = Log.ForContext<PermissionAuthorizationHandler>();
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
         {
+            logger.Information("Checking User Permission");
             if (context.User is {Identity.IsAuthenticated:false})
             {
+                logger.Warning("User is not authenticated");
                 context.Fail();
                 return;
             }
@@ -21,18 +25,23 @@ namespace Avera.Infrastructure.Authorization
 
             PermissionProvider permissionProvider = scope.ServiceProvider.GetRequiredService<PermissionProvider>();
 
-            Guid userId = context.User.GetUserId();
+            logger.Information("Getting user permission using context");
+            var roles = await permissionProvider.GetRoleWithPermission(context.User.GetUserId());
 
-            var role = await permissionProvider.GetRoleWithPermission(userId);
-
-            if(role.Name!.Equals(requirement.Permission, StringComparison.OrdinalIgnoreCase))
+            foreach(string role in roles)
             {
-                context.Succeed(requirement);
+                logger.Information("Comparing policy {policy} to user claim {claim}", requirement.Permission, role);
+                if(role.Equals(requirement.Permission, StringComparison.OrdinalIgnoreCase))
+                {
+                    logger.Information("Comparison succeeded");
+                    context.Succeed(requirement);
+                    return;
+                }
             }
-            else
-            {
-                context.Fail();
-            }
+            
+            logger.Warning("User claim does not match policy");
+            context.Fail();
+            
         }
     }
 }
