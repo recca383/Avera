@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
@@ -16,14 +17,15 @@ namespace Avera.Infrastructure.Authorization
         {
             AuthorizationPolicy? policy = await base.GetPolicyAsync(policyName);
 
-            if (policy is null)
+            if (policy is not null)
             {
                 return policy;
             }
 
-            AuthorizationPolicy permissionPolicy = new AuthorizationPolicyBuilder()
-            .AddRequirements(new PermissionRequirement(policyName))
-            .Build();
+            AuthorizationPolicy permissionPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser()
+                .AddRequirements(new PermissionRequirement(policyName))
+                .Build();
 
             _authorizationOptions.AddPolicy(policyName, permissionPolicy);
 
