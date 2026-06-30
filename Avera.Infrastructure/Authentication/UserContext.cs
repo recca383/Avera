@@ -1,5 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Avera.Application.Abstractions.Authentication;
 using Microsoft.AspNetCore.Http;
 
@@ -42,5 +40,12 @@ namespace Avera.Infrastructure.Authentication
                 .User
                 .GetRoles() ??
                 throw new ApplicationException("Roles context is unavailable");
+
+        public string SecurityStamp => 
+            httpContextAccessor
+                .HttpContext?
+                .User
+                .GetSecurityStamp() ??
+                throw new ApplicationException("Invalid Token, please log in again");
     }
 }
