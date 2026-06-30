@@ -25,7 +25,6 @@ namespace Avera.Application.ML.Process
             logger.LogInformation("Selected Case with Id: {CaseId} has {NumberOfImages} images", selectedCase!.Id, selectedCase.CaseImages.Count);
             var processRequest = new ProcessRequest(
                 CaseName: selectedCase!.CaseCode,
-                OutputBlobName: "output.json",
                 QuestionedImageUrl: selectedCase.CaseImages
                                     .Where(ci => ci.Type == ImageType.Suspected)
                                     .Select(ci => ci.FileName)

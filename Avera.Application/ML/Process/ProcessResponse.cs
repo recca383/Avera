@@ -7,7 +7,7 @@ namespace Avera.Application.ML.Process
         [property: JsonPropertyName("confidence_forged")] float ConfidenceForged,
         [property: JsonPropertyName("confidence_genuine")] float ConfidenceGenuine,
         [property: JsonPropertyName("distance")] float Distance,
-        [property: JsonPropertyName("gradcam_blob_id")] string GradcamBlobId,
+        [property: JsonPropertyName("gradcam_blob_ids")] List<string> GradcamBlobId,
         float Threshold,
         string Verdict);
     
