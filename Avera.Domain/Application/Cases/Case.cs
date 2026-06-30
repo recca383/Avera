@@ -19,7 +19,7 @@ namespace Avera.Domain.Application.Cases
         public string Notes { get; set; } = string.Empty;
         public Status Status { get; set; }
         public bool Verdict { get; set; }
-        public DateTime DeletedAt { get; set; }
+        public DateTime DeletedAt { get; set; } = DateTime.MaxValue;
         public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
@@ -29,6 +29,6 @@ namespace Avera.Domain.Application.Cases
         public List<ExportedReport> ExportedReports { get; set; } = new();
 
         // Static Properties
-        public static string OutputBlob => $"output.json";
+        public static string OutputBlob => $"output.pdf";
     }
 }

@@ -22,7 +22,7 @@ namespace Avera.WebApi.Endpoints.ML
                 var result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(
-                    onSuccess => Results.Stream(result.Value.ResultsStream, "application/json"),
+                    onSuccess => Results.Stream(result.Value.ResultsStream, "application/pdf"),
                     onFailure: CustomResults.Problem);
             })
             .WithTags(Tags.ML)
