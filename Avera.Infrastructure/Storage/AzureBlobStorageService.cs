@@ -25,6 +25,16 @@ namespace Avera.Infrastructure.Storage
             _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
         }
         
+        public Task DeleteFolderAsync(string folderUrl, CancellationToken cancellationToken = default)
+        {
+            if(!folderUrl.EndsWith('/'))
+            {
+                folderUrl += "/";
+            }
+
+            var blobClient = _containerClient.GetBlobClient(folderUrl);
+            return blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+        }
         public Task DeleteAsync(string fileUrl, CancellationToken cancellationToken = default)
         {
             var blobClient = _containerClient.GetBlobClient(fileUrl);

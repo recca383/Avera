@@ -11,7 +11,9 @@ namespace Avera.Application.Abstractions.Storage
         Task<Stream?> DownloadAsync(
             string fileUrl,
             CancellationToken cancellationToken = default);
-
+        Task DeleteFolderAsync(
+            string folderUrl,
+            CancellationToken cancellationToken = default);
         Task DeleteAsync(
             string fileUrl,
             CancellationToken cancellationToken = default); 

@@ -28,7 +28,7 @@ namespace Avera.Application.Cases.Delete
 
             logger.LogInformation("Deleting blob storage for case with code: {CaseCode}", caseToDelete!.CaseCode);
 
-            await blobStorageService.DeleteAsync(caseToDelete!.CaseCode, cancellationToken);
+            await blobStorageService.DeleteFolderAsync(caseToDelete!.CaseCode, cancellationToken);
 
             logger.LogInformation("Deleted blob storage for case with code: {CaseCode}", caseToDelete.CaseCode);
 
@@ -36,6 +36,8 @@ namespace Avera.Application.Cases.Delete
             logger.LogInformation("Removing case with ID: {CaseId} from database", caseToDelete.Id);
 
             dbContext.Cases.Remove(caseToDelete!);
+
+            dbContext.CaseImages.Where(c => c.CaseId == caseToDelete.Id).ExecuteDelete();
 
             logger.LogInformation("Removed case with ID: {CaseId} from database", caseToDelete.Id);
 
