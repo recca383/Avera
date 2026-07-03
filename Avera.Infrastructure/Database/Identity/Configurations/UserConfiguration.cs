@@ -16,9 +16,6 @@ namespace Avera.Infrastructure.Database.Identity.Configurations
             builder.HasIndex(u => u.Id);
             builder.HasIndex(u => u.TenantId);
             
-            builder.HasOne<Tenant>(u => u.Tenant)
-                .WithMany(t => t.Users)
-                .HasForeignKey(u => u.TenantId); 
         }
     }
 }
