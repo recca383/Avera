@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Avera.Infrastructure.Identity.Tenants;
 
-namespace Avera.Infrastructure.Identity.ShareLinks
+namespace Avera.Infrastructure.Identity.InviteCodes
 {
-    public sealed class ShareLink
+    public sealed class InviteCode
     {
         public Guid Id { get; set; }
         public string Token { get; set; } = string.Empty;
