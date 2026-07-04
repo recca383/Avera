@@ -1,4 +1,4 @@
-using Avera.Infrastructure.Identity.ShareLinks;
+using Avera.Infrastructure.Identity.InviteCodes;
 using Avera.Infrastructure.Identity.TenantSubscriptions;
 using Avera.Infrastructure.Identity.Users;
 
@@ -13,7 +13,7 @@ namespace Avera.Infrastructure.Identity.Tenants
         // Navigation Properties
         public List<TenantSubscription> TenantSubscriptions { get; set; } = new();
         public List<User> Users { get; set; } = new();
-        public List<ShareLink> ShareLinks { get; set; } = new();
+        public List<InviteCode> ShareLinks { get; set; } = new();
     }
     
 }
