@@ -12,10 +12,11 @@ namespace Avera.Infrastructure.Identity.Users
 {
     public class User : IdentityUser<Guid>
     {
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         // Navigation 
         public List<Notification> Notifications { get; set; } = new();
         public List<Case> Cases { get; set; } = new();
-        public Tenant? Tenant { get; set; }
         public Guid TenantId { get; set; }
         
     }
