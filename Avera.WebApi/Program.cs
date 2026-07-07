@@ -6,6 +6,12 @@ using System.Reflection;
 using Azure.Identity;
 using Avera.WebApi.Infrastructure;
 using dotenv.net;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,17 +28,24 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>()
+);
 builder.Services.AddAntiforgery();
+
 var app = builder.Build();
+
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+//app.UseMiddleware<ApiKeyMiddleware>();
+
 app.MapEndpoints();
 
 app.UseAntiforgery();
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -41,11 +54,15 @@ if (app.Environment.IsDevelopment())
     {
         options.Theme = ScalarTheme.DeepSpace;
         options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
+
+        var key = app.Configuration["EXTERNAL-API-KEY"];
+
+        options.AddPreferredSecuritySchemes("Bearer");
+
     });
 }
 
-app.UseHttpsRedirection();
-app.UseMiddleware<ApiKeyMiddleware>();
+app.Lifetime.ApplicationStopping.Register(() => Log.CloseAndFlush());
 
 app.Run();
 
