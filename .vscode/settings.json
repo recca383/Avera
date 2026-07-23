@@ -3,6 +3,8 @@
         "Antiforgery",
         "Avera",
         "averablobcontainer",
+        "bbox",
+        "Gradcam",
         "Npgsql",
         "numofcases",
         "nvarchar",
