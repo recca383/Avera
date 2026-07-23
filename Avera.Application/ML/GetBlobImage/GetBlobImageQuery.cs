@@ -4,7 +4,6 @@ namespace Avera.Application.ML.GetBlobImage
 {
     public sealed record GetBlobImageQuery(
         Guid CaseId,
-        string Folder,
-        string FileName
+        Guid ImageId
     ) :IQuery<GetBlobImageResponse>;
 }

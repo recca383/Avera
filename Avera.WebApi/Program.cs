@@ -4,9 +4,15 @@ using Avera.Infrastructure;
 using Scalar.AspNetCore;
 using System.Reflection;
 using Azure.Identity;
+using Avera.WebApi.Infrastructure;
+using dotenv.net;
 
 var builder = WebApplication.CreateBuilder(args);
 
+DotEnv.Load();
+builder.Configuration.AddEnvironmentVariables();
+
+builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
 builder.Configuration.AddAzureKeyVault(
@@ -23,6 +29,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddAntiforgery();
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapEndpoints();
 
@@ -40,9 +48,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-var scopeRequiredByApi = app.Configuration["AzureAd:Scopes"] ?? "";
-
+app.UseMiddleware<ApiKeyMiddleware>();
 
 app.Run();
 

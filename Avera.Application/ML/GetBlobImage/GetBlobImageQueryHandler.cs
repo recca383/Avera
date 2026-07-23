@@ -3,6 +3,7 @@ using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Abstractions.Storage;
 using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
@@ -29,28 +30,22 @@ namespace Avera.Application.ML.GetBlobImage
                 return Result.Failure<GetBlobImageResponse>(CaseErrors.CaseNotFound);
             }
 
-            // Reject anything that isn't a known folder or contains path traversal characters
-            if (!AllowedFolders.Contains(query.Folder) ||
-                query.FileName.Contains("..") ||
-                query.FileName.Contains('/') ||
-                query.FileName.Contains('\\'))
-            {
-                logger.LogWarning("Invalid blob image request for Case {CaseId}: {Folder}/{FileName}", query.CaseId, query.Folder, query.FileName);
-                return Result.Failure<GetBlobImageResponse>(CaseImageErrors.CaseImageNotFound);
-            }
+            var image = await dbContext.GradCamImages.FirstOrDefaultAsync(
+                ci => ci.CaseId == query.CaseId 
+                && ci.Id == query.ImageId, cancellationToken);
 
-            // Backend reconstructs the full blob path — frontend never sees or sends it
-            var blobPath = $"{selectedCase.CaseCode}/{query.Folder}/{query.FileName}";
+            
+            var imageBlobPath = image?.BlobPath;
 
-            var stream = await blobStorageService.DownloadAsync(blobPath, cancellationToken);
+            var stream = await blobStorageService.DownloadAsync(imageBlobPath!, cancellationToken);
 
             if (stream is null)
             {
-                logger.LogWarning("Blob not found at path: {BlobPath}", blobPath);
+                logger.LogWarning("Blob not found at path: {BlobPath}", imageBlobPath);
                 return Result.Failure<GetBlobImageResponse>(CaseImageErrors.CaseImageNotFound);
             }
             
-            var contentType = query.FileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
+            var contentType = imageBlobPath!.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
                 ? "image/png"
                 : "application/octet-stream";
 

@@ -10,15 +10,14 @@ namespace Avera.WebApi.Endpoints.ML
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapGet("cases/{caseId:guid}/blob/{folder}/{filename}", async(
+            routeBuilder.MapGet("cases/{caseId:guid}/images/{imageId:guid}", async(
                 Guid caseId,
-                string folder,
-                string filename,
+                Guid imageId,
                 IQueryHandler<GetBlobImageQuery, GetBlobImageResponse> handler,
                 CancellationToken cancellationToken
             ) =>
             {
-                var query = new GetBlobImageQuery(caseId, folder, filename);
+                var query = new GetBlobImageQuery(caseId, imageId);
 
                 var result = await handler.Handle(query, cancellationToken);
 
