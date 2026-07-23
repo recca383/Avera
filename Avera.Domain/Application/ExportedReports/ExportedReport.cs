@@ -10,8 +10,7 @@ namespace Avera.Domain.Application.ExportedReports
     public sealed class ExportedReport
     {
         public Guid Id { get; set; }
-        public string? FileUrl { get; set; }
-        public string? StorageKey { get; set; }
+        public string? BlobPath { get; set; }
         public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
