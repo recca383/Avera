@@ -8,6 +8,7 @@ using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.Notifications;
+using Avera.Domain.Application.OverlayImages;
 using Avera.Domain.Identity.ShareLinks;
 using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.TenantSubscriptions;
@@ -26,6 +27,7 @@ namespace Avera.Infrastructure.Database.Application
     {
         public DbSet<Case> Cases { get; set; }
         public DbSet<CaseImage> CaseImages { get; set; }
+        public DbSet<GradCamImage> GradCamImages { get; set; }
         public DbSet<ExportedReport> ExportedReports { get; set; }
         public DbSet<ShareLink> ShareLinks { get; set; }
         public DbSet<Notification> Notifications { get; set; }
