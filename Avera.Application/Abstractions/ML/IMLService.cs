@@ -7,6 +7,6 @@ namespace Avera.Application.Abstractions.ML
     {
          Task<GetMLHealthResponse> GetMLHealthAsync(CancellationToken cancellationToken);
 
-         Task<ProcessResponse> ProcessAsync(ProcessRequest request, CancellationToken cancellationToken);
+         Task<ProcessMLResponse> ProcessAsync(ProcessRequest request, CancellationToken cancellationToken);
     }
 }
