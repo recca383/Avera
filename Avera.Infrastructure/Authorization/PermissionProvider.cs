@@ -1,24 +1,26 @@
 using Avera.Application.Abstractions.Databases;
 using Avera.Infrastructure.Identity.Roles;
+using Avera.Infrastructure.Identity.Users;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Avera.Infrastructure.Authorization
 {
-    internal sealed class PermissionProvider()
+    internal sealed class PermissionProvider(UserManager<User> userManager)
     {
-         public async Task<Role> GetRoleWithPermission(Guid userId)
+         public async Task<IList<string>> GetRoleWithPermission(Guid userId)
         {
-            // var userRole = await context.UserRoles
-            //     .FirstOrDefaultAsync(r => r.UserId == userId) 
-            //     ?? throw new InvalidOperationException($"Role not found for user with ID {userId}");
+            var user = await userManager.FindByIdAsync(userId.ToString());
 
-            
-            // var role = await context.Roles
-            //     .FirstOrDefaultAsync(r => r.Id == userRole.RoleId);
+            if(user is null)
+            {
+                throw new Exception("User not found");
+            }
 
-            // return role ?? throw new InvalidOperationException($"Role not found with ID {userRole.RoleId}");
+            IList<string> role = await userManager.GetRolesAsync(user!);
 
-            throw new NotImplementedException("GetRoleWithPermission method is not implemented yet.");
+            return role;
         }
     }
 }
