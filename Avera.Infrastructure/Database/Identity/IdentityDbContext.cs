@@ -3,8 +3,8 @@ using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.Notifications;
 using Avera.Infrastructure.Identity;
+using Avera.Infrastructure.Identity.InviteCodes;
 using Avera.Infrastructure.Identity.Roles;
-using Avera.Infrastructure.Identity.ShareLinks;
 using Avera.Infrastructure.Identity.SubscriptionPlans;
 using Avera.Infrastructure.Identity.Tenants;
 using Avera.Infrastructure.Identity.TenantSubscriptions;
@@ -16,7 +16,7 @@ using SharedKernel;
 
 namespace Avera.Infrastructure.Database.Identity
 {
-    internal sealed class IdentityDbContext(
+    public sealed class IdentityDbContext(
         DbContextOptions<IdentityDbContext> options,
         IDomainEventsDispatcher domainEventsDispatcher)
         : IdentityDbContext<User, Role, Guid>(options)
@@ -24,7 +24,7 @@ namespace Avera.Infrastructure.Database.Identity
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<TenantSubscription> TenantSubscriptions { get; set; }
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
-        public DbSet<ShareLink> ShareLinks { get; set; }
+        public DbSet<InviteCode> ShareLinks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +34,8 @@ namespace Avera.Infrastructure.Database.Identity
              type => type.Namespace == "Avera.Infrastructure.Database.Identity.Configurations");
             
             //modelBuilder.HasDefaultSchema(Schemas.Default);
+
+            
 
             modelBuilder.Ignore<Case>();
             modelBuilder.Ignore<CaseImage>();
