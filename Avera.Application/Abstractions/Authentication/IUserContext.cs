@@ -13,5 +13,6 @@ namespace Avera.Application.Abstractions.Authentication
         bool IsAuthenticated { get; }
         IReadOnlyCollection<string> Roles { get; }
         string SecurityStamp { get; }
+        Guid? TenantId { get; }
     }
 }
