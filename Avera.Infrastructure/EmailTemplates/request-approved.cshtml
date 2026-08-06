@@ -1,0 +1,115 @@
+<!--
+  AVERA — "Confirm Email" (really: Account Approved notification)
+  ================================================
+  FLAG: Per your clarification, this is NOT address-verification (no click-to-
+  confirm link). It fires when an Org Admin approves a pending Forensic
+  Analyst's registration request — this is the email version of moving past
+  the app's "Pending Approval" screen. File is named confirm-email.html to
+  match your original request, but consider naming the backend event/trigger
+  "account_approved" so it isn't confused with true email verification later
+  if you ever add that as a separate feature.
+
+  Required template variables:
+    @* @Model.Header - hosted URL for Email_Header.png (see README)
+    @Model.FirstName          - recipient's first name (the newly approved analyst)
+    @Model.OrganizationName - e.g. "Cebu Forensics Lab"
+    @Model.AdminName       - OPTIONAL, e.g. "Maria Santos" — the admin who approved. Falls back to generic org phrasing if blank
+    @Model.LoginUrl   - OR {{signin_url}} if you add a web login later
+    @Model.CurrentYear        - e.g. "2026" *@
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Your Request Have Been Approved</title>
+  <!-- Sora web font. Renders in Gmail, Apple Mail, iOS/Android Mail.
+       Outlook desktop (Windows) ignores this and silently falls back
+       to Segoe UI in the stack below — no broken layout either way. -->
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style> @@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap'); </style>
+  
+</head>
+<body style="margin:0; padding:0; background-color:#F1F4F9; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    Your registration to @Model.OrganizationName has been approved. Sign in to get started.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1F4F9;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#FFFFFF; border-radius:12px; overflow:hidden; border:1px solid #E2E8F0;">
+
+          <tr>
+            <td style="padding:0;">
+              <a href="#" style="cursor: text !important; pointer-events: none;">
+                <img src="cid:@Model.Header" alt="Avera" width="600" style="display:block; width:100%; max-width:600px; height:auto; border:0;" />
+              </a>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:40px 40px 24px 40px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <h1 style="margin:0 0 16px 0; font-size:22px; line-height:28px; font-weight:700; color:#0F172A;">
+                Account Approved
+              </h1>
+              <p style="margin:0 0 8px 0; font-size:15px; line-height:22px; color:#0F172A;">
+                Hi @Model.FirstName,
+              </p>
+              <p style="margin:0; font-size:15px; line-height:22px; color:#0F172A;">
+                Good news — @Model.AdminName has approved your registration request
+                to join <strong>@Model.OrganizationName</strong> on Avera as a Forensic
+                Analyst. You can now sign in and start using your dashboard.
+              </p>
+            </td>
+          </tr>
+
+          <!-- What's next — mirrors the in-app pending-approval step list -->
+          <tr>
+            <td style="padding:32px 40px 8px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1F4F9; border:1px solid #E2E8F0; border-radius:10px;">
+                <tr>
+                  <td style="padding:20px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                    <p style="margin:0 0 12px 0; font-size:13px; font-weight:700; color:#0F172A;">
+                      What happened:
+                    </p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="padding-bottom:8px; font-size:13px; color:#98A2B3; width:20px; vertical-align:top;">1.</td>
+                        <td style="padding-bottom:8px; font-size:13px; color:#667085;">Your admin reviewed your request</td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom:8px; font-size:13px; color:#1E6FD9; font-weight:700; width:20px; vertical-align:top;">2.</td>
+                        <td style="padding-bottom:8px; font-size:13px; color:#0F172A; font-weight:600;">You received this approval email</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px; color:#98A2B3; width:20px; vertical-align:top;">3.</td>
+                        <td style="font-size:13px; color:#667085;">Sign in to access your dashboard</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px 40px 32px 40px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <p style="margin:0 0 4px 0; font-size:13px; line-height:19px; color:#667085; text-align:center;">
+                Avera — Forensic Signature Verification
+              </p>
+              <p style="margin:0; font-size:12px; line-height:18px; color:#98A2B3; text-align:center;">
+                &copy; @Model.CurrentYear Avera. This is an automated message, please don't reply directly to this email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
