@@ -3,8 +3,7 @@
     public enum Status
     {
         Processing,
-        Completed,
-        Suspect,
+        Suspected,
         Genuine
     }
 }

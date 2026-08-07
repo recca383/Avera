@@ -14,12 +14,12 @@ namespace Avera.Domain.Application.Cases
         public Priority Priority { get; set; }
         public string Notes { get; set; } = string.Empty;
         public Status Status { get; set; }
-        public bool Verdict { get; set; }
         public DateTime DeletedAt { get; set; } = DateTime.MaxValue;
         public DateTime CreatedAt { get; set; }
 
         // Navigation Properties
-        public Guid UserId { get; set; }
+        public Guid CreatedByUserId { get; set; }
+        public Guid? TenantId { get; set; }
         public List<CaseImage> CaseImages { get; set; } = new();
         public List<ExportedReport> ExportedReports { get; set; } = new();
         public List<GradCamImage> GradCamImages { get; set; } = new();
