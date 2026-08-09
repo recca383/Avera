@@ -1,4 +1,4 @@
-using Avera.Infrastructure.Identity.Roles;
+using Avera.Domain.Identity.Roles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

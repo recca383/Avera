@@ -2,13 +2,13 @@
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.Notifications;
+using Avera.Domain.Identity.MemberRequests;
+using Avera.Domain.Identity.Roles;
+using Avera.Domain.Identity.SubscriptionPlans;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.TenantSubscriptions;
+using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Identity;
-using Avera.Infrastructure.Identity.InviteCodes;
-using Avera.Infrastructure.Identity.Roles;
-using Avera.Infrastructure.Identity.SubscriptionPlans;
-using Avera.Infrastructure.Identity.Tenants;
-using Avera.Infrastructure.Identity.TenantSubscriptions;
-using Avera.Infrastructure.Identity.Users;
 using Infrastructure.DomainEvents;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +24,7 @@ namespace Avera.Infrastructure.Database.Identity
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<TenantSubscription> TenantSubscriptions { get; set; }
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
-        public DbSet<InviteCode> ShareLinks { get; set; }
+        public DbSet<MemberRequest> MemberRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

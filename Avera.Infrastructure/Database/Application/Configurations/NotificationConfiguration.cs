@@ -1,5 +1,4 @@
 using Avera.Domain.Application.Notifications;
-using Avera.Infrastructure.Identity.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
