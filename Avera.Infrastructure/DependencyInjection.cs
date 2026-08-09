@@ -1,16 +1,20 @@
-﻿using System.Security.Claims;
+﻿using System.Net;
+using System.Net.Mail;
+using System.Security.Claims;
 using System.Text;
 using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.ML;
+using Avera.Application.Abstractions.Services;
 using Avera.Application.Abstractions.Storage;
+using Avera.Domain.Identity.Roles;
+using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
 using Avera.Infrastructure.Authorization;
 using Avera.Infrastructure.Database.Application;
 using Avera.Infrastructure.Database.Identity;
-using Avera.Infrastructure.Identity.Roles;
-using Avera.Infrastructure.Identity.Users;
 using Avera.Infrastructure.ML;
+using Avera.Infrastructure.Services;
 using Avera.Infrastructure.Storage;
 using Avera.Infrastructure.Time;
 using Infrastructure.DomainEvents;
@@ -44,6 +48,19 @@ namespace Avera.Infrastructure
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
+
+            var client = new SmtpClient(configuration["SMTP:Host"], Convert.ToInt32(configuration["SMTP:Port"]))
+            {
+                EnableSsl = true,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(configuration["SMTP:SenderEmail"], configuration["SMTP:Password"])
+            };
+
+            services.AddFluentEmail(configuration["SMTP:SenderEmail"], configuration["SMTP:SenderName"])
+                .AddSmtpSender(client)
+                .AddRazorRenderer();
+                
+            services.AddScoped<IEmailService, EmailService>();
             return services;
         }
 
@@ -65,7 +82,7 @@ namespace Avera.Infrastructure
                 options.Password.RequiredLength = 8;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireNonAlphanumeric = true;
 
                 options.User.RequireUniqueEmail = true;
             })
@@ -74,7 +91,7 @@ namespace Avera.Infrastructure
 
             services.Configure<DataProtectionTokenProviderOptions>(options =>
             {
-                options.TokenLifespan = TimeSpan.FromHours(1);
+                options.TokenLifespan = TimeSpan.FromMinutes(Convert.ToInt32(configuration["Identity:TokenExpiryInMinutes"]));
             });
 
             return services;

@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using System.Text;
-using Avera.Infrastructure.Identity.Roles;
-using Avera.Infrastructure.Identity.Users;
+using Avera.Domain.Identity.Users;
+using Avera.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -33,13 +33,12 @@ namespace Avera.Infrastructure.Authentication
             logger.Information("Creating signing credentials for access token");
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            logger.Information("Building token descriptor for user {UserId} with {RoleCount} roles", user.Id, role.Count);
+            logger.Information("Building token descriptor for user {UserId} with {RoleCount} roles", user.Id, role.Count);            
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.GroupSid, user.TenantId.ToString()),
                     new Claim(ClaimTypes.Email, user.Email!),
                     new Claim("SecurityStamp", securityStamp)
                 }),
@@ -51,6 +50,11 @@ namespace Avera.Infrastructure.Authentication
                 SigningCredentials = credentials
             };
 
+            if(user.TenantId.HasValue)
+            {
+                tokenDescriptor.Subject.AddClaim(new Claim(ClaimTypes.GroupSid, user.TenantId.ToString()!));
+            }
+            
             logger.Information("Adding {RoleCount} role claims to token", role.Count);
             tokenDescriptor.Subject.AddClaims(role.Select(r => new Claim(ClaimTypes.Role, r)));
 
