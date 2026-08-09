@@ -13,7 +13,7 @@ namespace Avera.Infrastructure.Authentication
                 .GetUserId() ??
                 throw new ApplicationException("User context is unavailable");
 
-        public Guid TenantId => 
+        public Guid? TenantId => 
             httpContextAccessor
                 .HttpContext?
                 .User

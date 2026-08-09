@@ -1,6 +1,5 @@
 using Avera.Application.Abstractions.Databases;
-using Avera.Infrastructure.Identity.Roles;
-using Avera.Infrastructure.Identity.Users;
+using Avera.Domain.Identity.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

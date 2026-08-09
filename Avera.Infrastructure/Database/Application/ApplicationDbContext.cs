@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avera.Application.Abstractions.Databases;
+﻿using Avera.Application.Abstractions.Databases;
 using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.Notifications;
 using Avera.Domain.Application.OverlayImages;
-using Avera.Infrastructure.Identity.InviteCodes;
-using Avera.Infrastructure.Identity.Tenants;
-using Avera.Infrastructure.Identity.TenantSubscriptions;
-using Avera.Infrastructure.Identity.Users;
-using Infrastructure.Database;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.TenantSubscriptions;
+using Avera.Domain.Identity.Users;
 using Infrastructure.DomainEvents;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using SharedKernel;
 
 namespace Avera.Infrastructure.Database.Application
@@ -29,7 +21,6 @@ namespace Avera.Infrastructure.Database.Application
         public DbSet<CaseImage> CaseImages { get; set; }
         public DbSet<GradCamImage> GradCamImages { get; set; }
         public DbSet<ExportedReport> ExportedReports { get; set; }
-        public DbSet<InviteCode> ShareLinks { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -40,7 +31,6 @@ namespace Avera.Infrastructure.Database.Application
             //modelBuilder.HasDefaultSchema(Schemas.Default);
 
             modelBuilder.Ignore<User>();
-            modelBuilder.Ignore<InviteCode>();
             modelBuilder.Ignore<Tenant>();
             modelBuilder.Ignore<TenantSubscription>();
 
