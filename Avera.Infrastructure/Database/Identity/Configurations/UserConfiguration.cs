@@ -1,7 +1,7 @@
 using Avera.Domain.Application.Cases;
+using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Identity;
 using Avera.Infrastructure.Identity.Tenants;
-using Avera.Infrastructure.Identity.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
