@@ -1,6 +1,5 @@
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Authentication.ChangePassword;
-using Avera.Infrastructure.Identity.Roles;
 using Avera.WebApi.Extensions;
 using Avera.WebApi.Infrastructure;
 using SharedKernel;
