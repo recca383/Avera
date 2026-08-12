@@ -28,7 +28,9 @@ namespace Avera.Application.Abstractions.Authentication
             string token,
             string password,
             CancellationToken cancellationToken = default);
-        
+        Task<Result> JoinInviteCodeAsync(
+        string inviteCode,
+        CancellationToken cancellationToken = default);
         Task<Result> ChangePasswordAsync(
             Guid userId,
             string currentPassword,

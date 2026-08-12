@@ -5,15 +5,11 @@ namespace Avera.Application.Abstractions.Authentication
 {
     public interface IAdminService
     {
-        Task<Result> CreateTenantAsync(
+        Task<Result<Guid>> CreateTenantAsync(
             string name,
             CancellationToken cancellationToken = default);
 
         Task<Result> SendInviteCodeAsync(
-            CancellationToken cancellationToken = default);
-        
-        Task<Result> JoinInviteCodeAsync(
-            string inviteCode,
             CancellationToken cancellationToken = default);
 
         Task<Result> RemoveUserAsync(
@@ -25,10 +21,10 @@ namespace Avera.Application.Abstractions.Authentication
             CancellationToken cancellationToken = default
         );
 
-        Task<Result<List<TenantMemberDto>>> GetUsersAsync(
+        Task<Result<List<TenantMemberDto>>> GetMembersAsync(
             CancellationToken cancellationToken = default);
 
-        Task<Result<TenantMemberDto>> GetUserAsync(
+        Task<Result<TenantMemberDto>> GetMemberByIdAsync(
             Guid userId,
             CancellationToken cancellationToken = default);
     }
