@@ -11,7 +11,8 @@ namespace Avera.Application.Cases.Create
 {
     public sealed class CreateCaseCommandHandler(
         IApplicationDbContext dbContext,
-        IUserContext userContext) : ICommandHandler<CreateCaseCommand, Case>
+        IUserContext userContext) 
+        : ICommandHandler<CreateCaseCommand, Case>
     {
         private static readonly ILogger logger = Log.ForContext<CreateCaseCommandHandler>();
         
