@@ -1,4 +1,5 @@
-﻿using Avera.Domain.Application.CaseImages;
+﻿using Avera.Application.Abstractions.Databases;
+using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.Notifications;
@@ -19,7 +20,7 @@ namespace Avera.Infrastructure.Database.Identity
     public sealed class IdentityDbContext(
         DbContextOptions<IdentityDbContext> options,
         IDomainEventsDispatcher domainEventsDispatcher)
-        : IdentityDbContext<User, Role, Guid>(options)
+        : IdentityDbContext<User, Role, Guid>(options), IIdentityDbContext
     {
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<TenantSubscription> TenantSubscriptions { get; set; }

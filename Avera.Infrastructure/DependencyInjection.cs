@@ -47,7 +47,7 @@ namespace Avera.Infrastructure
             services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
-
+            services.AddTransient<IAdminService, AdminService>();
 
             var client = new SmtpClient(configuration["SMTP:Host"], Convert.ToInt32(configuration["SMTP:Port"]))
             {
@@ -73,7 +73,7 @@ namespace Avera.Infrastructure
             services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
                 options.UseNpgsql(applicationConnectionString));
             
-            services.AddDbContext<IdentityDbContext>(options =>
+            services.AddDbContext<IIdentityDbContext, IdentityDbContext>(options =>
                 options.UseNpgsql(identityConnectionString));
 
             services.AddIdentity<User, Role>(options =>
