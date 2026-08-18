@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Avera.Application.Abstractions.Authentication;
+using Avera.Application.Abstractions.Databases;
 using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
@@ -14,20 +15,20 @@ namespace Avera.Infrastructure.Services
     internal sealed class AdminService(
         UserManager<User> _userManager,
         IUserContext _userContext,
-        IdentityDbContext _db
+        IIdentityDbContext _db
     ) : IAdminService
     {
         private const int INVITECODELENGTH = 8;
-        public async Task<Result> CreateTenantAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<Result<Guid>> CreateTenantAsync(string name, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(
             _userContext.UserId.ToString());
 
             if (user is null)
-                return Result.Failure(UserErrors.UserNotFound);
+                return Result.Failure<Guid>(UserErrors.UserNotFound);
 
             if (user.TenantId.HasValue)
-                return Result.Failure(TenantErrors.AlreadyBelongsToTenant);
+                return Result.Failure<Guid>(TenantErrors.AlreadyBelongsToTenant);
 
             var tenant = new Tenant
             {
@@ -45,14 +46,16 @@ namespace Avera.Infrastructure.Services
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
-                return HandleIdentityResult(result);
+                return HandleIdentityResult<Guid>(result);
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            return Result.Success();
+            
+
+            return Result.Success<Guid>(tenant.Id);
         }
 
-        public async Task<Result<TenantMemberDto>> GetUserAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<Result<TenantMemberDto>> GetMemberByIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             var tenantId = _userContext.TenantId;
 
@@ -71,8 +74,6 @@ namespace Avera.Infrastructure.Services
                 return Result.Failure<TenantMemberDto>(
                     UserErrors.UserNotFound);
 
-            var roles = await _userManager.GetRolesAsync(user);
-
             return Result.Success(
                 new TenantMemberDto(
                     user.Id,
@@ -81,7 +82,7 @@ namespace Avera.Infrastructure.Services
                     user.Email!));
         }
 
-        public async Task<Result<List<TenantMemberDto>>> GetUsersAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<List<TenantMemberDto>>> GetMembersAsync(CancellationToken cancellationToken = default)
         {
             var tenantId = _userContext.TenantId;
 
@@ -106,11 +107,6 @@ namespace Avera.Infrastructure.Services
             }
 
             return Result.Success(result);
-        }
-
-        public Task<Result> JoinInviteCodeAsync(string inviteCode, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<Result> RemoveUserAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -146,8 +142,8 @@ namespace Avera.Infrastructure.Services
 
         private static string ProduceInviteCode()
         {
-            const string lettersPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            const string alphanumericPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            const string lettersPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string alphanumericPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
             char[] resultChars = new char[INVITECODELENGTH]; // 3 letters + 1 hyphen + 4 alphanumeric = 8 chars
 
@@ -167,13 +163,21 @@ namespace Avera.Infrastructure.Services
 
             return new string(resultChars);
         }
+        private static Result<T> HandleIdentityResult<T>(IdentityResult result)
+        {
+            var errors = result.Errors.Select(
+                e => new Error(
+                    string.IsNullOrWhiteSpace(e.Code) ? "Identity.Unknown" : e.Code,
+                    string.IsNullOrWhiteSpace(e.Description) ? "Identity validation failed" : e.Description,
+                    ErrorType.Validation)
+            ).
+            ToArray();
+
+            var validationErrors = new ValidationError(errors);
+            return Result.Failure<T>(validationErrors);
+        }
         private static Result HandleIdentityResult(IdentityResult result)
         {
-            if (result.Succeeded)
-            {
-                return Result.Success();
-            }
-
             var errors = result.Errors.Select(
                 e => new Error(
                     string.IsNullOrWhiteSpace(e.Code) ? "Identity.Unknown" : e.Code,

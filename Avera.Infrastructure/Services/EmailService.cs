@@ -1,5 +1,6 @@
 using System.Net.Mail;
 using Avera.Application.Abstractions.Authentication;
+using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Services;
 using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
@@ -18,7 +19,7 @@ namespace Avera.Infrastructure.Services
     (
         IFluentEmail fluentEmail,
         UserManager<User> userManager,
-        IdentityDbContext identityDbContext,
+        IIdentityDbContext identityDbContext,
         IUserContext userContext
     ) : IEmailService
     {

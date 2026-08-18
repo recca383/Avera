@@ -1,11 +1,14 @@
 using System.Reflection.Metadata;
 using System.Security.Cryptography.Pkcs;
+using System.Security.Principal;
 using Avera.Application.Abstractions.Authentication;
+using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Services;
 using Avera.Application.Authentication.ForgotPassword;
 using Avera.Application.Authentication.Login;
 using Avera.Application.Authentication.Register;
 using Avera.Application.Authentication.ResetPassword;
+using Avera.Domain.Identity.MemberRequests;
 using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +26,9 @@ namespace Avera.Infrastructure.Services
             SignInManager<User> _signInManager,
             JwtProvider _jwtProvider,
             IEmailService emailService,
-            IConfiguration configuration
+            IConfiguration configuration,
+            IIdentityDbContext identityDbContext,
+            IUserContext _userContext
         ) : IAuthenticationService
     {
         private static readonly ILogger Logger = Log.ForContext<AuthenticationService>();
@@ -229,5 +234,31 @@ namespace Avera.Infrastructure.Services
             return Result.Failure(validationErrors);
         }
 
+        public async Task<Result> JoinInviteCodeAsync(string inviteCode, CancellationToken cancellationToken = default)
+        {
+            if(inviteCode is null)
+                return Result.Failure(UserErrors.InvalidInviteCode);
+
+            var tenant = identityDbContext.Tenants.SingleOrDefault(t => t.InviteCode == inviteCode);
+
+            if(tenant is null)
+                return Result.Failure(UserErrors.JoinInviteCodeFailed);
+
+            // TEMPORARY : NO MEMBER REQUEST YET FOR DEVELOPMENT, UNCOMMENT TO REMOVE
+            // var memberRequest = new MemberRequest(
+            //     _userContext.UserId,
+            //     tenant.Id
+            // );
+
+            // await identityDbContext.MemberRequests.AddAsync(memberRequest, cancellationToken);
+
+            var user = await _userManager.FindByIdAsync(_userContext.UserId.ToString());
+
+            user!.TenantId = tenant.Id;
+
+            await identityDbContext.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
     }
 }
