@@ -32,6 +32,7 @@ namespace Avera.WebApi.Endpoints.CaseImages
                     onSuccess => Results.Stream(result.Value.ImageStream, result.Value.ContentType),
                     CustomResults.Problem);
             })
+            .RequireAuthorization()
             .WithTags(Tags.CaseImages)
             .WithSummary("Get a reference image by index");
         }
