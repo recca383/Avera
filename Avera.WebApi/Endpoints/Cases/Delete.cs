@@ -22,6 +22,7 @@ namespace Avera.WebApi.Endpoints.Cases
 
                 return result.Match(Results.NoContent, CustomResults.Problem);
             })
+            .RequireAuthorization()
             .WithTags(Tags.Cases)
             .WithSummary("Delete an existing case")
 

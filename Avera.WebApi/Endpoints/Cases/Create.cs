@@ -35,6 +35,7 @@ namespace Avera.WebApi.Endpoints.Cases
                     onSuccess => Results.Created(locationUri, result.Value),
                     CustomResults.Problem);
             })
+            .RequireAuthorization()
            .WithTags(Tags.Cases)
            .WithSummary("Create a new case")
             ;

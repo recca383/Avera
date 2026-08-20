@@ -40,6 +40,7 @@ namespace Avera.WebApi.Endpoints.Cases
 
                 return result.Match(Results.Ok, CustomResults.Problem);
             })
+            .RequireAuthorization()
             .WithTags(Tags.Cases)
             .WithSummary("Get all cases")
 
