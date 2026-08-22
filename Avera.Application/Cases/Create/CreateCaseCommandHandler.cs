@@ -3,6 +3,8 @@ using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SharedKernel;
@@ -11,15 +13,19 @@ namespace Avera.Application.Cases.Create
 {
     public sealed class CreateCaseCommandHandler(
         IApplicationDbContext dbContext,
-        IUserContext userContext) 
+        IUserContext userContext,
+        UserManager<User> userManager
+        ) 
         : ICommandHandler<CreateCaseCommand, Case>
     {
         private static readonly ILogger logger = Log.ForContext<CreateCaseCommandHandler>();
         
         public async Task<Result<Case>> Handle(CreateCaseCommand command, CancellationToken cancellationToken)
         {
-            if(userContext.TenantId == null)
+            if (userContext.TenantId == null)
                 return Result.Failure<Case>(TenantErrors.NotMember);
+
+            
 
             logger.Information("Creating a new case for subject: {SubjectName}", command.SubjectName);
             var newCase = new Case()
