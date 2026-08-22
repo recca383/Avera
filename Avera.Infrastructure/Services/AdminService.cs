@@ -15,20 +15,21 @@ namespace Avera.Infrastructure.Services
     internal sealed class AdminService(
         UserManager<User> _userManager,
         IUserContext _userContext,
-        IIdentityDbContext _db
+        IIdentityDbContext _db,
+        JwtProvider jwtProvider
     ) : IAdminService
     {
         private const int INVITECODELENGTH = 8;
-        public async Task<Result<Guid>> CreateTenantAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<Result<string>> CreateTenantAsync(string name, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(
             _userContext.UserId.ToString());
 
             if (user is null)
-                return Result.Failure<Guid>(UserErrors.UserNotFound);
+                return Result.Failure<string>(UserErrors.UserNotFound);
 
             if (user.TenantId.HasValue)
-                return Result.Failure<Guid>(TenantErrors.AlreadyBelongsToTenant);
+                return Result.Failure<string>(TenantErrors.AlreadyBelongsToTenant);
 
             var tenant = new Tenant
             {
@@ -46,13 +47,17 @@ namespace Avera.Infrastructure.Services
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
-                return HandleIdentityResult<Guid>(result);
+                return HandleIdentityResult<string>(result);
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            
+            var iListroles = await _userManager.GetRolesAsync(user);
 
-            return Result.Success<Guid>(tenant.Id);
+            var listroles = iListroles.Cast<string>().ToList();
+
+            var newToken = await jwtProvider.GenerateAccessTokenAsync(user, listroles, cancellationToken);
+
+            return Result.Success<string>(newToken);
         }
 
         public async Task<Result<TenantMemberDto>> GetMemberByIdAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -82,29 +87,45 @@ namespace Avera.Infrastructure.Services
                     user.Email!));
         }
 
-        public async Task<Result<List<TenantMemberDto>>> GetMembersAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<List<TenantMemberDto>>> GetMembersAsync(
+            bool? IsAlphabetical = null,
+            bool? IsMostCases = null,
+            string? Name = null,
+            CancellationToken cancellationToken = default)
         {
             var tenantId = _userContext.TenantId;
 
             if (!tenantId.HasValue)
                 return Result.Failure<List<TenantMemberDto>>(TenantErrors.NotMember);
 
-            var users = await _userManager.Users
-                .Where(x => x.TenantId == tenantId)
+            var users = _userManager.Users
+                .Where(x => x.TenantId == tenantId);
+            
+
+            if (IsAlphabetical.HasValue)
+            {
+                users = users.OrderBy(x => x.FirstName);
+            }
+
+            //if (IsMostCases.HasValue)
+            //{
+            //    users = users
+            //}
+
+            if (Name != null)
+            {
+                users = users.Where(x => x.FirstName!.Contains(Name) 
+                || x.LastName!.Contains(Name));
+            }
+
+            var result = await users
+                .Select(x => new TenantMemberDto(
+                    x.Id,
+                    x.FirstName,
+                    x.LastName,
+                    x.Email!))  
                 .ToListAsync(cancellationToken);
 
-            var result = new List<TenantMemberDto>();
-
-            foreach (var user in users)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-
-                result.Add(new TenantMemberDto(
-                    user.Id,
-                    user.FirstName,
-                    user.LastName,
-                    user.Email!));
-            }
 
             return Result.Success(result);
         }
@@ -120,12 +141,24 @@ namespace Avera.Infrastructure.Services
             if (user.TenantId != _userContext.TenantId)
                 return Result.Failure(TenantErrors.UserNotInTenant);
 
+            // Remove the user from the tenant
             user.TenantId = null;
+
+            var role = await _userManager.GetRolesAsync(user);
+
+            // Remove user roles
+            var roleresult = await _userManager.RemoveFromRoleAsync(user, role.FirstOrDefault()!);
+
+            if (!roleresult.Succeeded)
+                return HandleIdentityResult(roleresult);
 
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
                 return HandleIdentityResult(result);
+
+            // Invalidate the user's security stamp to force re-authentication
+            await _userManager.UpdateSecurityStampAsync(user);
 
             return Result.Success();
         }
@@ -135,9 +168,25 @@ namespace Avera.Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public Task<Result> SuspendUserAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<Result> SuspendUserAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user is null)
+                return Result.Failure(UserErrors.UserNotFound);
+
+            user.IsSuspended = true;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return HandleIdentityResult(result);
+            }
+
+            await _userManager.UpdateSecurityStampAsync(user);
+
+            return Result.Success();
         }
 
         private static string ProduceInviteCode()

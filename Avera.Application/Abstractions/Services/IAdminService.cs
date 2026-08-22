@@ -5,7 +5,7 @@ namespace Avera.Application.Abstractions.Authentication
 {
     public interface IAdminService
     {
-        Task<Result<Guid>> CreateTenantAsync(
+        Task<Result<string>> CreateTenantAsync(
             string name,
             CancellationToken cancellationToken = default);
 
@@ -22,6 +22,9 @@ namespace Avera.Application.Abstractions.Authentication
         );
 
         Task<Result<List<TenantMemberDto>>> GetMembersAsync(
+            bool? IsAlphabetical,
+            bool? IsMostCases,
+            string Name,
             CancellationToken cancellationToken = default);
 
         Task<Result<TenantMemberDto>> GetMemberByIdAsync(
