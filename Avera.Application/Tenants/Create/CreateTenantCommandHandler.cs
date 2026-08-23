@@ -7,9 +7,9 @@ namespace Avera.Application.Tenants.Create
     internal sealed class CreateTenantCommandHandler
     (
         IAdminService adminService
-    ) : ICommandHandler<CreateTenantCommand, Guid>
+    ) : ICommandHandler<CreateTenantCommand, string>
     {
-        public async Task<Result<Guid>> Handle(CreateTenantCommand command, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(CreateTenantCommand command, CancellationToken cancellationToken)
         {
             return await adminService.CreateTenantAsync(command.Name, cancellationToken);
         }
