@@ -3,7 +3,7 @@ using Avera.Domain.Identity.Tenants;
 
 namespace Avera.Application.Tenants.GetMemberById
 {
-    public sealed record GetMemberByIdCommand(
+    public sealed record GetMemberByIdQuery(
         Guid UserId
-    ) : ICommand<TenantMemberDto>;
+    ) : IQuery<TenantMemberDto>;
 }
