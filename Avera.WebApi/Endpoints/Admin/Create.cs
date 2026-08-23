@@ -15,7 +15,7 @@ namespace Avera.WebApi.Endpoints.Admin
         {
             routeBuilder.MapPost("tenants", async (
                 Request request,
-                [FromServices] ICommandHandler<CreateTenantCommand, Guid> handler,
+                [FromServices] ICommandHandler<CreateTenantCommand, string> handler,
                 CancellationToken cancellationToken
             ) =>
             {
