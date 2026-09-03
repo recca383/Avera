@@ -52,7 +52,7 @@ namespace Avera.Infrastructure.Authentication
 
             if(user.TenantId.HasValue)
             {
-                tokenDescriptor.Subject.AddClaim(new Claim(ClaimTypes.GroupSid, user.TenantId.ToString()!));
+                tokenDescriptor.Subject.AddClaim(new Claim("TenantId", user.TenantId.ToString()!));
             }
             
             logger.Information("Adding {RoleCount} role claims to token", role.Count);

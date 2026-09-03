@@ -106,7 +106,7 @@ namespace Avera.Infrastructure
         {
              var issuer = configuration["Jwt:Issuer"]
                 ?? throw new InvalidOperationException(
-            "       JWT issuer is not configured.");
+                    "JWT issuer is not configured.");
 
             var audience = configuration["Jwt:Audience"]
                 ?? throw new InvalidOperationException(

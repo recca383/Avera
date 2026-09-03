@@ -10,6 +10,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Endpoints\Export\**" />
+    <Compile Remove="Endpoints\Profile\**" />
+    <Compile Remove="Endpoints\Stats\**" />
+    <Compile Remove="Endpoints\Super Admin\**" />
+    <Content Remove="Endpoints\Export\**" />
+    <Content Remove="Endpoints\Profile\**" />
+    <Content Remove="Endpoints\Stats\**" />
+    <Content Remove="Endpoints\Super Admin\**" />
+    <EmbeddedResource Remove="Endpoints\Export\**" />
+    <EmbeddedResource Remove="Endpoints\Profile\**" />
+    <EmbeddedResource Remove="Endpoints\Stats\**" />
+    <EmbeddedResource Remove="Endpoints\Super Admin\**" />
+    <None Remove="Endpoints\Export\**" />
+    <None Remove="Endpoints\Profile\**" />
+    <None Remove="Endpoints\Stats\**" />
+    <None Remove="Endpoints\Super Admin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="dotenv.net" Version="4.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.14" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.14" />
@@ -25,14 +44,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Endpoints\Admin\" />
     <Folder Include="Endpoints\Cases\" />
     <Folder Include="Endpoints\ML\" />
-    <Folder Include="Endpoints\Export\" />
-    <Folder Include="Endpoints\Super Admin\" />
-    <Folder Include="Endpoints\Profile\" />
     <Folder Include="Endpoints\Notifications\" />
-    <Folder Include="Endpoints\Stats\" />
   </ItemGroup>
 
   <ItemGroup>
