@@ -11,13 +11,13 @@ namespace Avera.WebApi.Endpoints.Admin
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapGet("tenant/member/{userId:guid}", async (
+            routeBuilder.MapGet("tenant/members/{userId:guid}", async (
                 [FromRoute] Guid userId,
-                [FromServices] ICommandHandler<GetMemberByIdCommand, TenantMemberDto> handler,
+                [FromServices] IQueryHandler<GetMemberByIdQuery, TenantMemberDto> handler,
                 CancellationToken cancellationToken
             )=>
             {
-                var command = new GetMemberByIdCommand(userId);
+                var command = new GetMemberByIdQuery(userId);
 
                 var result = await handler.Handle(command, cancellationToken);
 
