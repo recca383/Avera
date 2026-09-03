@@ -8,6 +8,7 @@ namespace Avera.Domain.Identity.Users
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public bool IsSuspended { get; set; } = false;
         // Navigation 
         public List<Notification> Notifications { get; set; } = new();
         public List<Case> Cases { get; set; } = new();
