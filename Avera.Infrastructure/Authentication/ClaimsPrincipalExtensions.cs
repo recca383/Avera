@@ -17,7 +17,7 @@ namespace Avera.Infrastructure.Authentication
 
         public static Guid GetTenantId(this ClaimsPrincipal? principal)
         {
-            string? tenantId = principal?.FindFirstValue(ClaimTypes.GroupSid);
+            string? tenantId = principal?.FindFirstValue("TenantId");
 
             return Guid.TryParse(tenantId, out Guid parsedTenantId)?
                 parsedTenantId :

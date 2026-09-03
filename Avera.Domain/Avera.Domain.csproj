@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Identity\TenantSubscription\**" />
+    <Compile Remove="Identity\Tenant\**" />
+    <EmbeddedResource Remove="Identity\TenantSubscription\**" />
+    <EmbeddedResource Remove="Identity\Tenant\**" />
+    <None Remove="Identity\TenantSubscription\**" />
+    <None Remove="Identity\Tenant\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.15" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.7" />
   </ItemGroup>
@@ -17,8 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Identity\SubscriptionPlans\" />
-    <Folder Include="Identity\TenantSubscription\" />
-    <Folder Include="Identity\Tenant\" />
   </ItemGroup>
 
   
