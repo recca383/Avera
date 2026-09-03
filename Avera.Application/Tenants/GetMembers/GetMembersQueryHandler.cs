@@ -5,11 +5,11 @@ using SharedKernel;
 
 namespace Avera.Application.Tenants.GetMembers
 {
-    internal sealed class GetMembersCommandHandler(
+    internal sealed class GetMembersQueryHandler(
         IAdminService adminService
-    ) : ICommandHandler<GetMembersCommand, List<TenantMemberDto>>
+    ) : IQueryHandler<GetMembersQuery, List<TenantMemberDto>>
     {
-        public async Task<Result<List<TenantMemberDto>>> Handle(GetMembersCommand command, CancellationToken cancellationToken)
+        public async Task<Result<List<TenantMemberDto>>> Handle(GetMembersQuery command, CancellationToken cancellationToken)
         {
             return await adminService.GetMembersAsync(cancellationToken);
         }
