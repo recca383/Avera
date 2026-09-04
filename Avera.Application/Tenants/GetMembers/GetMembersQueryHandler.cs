@@ -11,7 +11,7 @@ namespace Avera.Application.Tenants.GetMembers
     {
         public async Task<Result<List<TenantMemberDto>>> Handle(GetMembersQuery command, CancellationToken cancellationToken)
         {
-            return await adminService.GetMembersAsync(cancellationToken);
+            return await adminService.GetMembersAsync(command.IsAlphabetical, command.IsMostCases, command.Name, cancellationToken);
         }
     }
 }
