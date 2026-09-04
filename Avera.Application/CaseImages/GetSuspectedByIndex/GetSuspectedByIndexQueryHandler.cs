@@ -1,8 +1,12 @@
+using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Abstractions.Storage;
 using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
@@ -12,11 +16,22 @@ namespace Avera.Application.CaseImages.GetSuspectedByIndex
     internal sealed class GetSuspectedByIndexQueryHandler(
         IApplicationDbContext applicationDbContext,
         IBlobStorageService blobStorageService,
-        ILogger<GetSuspectedByIndexQueryHandler> logger
+        // Temporary logger
+        ILogger<GetSuspectedByIndexQueryHandler> logger,
+        IUserContext userContext,
+        UserManager<User> userManager
     ) : IQueryHandler<GetSuspectedByIndexQuery, GetSuspectedByIndexQueryResponse>
     {
         public async Task<Result<GetSuspectedByIndexQueryResponse>> Handle(GetSuspectedByIndexQuery query, CancellationToken cancellationToken)
         {
+            if (userContext.TenantId == null)
+                return Result.Failure<GetSuspectedByIndexQueryResponse>(TenantErrors.NotMember);
+
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<GetSuspectedByIndexQueryResponse>(UserErrors.IsSuspended);
+
             var selectedCase = await applicationDbContext.Cases.Include(c => c.CaseImages)
             .FirstOrDefaultAsync(c => c.Id == query.CaseId, cancellationToken);
 

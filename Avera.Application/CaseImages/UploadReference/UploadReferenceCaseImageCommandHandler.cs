@@ -1,8 +1,12 @@
+using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Abstractions.Storage;
 using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
@@ -11,10 +15,21 @@ namespace Avera.Application.CaseImages.UploadReference
     internal sealed class UploadReferenceCaseImageCommandHandler
     (IApplicationDbContext applicationDbContext,
     IBlobStorageService blobStorage,
-    ILogger<UploadReferenceCaseImageCommandHandler> logger) : ICommandHandler<UploadReferenceCaseImageCommand, Guid>
+    ILogger<UploadReferenceCaseImageCommandHandler> logger,
+    IUserContext userContext,
+    UserManager<User> userManager) : ICommandHandler<UploadReferenceCaseImageCommand, Guid>
     {
         public async Task<Result<Guid>> Handle(UploadReferenceCaseImageCommand command, CancellationToken cancellationToken)
         {
+
+            if (userContext.TenantId == null)
+                return Result.Failure<Guid>(TenantErrors.NotMember);
+
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<Guid>(UserErrors.IsSuspended);
+
             logger.LogInformation("Handling UploadReferenceCaseImageCommand for Case with ID {CaseId}", command.CaseId);
             var selectedCase = applicationDbContext.Cases.Find(command.CaseId);
 
