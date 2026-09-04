@@ -1,21 +1,35 @@
-using System.Windows.Input;
+using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Abstractions.Storage;
 using Avera.Domain.Application.Cases;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
+using System.Windows.Input;
 
 namespace Avera.Application.ML.GetResults
 {
     internal sealed class GetMLResultsCommandHandler(
         IApplicationDbContext dbContext,
         IBlobStorageService blobStorageService,
-        ILogger<GetMLResultsCommandHandler> logger
+        ILogger<GetMLResultsCommandHandler> logger,
+        IUserContext userContext,
+        UserManager<User> userManager
     ) : ICommandHandler<GetMLResultsCommand, GetMLResultsResponse>
     {
         public async Task<Result<GetMLResultsResponse>> Handle(GetMLResultsCommand command, CancellationToken cancellationToken)
         {
+            if (userContext.TenantId == null)
+                return Result.Failure<GetMLResultsResponse>(TenantErrors.NotMember);
+
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<GetMLResultsResponse>(UserErrors.IsSuspended);
+
             var selectedCase = dbContext.Cases.FirstOrDefault(c => c.Id == command.CaseId);
 
             if (selectedCase is null)

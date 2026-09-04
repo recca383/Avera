@@ -1,5 +1,10 @@
+using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.ML.Health;
+using Avera.Domain.Application.Cases;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
@@ -7,11 +12,22 @@ namespace Avera.Application.Abstractions.ML.Health
 {
     internal sealed class GetMLHealth(
         IMLService mLService,
-        ILogger<GetMLHealth> logger) 
+        // Temporary Logger
+        ILogger<GetMLHealth> logger,
+        IUserContext userContext,
+        UserManager<User> userManager) 
     : ICommandHandler<GetMLHealthCommand, GetMLHealthResponse>
     {
         public async Task<Result<GetMLHealthResponse>> Handle(GetMLHealthCommand command, CancellationToken cancellationToken)
         {
+            if (userContext.TenantId == null)
+                return Result.Failure<GetMLHealthResponse>(TenantErrors.NotMember);
+
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<GetMLHealthResponse>(UserErrors.IsSuspended);
+
             try
             {
                 var health = await mLService.GetMLHealthAsync(cancellationToken);

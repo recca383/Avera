@@ -1,23 +1,39 @@
-using System.Windows.Input;
+using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Abstractions.ML;
 using Avera.Domain.Application.CaseImages;
+using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.OverlayImages;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
+using System.Windows.Input;
 
 namespace Avera.Application.ML.Process
 {
     internal sealed class ProcessCommandHandler(
         IApplicationDbContext dbContext,
         IMLService mLService,
-        ILogger<ProcessCommandHandler> logger) : ICommandHandler<ProcessCommand, ProcessResponse>
+        // Temporary Logger
+        ILogger<ProcessCommandHandler> logger,
+        IUserContext userContext,
+        UserManager<User> userManager) : ICommandHandler<ProcessCommand, ProcessResponse>
     {
         public async Task<Result<ProcessResponse>> Handle(ProcessCommand command, CancellationToken cancellationToken)
         {
+            if (userContext.TenantId == null)
+                return Result.Failure<ProcessResponse>(TenantErrors.NotMember);
+
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<ProcessResponse>(UserErrors.IsSuspended);
+
             logger.LogInformation("Processing ML for Case with Id: {CaseId}", command.CaseId);
             var selectedCase = await dbContext.Cases
                                                     .Include(c => c.CaseImages)

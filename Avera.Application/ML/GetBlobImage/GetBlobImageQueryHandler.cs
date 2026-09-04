@@ -1,8 +1,12 @@
+using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Abstractions.Storage;
 using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
+using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
@@ -12,7 +16,10 @@ namespace Avera.Application.ML.GetBlobImage
     internal sealed class GetBlobImageQueryHandler(
         IApplicationDbContext dbContext,
         IBlobStorageService blobStorageService,
-        ILogger<GetBlobImageQueryHandler> logger
+        // Temporary Logger
+        ILogger<GetBlobImageQueryHandler> logger,
+        IUserContext userContext,
+        UserManager<User> userManager
     ) : IQueryHandler<GetBlobImageQuery, GetBlobImageResponse>
     {
         private static readonly HashSet<string> AllowedFolders = new(StringComparer.OrdinalIgnoreCase)
@@ -22,6 +29,14 @@ namespace Avera.Application.ML.GetBlobImage
 
         public async Task<Result<GetBlobImageResponse>> Handle(GetBlobImageQuery query, CancellationToken cancellationToken)
         {
+            if (userContext.TenantId == null)
+                return Result.Failure<GetBlobImageResponse>(TenantErrors.NotMember);
+
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<GetBlobImageResponse>(UserErrors.IsSuspended);
+
             var selectedCase = dbContext.Cases.FirstOrDefault(c => c.Id == query.CaseId);
 
             if (selectedCase is null)
