@@ -1,4 +1,5 @@
 
+using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.UpdateCase;
 using Avera.Domain.Application.Cases;
@@ -19,9 +20,10 @@ namespace Avera.WebApi.Endpoints.Cases
         {
             routeBuilder.MapPut("cases/{id:guid}", async(
                 Guid id,
-                    UpdateCaseRequest request,
-                    ICommandHandler<UpdateCaseCommand, Guid> sender
-            )=>
+                UpdateCaseRequest request,
+                ICommandHandler<UpdateCaseCommand, Guid> handler,
+                CancellationToken cancellationToken
+            ) =>
             {
                 var command = new UpdateCaseCommand(
                     Id: id,
@@ -30,7 +32,7 @@ namespace Avera.WebApi.Endpoints.Cases
                     Priority: request.Priority
                 );
 
-                var result = await sender.Handle(command, CancellationToken.None);
+                var result = await handler.Handle(command, cancellationToken);
 
                 return result.Match(Results.Ok, CustomResults.Problem);
             })
