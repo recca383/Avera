@@ -1,4 +1,5 @@
-﻿using Avera.Application.Abstractions.Databases;
+﻿using Avera.Application.Abstractions.Authentication;
+using Avera.Application.Abstractions.Databases;
 using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
@@ -14,7 +15,8 @@ using SharedKernel;
 namespace Avera.Infrastructure.Database.Application
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
-     IDomainEventsDispatcher domainEventsDispatcher)
+     IDomainEventsDispatcher domainEventsDispatcher,
+     IUserContext userContext)
     : DbContext(options), IApplicationDbContext
     {
         public DbSet<Case> Cases { get; set; }
@@ -29,6 +31,8 @@ namespace Avera.Infrastructure.Database.Application
             type => type.Namespace == "Avera.Infrastructure.Database.Application.Configurations");
             
             //modelBuilder.HasDefaultSchema(Schemas.Default);
+
+            modelBuilder.Entity<Case>().HasQueryFilter(c => c.TenantId == userContext.TenantId);
 
             modelBuilder.Ignore<User>();
             modelBuilder.Ignore<Tenant>();

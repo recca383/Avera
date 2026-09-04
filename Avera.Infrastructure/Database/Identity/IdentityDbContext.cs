@@ -1,4 +1,5 @@
-﻿using Avera.Application.Abstractions.Databases;
+﻿using Avera.Application.Abstractions.Authentication;
+using Avera.Application.Abstractions.Databases;
 using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
@@ -19,13 +20,16 @@ namespace Avera.Infrastructure.Database.Identity
 {
     public sealed class IdentityDbContext(
         DbContextOptions<IdentityDbContext> options,
-        IDomainEventsDispatcher domainEventsDispatcher)
+        IDomainEventsDispatcher domainEventsDispatcher,
+        IUserContext userContext)
         : IdentityDbContext<User, Role, Guid>(options), IIdentityDbContext
     {
         public DbSet<Tenant> Tenants { get; set; }
         public DbSet<TenantSubscription> TenantSubscriptions { get; set; }
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
         public DbSet<MemberRequest> MemberRequests { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,8 +40,7 @@ namespace Avera.Infrastructure.Database.Identity
             
             //modelBuilder.HasDefaultSchema(Schemas.Default);
 
-            
-
+            modelBuilder.Entity<User>().HasQueryFilter(u => u.TenantId == userContext.TenantId);
             modelBuilder.Ignore<Case>();
             modelBuilder.Ignore<CaseImage>();
             modelBuilder.Ignore<ExportedReport>();
