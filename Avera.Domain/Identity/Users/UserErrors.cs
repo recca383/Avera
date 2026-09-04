@@ -12,6 +12,27 @@ namespace Avera.Domain.Identity.Users
         private UserErrors(string code, string description, ErrorType errorType)
             : base(code, description, errorType) { }
 
+        // Conflict Errors
+
+        public static UserErrors MemberRequestIsDuplicate => new UserErrors(
+            "User.MemberRequestIsDuplicate",
+            "Member request is duplicate",
+            ErrorType.Conflict
+        );
+
+        public static UserErrors MemberIsJoiningMultipleTimes => new UserErrors(
+            "User.MemberIsJoiningMultipleTimes",
+            "Member is joining multiple times",
+            ErrorType.Conflict
+        );
+
+        // Unauthorized Errors
+
+        public static UserErrors IsSuspended => new UserErrors(
+            "User.Suspended",
+            "User is suspended",
+            ErrorType.Unauthorized
+        );
         // Not Found Errors
 
         public static UserErrors UserNotFound => new UserErrors(
