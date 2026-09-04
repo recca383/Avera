@@ -26,6 +26,7 @@ namespace Avera.WebApi.Endpoints.ML
                     CustomResults.Problem
                 );
             })
+            .RequireAuthorization()
             .WithTags(Tags.ML)
             .WithSummary("Get a single gradcam overlay/original image for a case");
         }

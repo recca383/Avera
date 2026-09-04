@@ -25,6 +25,7 @@ namespace Avera.WebApi.Endpoints.ML
                     onSuccess => Results.Stream(result.Value.ResultsStream, "application/pdf"),
                     onFailure: CustomResults.Problem);
             })
+            .RequireAuthorization()
             .WithTags(Tags.ML)
             .WithSummary("Get the results of an ML analysis for a case");
         }

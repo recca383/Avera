@@ -22,6 +22,7 @@ namespace Avera.WebApi.Endpoints.ML
 
                 return result.Match(Results.Ok, CustomResults.Problem);
             })
+            .RequireAuthorization()
             .WithTags(Tags.ML)
             .WithSummary("Analyze a case using ML");
         }

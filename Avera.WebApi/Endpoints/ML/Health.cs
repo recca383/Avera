@@ -17,6 +17,7 @@ namespace Avera.WebApi.Endpoints.ML
 
                 return result.Match(Results.Ok,CustomResults.Problem);
             })
+            .RequireAuthorization()
             .WithTags(Tags.ML)
             .WithSummary("Get the health status of the ML service");
         }
