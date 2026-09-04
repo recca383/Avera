@@ -7,6 +7,7 @@ using Azure.Identity;
 using Avera.WebApi.Infrastructure;
 using dotenv.net;
 using Serilog;
+using Avera.WebApi;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -15,6 +16,7 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog();
 DotEnv.Load();
 builder.Configuration.AddEnvironmentVariables();
 
@@ -22,19 +24,15 @@ builder.Configuration.AddAzureKeyVault(
     new Uri(builder.Configuration["KeyVault:Uri"]!),
     new DefaultAzureCredential()
 );
-builder.Services.AddHttpClient();
+
 builder.Services
+    .AddWebApi()
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
 
-builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
-builder.Services.AddOpenApi(options =>
-    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>()
-);
-builder.Services.AddAntiforgery();
-
 var app = builder.Build();
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
