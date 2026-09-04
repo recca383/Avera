@@ -71,8 +71,7 @@ namespace Avera.Infrastructure.Services
             var user = await _userManager.Users
                 .FirstOrDefaultAsync(
                     x =>
-                        x.Id == userId &&
-                        x.TenantId == tenantId,
+                        x.Id == userId,
                     cancellationToken);
 
             if (user is null)
@@ -98,8 +97,7 @@ namespace Avera.Infrastructure.Services
             if (!tenantId.HasValue)
                 return Result.Failure<List<TenantMemberDto>>(TenantErrors.NotMember);
 
-            var users = _userManager.Users
-                .Where(x => x.TenantId == tenantId);
+            var users = _userManager.Users;
             
 
             if (IsAlphabetical.HasValue)

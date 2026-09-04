@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using SharedKernel;
+using Microsoft.EntityFrameworkCore;
 
 namespace Avera.Infrastructure.Services
 {
@@ -244,20 +245,38 @@ namespace Avera.Infrastructure.Services
             if(tenant is null)
                 return Result.Failure(UserErrors.JoinInviteCodeFailed);
 
-            // TEMPORARY : NO MEMBER REQUEST YET FOR DEVELOPMENT, UNCOMMENT TO REMOVE
-            // var memberRequest = new MemberRequest(
-            //     _userContext.UserId,
-            //     tenant.Id
-            // );
+             var memberRequest = new MemberRequest(
+                 _userContext.UserId,
+                 tenant.Id
+             );
 
-            // await identityDbContext.MemberRequests.AddAsync(memberRequest, cancellationToken);
+            var results = await Task.WhenAll(
+               CheckDuplicateMemberRequest(_userContext.UserId, tenant.Id, cancellationToken),
+               CheckJoiningMultipleTenants(_userContext.UserId, cancellationToken));
 
-            var user = await _userManager.FindByIdAsync(_userContext.UserId.ToString());
+            if (results.Any(t => t.IsFailure))
+                return results.First(t => t.IsFailure);
 
-            user!.TenantId = tenant.Id;
+            await identityDbContext.MemberRequests.AddAsync(memberRequest, cancellationToken);
 
             await identityDbContext.SaveChangesAsync(cancellationToken);
 
+            return Result.Success();
+        }
+
+        public async Task<Result> CheckDuplicateMemberRequest(Guid userId, Guid tenantId, CancellationToken cancellationToken = default)
+        {
+            var duplicateRequest = await identityDbContext.MemberRequests.AnyAsync(mr => mr.UserId == userId && mr.TenantId == tenantId, cancellationToken);
+            if (duplicateRequest)
+                return Result.Failure(UserErrors.MemberRequestIsDuplicate);
+            return Result.Success();
+        }
+
+        public async Task<Result> CheckJoiningMultipleTenants(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var joiningMultipleTimes = await identityDbContext.MemberRequests.AnyAsync(mr => mr.UserId == userId, cancellationToken);
+            if (joiningMultipleTimes)
+                return Result.Failure(UserErrors.MemberIsJoiningMultipleTimes);
             return Result.Success();
         }
     }
