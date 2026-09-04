@@ -23,15 +23,18 @@ namespace Avera.Application.Cases.Get
         private const bool IS_CASE_DELETED = false;
         public async Task<Result<GetCasesQueryResult>> Handle(GetCasesQuery query, CancellationToken cancellationToken)
         {
+            if (userContext.TenantId == null)
+                return Result.Failure<GetCasesQueryResult>(TenantErrors.NotMember);
+
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<GetCasesQueryResult>(UserErrors.IsSuspended);
+
             IQueryable<Case>? cases = applicationDbContext.Cases.AsQueryable();
 
             if (userContext.TenantId == null)
                 return Result.Failure<GetCasesQueryResult>(TenantErrors.NotMember);
-
-            // Tenant Filtration
-            cases = cases.Where(
-                c => c.TenantId == userContext.TenantId
-            );
 
             if (query.CaseStatus.HasValue)
                 cases = cases.Where(c => c.Status == query.CaseStatus.Value);
@@ -74,6 +77,8 @@ namespace Avera.Application.Cases.Get
                     pagedCase.AnalysisType,
                     IS_CASE_DELETED
                 );
+
+                pagedCasesList.Add( selectedCase );
             }
 
             GetCasesQueryResult? result = new(

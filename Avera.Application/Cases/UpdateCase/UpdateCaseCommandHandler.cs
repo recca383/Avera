@@ -9,6 +9,7 @@ namespace Avera.Application.Cases.UpdateCase
 {
     internal sealed class UpdateCaseCommandHandler(
         IApplicationDbContext applicationDbContext,
+        //Temporary Logger
         ILogger<UpdateCaseCommandHandler> logger) : ICommandHandler<UpdateCaseCommand, Guid>
     {
         public async Task<Result<Guid>> Handle(UpdateCaseCommand command, CancellationToken cancellationToken)

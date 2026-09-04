@@ -25,7 +25,10 @@ namespace Avera.Application.Cases.Create
             if (userContext.TenantId == null)
                 return Result.Failure<Case>(TenantErrors.NotMember);
 
-            
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<Case>(UserErrors.IsSuspended);
 
             logger.Information("Creating a new case for subject: {SubjectName}", command.SubjectName);
             var newCase = new Case()

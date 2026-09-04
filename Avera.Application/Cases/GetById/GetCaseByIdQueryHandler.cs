@@ -2,6 +2,7 @@ using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Domain.Application.Cases;
+using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,10 +18,17 @@ namespace Avera.Application.Cases.GetById
         private const bool IS_CASE_DELETED = false;
         public async Task<Result<GetCaseByIdQueryResult>> Handle(GetCaseByIdQuery query, CancellationToken cancellationToken)
         {
+            if (userContext.TenantId == null)
+                return Result.Failure<GetCaseByIdQueryResult>(TenantErrors.NotMember);
+
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user!.IsSuspended)
+                return Result.Failure<GetCaseByIdQueryResult>(UserErrors.IsSuspended);
+
             var queryResult = await dbContext.Cases
                         .Where(c => 
-                            c.Id == query.CaseId &&
-                            c.TenantId == userContext.TenantId)
+                            c.Id == query.CaseId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             //             .Select(c => new GetCaseByIdQueryResult(new CaseDto
