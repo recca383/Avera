@@ -18,5 +18,8 @@ namespace Avera.Application.Abstractions.Services
             string recipient,
             CancellationToken cancellationToken = default
          );
+        Task<Result> SendRequestRejectedAsync(
+          string recipient,
+          CancellationToken cancellationToken = default);
     }
 }

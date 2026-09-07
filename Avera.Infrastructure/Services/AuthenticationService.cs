@@ -18,6 +18,8 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using SharedKernel;
 using Microsoft.EntityFrameworkCore;
+using Avera.Application.MemberRequests.Notifications;
+using Avera.Application.Abstractions.NotificationHub;
 
 namespace Avera.Infrastructure.Services
 {
@@ -29,7 +31,8 @@ namespace Avera.Infrastructure.Services
             IEmailService emailService,
             IConfiguration configuration,
             IIdentityDbContext identityDbContext,
-            IUserContext _userContext
+            IUserContext _userContext,
+            IMemberRequestNotifier memberRequestNotifier
         ) : IAuthenticationService
     {
         private static readonly ILogger Logger = Log.ForContext<AuthenticationService>();
@@ -99,14 +102,21 @@ namespace Avera.Infrastructure.Services
                 lockoutOnFailure: false
             );
 
-            var role = await _userManager.GetRolesAsync(user);
-
             if (!result.Succeeded)
             {
                 return Result.Failure<LoginResponse>(UserErrors.InvalidPassword);
             }
 
+            if (user.IsSuspended)
+            {
+                Logger.Warning("Login failed because user {UserId} is suspended", user.Id);
+                return Result.Failure<LoginResponse>(UserErrors.IsSuspended);
+            }
+
+            var role = await _userManager.GetRolesAsync(user);
+
             var roleList = role.ToList();
+
             string accessToken = await _jwtProvider.GenerateAccessTokenAsync(user, roleList, cancellationToken);
 
             LoginResponse response = new LoginResponse
@@ -216,6 +226,54 @@ namespace Avera.Infrastructure.Services
 
             return Result.Success();
         }
+
+        public async Task<Result> JoinInviteCodeAsync(string inviteCode, CancellationToken cancellationToken = default)
+        {
+            if(inviteCode is null)
+                return Result.Failure(UserErrors.InvalidInviteCode);
+
+            var tenant = identityDbContext.Tenants.SingleOrDefault(t => t.InviteCode == inviteCode);
+
+            if(tenant is null)
+                return Result.Failure(UserErrors.JoinInviteCodeFailed);
+
+            var user = await _userManager.FindByIdAsync(_userContext.UserId.ToString());
+
+            if(user == null)
+            {
+                return Result.Failure(UserErrors.UserNotFound);
+            }
+
+            var memberRequest = new MemberRequest(
+                _userContext.UserId,
+                tenant.Id
+             );
+
+            var results = await Task.WhenAll(
+               CheckDuplicateMemberRequest(_userContext.UserId, tenant.Id, cancellationToken),
+               CheckJoiningMultipleTenants(_userContext.UserId, cancellationToken));
+
+            if (results.Any(t => t.IsFailure))
+                return results.First(t => t.IsFailure);
+
+            await identityDbContext.MemberRequests.AddAsync(memberRequest, cancellationToken);
+
+            await identityDbContext.SaveChangesAsync(cancellationToken);
+
+            var memberRequestCreated = new MemberRequestCreatedNotification(
+                memberRequest.Id,
+                memberRequest.UserId,
+                user.FirstName!,
+                user.LastName!,
+                user.Email!,
+                tenant.Id,
+                memberRequest.CreatedAt
+            );
+
+            await memberRequestNotifier.NotifyMemberRequestCreatedAsync(memberRequestCreated, cancellationToken);
+
+            return Result.Success();
+        }
         private static Result HandleIdentityResult(IdentityResult result)
         {
             if (result.Succeeded)
@@ -234,37 +292,7 @@ namespace Avera.Infrastructure.Services
             var validationErrors = new ValidationError(errors);
             return Result.Failure(validationErrors);
         }
-
-        public async Task<Result> JoinInviteCodeAsync(string inviteCode, CancellationToken cancellationToken = default)
-        {
-            if(inviteCode is null)
-                return Result.Failure(UserErrors.InvalidInviteCode);
-
-            var tenant = identityDbContext.Tenants.SingleOrDefault(t => t.InviteCode == inviteCode);
-
-            if(tenant is null)
-                return Result.Failure(UserErrors.JoinInviteCodeFailed);
-
-             var memberRequest = new MemberRequest(
-                 _userContext.UserId,
-                 tenant.Id
-             );
-
-            var results = await Task.WhenAll(
-               CheckDuplicateMemberRequest(_userContext.UserId, tenant.Id, cancellationToken),
-               CheckJoiningMultipleTenants(_userContext.UserId, cancellationToken));
-
-            if (results.Any(t => t.IsFailure))
-                return results.First(t => t.IsFailure);
-
-            await identityDbContext.MemberRequests.AddAsync(memberRequest, cancellationToken);
-
-            await identityDbContext.SaveChangesAsync(cancellationToken);
-
-            return Result.Success();
-        }
-
-        public async Task<Result> CheckDuplicateMemberRequest(Guid userId, Guid tenantId, CancellationToken cancellationToken = default)
+        private async Task<Result> CheckDuplicateMemberRequest(Guid userId, Guid tenantId, CancellationToken cancellationToken = default)
         {
             var duplicateRequest = await identityDbContext.MemberRequests.AnyAsync(mr => mr.UserId == userId && mr.TenantId == tenantId, cancellationToken);
             if (duplicateRequest)
@@ -272,7 +300,7 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public async Task<Result> CheckJoiningMultipleTenants(Guid userId, CancellationToken cancellationToken = default)
+        private async Task<Result> CheckJoiningMultipleTenants(Guid userId, CancellationToken cancellationToken = default)
         {
             var joiningMultipleTimes = await identityDbContext.MemberRequests.AnyAsync(mr => mr.UserId == userId, cancellationToken);
             if (joiningMultipleTimes)

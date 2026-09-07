@@ -25,6 +25,8 @@ namespace Avera.Infrastructure.Services
     {
         private const string HEADER_REFERENCE = "email-header";
         private readonly string CURRENT_YEAR = DateTime.UtcNow.Year.ToString();
+        private readonly string DEEP_LINK_URL = "avera://";
+        private readonly string SUPPORT_EMAIL = "sirpatrick121402@gmail.com";
 
         public async Task<Result> ResetPasswordNotificationAsync(string recipient, CancellationToken cancellationToken = default)
         {
@@ -152,6 +154,45 @@ namespace Avera.Infrastructure.Services
                 return Result.Failure(validationErrors);
             }
 
+            return Result.Success();
+        }
+
+        public async Task<Result> SendRequestRejectedAsync(string recipient, CancellationToken cancellationToken = default)
+        {
+            var userRecipient = await userManager.FindByEmailAsync(recipient);
+            var organization = await identityDbContext.Tenants
+                    .FirstOrDefaultAsync(t => t.Id == userContext.TenantId, cancellationToken);
+            var admin = await userManager.FindByIdAsync(userContext.UserId.ToString());
+            var result =  await fluentEmail
+                .To(recipient)
+                .Subject("Request Rejected")
+                .UsingTemplateFromFile(
+                    GetTemplatePath("request-rejected.cshtml"),
+                    new
+                    {
+                        Header = HEADER_REFERENCE,
+                        FirstName = userRecipient!.FirstName,
+                        OrganizationName = "Philippine National Police", //organization!.Name,
+                        AdminName = "Patrick Fernandez",//admin!.FirstName + " " + admin!.LastName,
+                        CurrentYear = CURRENT_YEAR,
+                        LoginUrl = DEEP_LINK_URL,
+                        SupportEmail = SUPPORT_EMAIL
+                    }
+                )
+                .Attach(GetHeader())
+                .SendAsync();
+            if(!result.Successful)
+            {
+                var errors = result.ErrorMessages.Select(
+                e => new Error(
+                    "Email.Failure",
+                    e,
+                    ErrorType.Failure)
+                ).
+                ToArray();
+                var validationErrors = new ValidationError(errors);
+                return Result.Failure(validationErrors);
+            }
             return Result.Success();
         }
 

@@ -161,11 +161,6 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public Task<Result> SendInviteCodeAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<Result> SuspendUserAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());

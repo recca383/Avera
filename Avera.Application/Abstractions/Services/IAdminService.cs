@@ -9,9 +9,6 @@ namespace Avera.Application.Abstractions.Authentication
             string name,
             CancellationToken cancellationToken = default);
 
-        Task<Result> SendInviteCodeAsync(
-            CancellationToken cancellationToken = default);
-
         Task<Result> RemoveUserAsync(
             Guid userId,
             CancellationToken cancellationToken = default);
