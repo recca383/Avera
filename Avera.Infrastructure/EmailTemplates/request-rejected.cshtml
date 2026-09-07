@@ -1,0 +1,115 @@
+@*
+  AVERA — Disapprove Join Request
+  ================================================
+  Trigger: Org Admin rejects a pending Forensic Analyst's registration
+  request (the counterpart to request-approved.cshtml).
+
+  Design choice per your Q1-Option A answer: no rejection-reason field
+  shown. Reasons are often sensitive ("we don't recognize you at this
+  institution") and easy to get wrong tonally, so this stays generic and
+  points the person to the org admin directly instead.
+
+  Model properties expected:
+    Model.Header            - cid for Email_Header.png
+    Model.FirstName         - the rejected applicant's first name
+    Model.OrganizationName  - e.g. "Cebu Forensics Lab"
+    Model.LoginUrl          - deep link back to sign-in, mirrors the app's
+                              own "Back to Sign In" button on the Pending
+                              Approval screen
+    Model.SupportEmail      - e.g. "support@avera.app"
+    Model.CurrentYear       - e.g. "2026"
+
+  This comment block uses Razor's syntax, which the Razor engine
+  strips entirely at compile time — unlike the outer HTML-comment wrapper
+  used in request-approved.cshtml, none of this text will exist in the
+  email actually sent. Flagging this as a small improvement worth carrying
+  back into the other file if you'd like.
+*@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Your Request Have Been Rejected</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style> @@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap'); </style>
+</head>
+<body style="margin:0; padding:0; background-color:#F1F4F9; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    An update on your request to join @Model.OrganizationName on Avera.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1F4F9;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#FFFFFF; border-radius:12px; overflow:hidden; border:1px solid #E2E8F0;">
+
+          <tr>
+            <td style="padding:0;">
+              <a href="#" style="cursor: text !important; pointer-events: none;">
+                <img src="cid:@Model.Header" alt="Avera" width="600" style="display:block; width:100%; max-width:600px; height:auto; border:0;" />
+              </a>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:40px 40px 24px 40px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <h1 style="margin:0 0 16px 0; font-size:22px; line-height:28px; font-weight:700; color:#0F172A;">
+                Update on Your Request
+              </h1>
+              <p style="margin:0 0 8px 0; font-size:15px; line-height:22px; color:#0F172A;">
+                Hi @Model.FirstName,
+              </p>
+              <p style="margin:0; font-size:15px; line-height:22px; color:#0F172A;">
+                Your request to join <strong>@Model.OrganizationName</strong> on Avera
+                wasn't approved at this time. If you believe this is a mistake, reach
+                out to your organization's admin directly to confirm your details.
+              </p>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:8px 40px 8px 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="border-radius:10px; background-color:#1E6FD9;">
+                    <a href="@Model.LoginUrl" target="_blank" style="display:inline-block; padding:14px 32px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:15px; font-weight:700; color:#FFFFFF; text-decoration:none; border-radius:10px;">
+                      Back to Sign In
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Notice — plain text, no fill color -->
+          <tr>
+            <td style="padding:24px 40px 8px 40px; border-top:1px solid #E2E8F0; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <p style="margin:0; font-size:13px; line-height:20px; color:#667085;">
+                Questions about this decision? Contact your organization's admin, or
+                reach us at
+                <a href="mailto:@Model.SupportEmail" style="color:#1E6FD9; text-decoration:none;">@Model.SupportEmail</a>.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px 40px 32px 40px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <p style="margin:0 0 4px 0; font-size:13px; line-height:19px; color:#667085; text-align:center;">
+                Avera — Forensic Signature Verification
+              </p>
+              <p style="margin:0; font-size:12px; line-height:18px; color:#98A2B3; text-align:center;">
+                &copy; @Model.CurrentYear Avera. This is an automated message, please don't reply directly to this email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

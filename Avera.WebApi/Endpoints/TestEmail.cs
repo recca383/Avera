@@ -10,8 +10,8 @@ namespace Avera.WebApi.Endpoints
             routeBuilder.MapPost("test", async (IEmailService service, CancellationToken cancellationToken)=>
             {
                // return configuration["ApplicationDbConnectionString"] + "\n\n" + configuration["ApplicationIdentityDbConnectionString"];
-                //await service.SendRequestApprovedAsync("sirpatrick121402@gmail.com", "Patrick", "Philippine National Police", cancellationToken);
-            });
+                await service.SendRequestRejectedAsync("sirpatrick121402@gmail.com", cancellationToken);
+            }).RequireAuthorization();
             
         }
     }
