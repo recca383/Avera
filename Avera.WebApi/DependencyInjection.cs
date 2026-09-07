@@ -20,6 +20,8 @@ namespace Avera.WebApi
 
             services.AddHttpClient();
 
+            services.AddSignalR();
+
             return services;
         }
     }
