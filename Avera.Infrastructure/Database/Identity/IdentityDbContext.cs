@@ -40,7 +40,6 @@ namespace Avera.Infrastructure.Database.Identity
             
             //modelBuilder.HasDefaultSchema(Schemas.Default);
 
-            modelBuilder.Entity<User>().HasQueryFilter(u => u.TenantId == userContext.TenantId);
             modelBuilder.Ignore<Case>();
             modelBuilder.Ignore<CaseImage>();
             modelBuilder.Ignore<ExportedReport>();

@@ -1,5 +1,6 @@
 using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.Users;
+using System.Runtime.CompilerServices;
 
 namespace Avera.Domain.Identity.MemberRequests
 {
@@ -17,20 +18,41 @@ namespace Avera.Domain.Identity.MemberRequests
             TenantId = TenantRequestedToId;
         }
 
-         public Guid Id { get; set; }
-         public MemberRequestStatus Status { get; set; }
-         public DateTime CreatedAt { get; set; }
-         public DateTime? ReviewedAt { get; set; }
-         public Guid? ReviewedByUserId { get; set; }
+        public Guid Id { get; set; }
+        public MemberRequestStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? ReviewedAt { get; set; }
+        public Guid? ReviewedByUserId { get; set; }
 
-         // Navigation Attributes
+        // Navigation Attributes
 
-         public User? User { get; set; }
-         public Guid UserId { get; set; }
-         public Tenant? Tenant { get; set; }
-         public Guid TenantId { get; set; }
+        public User? User { get; set; }
+        public Guid UserId { get; set; }
+        public Tenant? Tenant { get; set; }
+        public Guid TenantId { get; set; }
 
         // Ef Core
-         public MemberRequest() {}
+        public MemberRequest() { }
+
+        // Static Methods
+        public void Approve(Guid reviewerId)
+        {
+
+            Status = MemberRequestStatus.Approved;
+
+            ReviewedAt = DateTime.UtcNow;
+
+            ReviewedByUserId = reviewerId;
+
+        }
+
+        public void Reject(Guid reviewerId)
+        {
+            Status = MemberRequestStatus.Rejected;
+
+            ReviewedAt = DateTime.UtcNow;
+
+            ReviewedByUserId = reviewerId;
+        }
     }
 }
