@@ -1,0 +1,100 @@
+@*
+  AVERA — Email Verified (shared/generic)
+  ================================================
+  Trigger: fires after EITHER (a) the signup magic-link verification
+  succeeds, OR (b) the change-email confirmation link succeeds. Per your
+  Q4-Option A answer, this is ONE shared template rather than two
+  context-specific ones — copy stays generic enough to work in both cases.
+
+  FLAG — genuinely generic copy:
+    Because this covers two different moments in two different flows, I
+    kept the CTA neutral ("Continue in Avera") rather than writing
+    something like "you can now sign in" — a brand-new signup might still
+    be waiting on org-admin approval at this point, so a hard "sign in now"
+    promise could be inaccurate for that path. If in practice you'd rather
+    have two precise, context-specific versions instead of one generic one,
+    say so and I'll split this into two files.
+
+  Model properties expected:
+    Model.Header       - cid for Email_Header.png
+    Model.FirstName    - recipient's first name
+    Model.EmailAddress - the address that was just verified
+    Model.AppUrl        - generic deep link back into the app
+    Model.CurrentYear  - e.g. "2026"
+*@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Your Avera Email Has Been Verified</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style> @@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap'); </style>
+</head>
+<body style="margin:0; padding:0; background-color:#F1F4F9; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    @Model.EmailAddress has been verified on your Avera account.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1F4F9;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#FFFFFF; border-radius:12px; overflow:hidden; border:1px solid #E2E8F0;">
+
+          <tr>
+            <td style="padding:0;">
+              <a href="#" style="cursor: text !important; pointer-events: none;">
+                <img src="cid:@Model.Header" alt="Avera" width="600" style="display:block; width:100%; max-width:600px; height:auto; border:0;" />
+              </a>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:40px 40px 24px 40px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <h1 style="margin:0 0 16px 0; font-size:22px; line-height:28px; font-weight:700; color:#0F172A;">
+                Email Verified
+              </h1>
+              <p style="margin:0 0 8px 0; font-size:15px; line-height:22px; color:#0F172A;">
+                Hi @Model.FirstName,
+              </p>
+              <p style="margin:0; font-size:15px; line-height:22px; color:#0F172A;">
+                <strong>@Model.EmailAddress</strong> has been successfully verified on
+                your Avera account.
+              </p>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:8px 40px 32px 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="border-radius:10px; background-color:#1E6FD9;">
+                    <a href="@Model.AppUrl" target="_blank" style="display:inline-block; padding:14px 32px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:15px; font-weight:700; color:#FFFFFF; text-decoration:none; border-radius:10px;">
+                      Continue in Avera
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px 40px 32px 40px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <p style="margin:0 0 4px 0; font-size:13px; line-height:19px; color:#667085; text-align:center;">
+                Avera — Forensic Signature Verification
+              </p>
+              <p style="margin:0; font-size:12px; line-height:18px; color:#98A2B3; text-align:center;">
+                &copy; @Model.CurrentYear Avera. This is an automated message, please don't reply directly to this email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

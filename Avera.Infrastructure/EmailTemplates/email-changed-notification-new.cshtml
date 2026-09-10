@@ -1,0 +1,96 @@
+@*
+  AVERA — User Changed Email (notice to new address)
+  ================================================
+  Trigger: fires AFTER an email change is fully confirmed and applied —
+  the counterpart to email-changed-notification-old.cshtml, sent to the
+  new address instead. This is distinct from change-email-confirmation.cshtml
+  (which was the BEFORE-the-fact "click to confirm" link); this one fires
+  once the change is already done, purely as a record.
+
+  Model properties expected:
+    Model.Header      - cid for Email_Header.png
+    Model.FirstName   - recipient's first name
+    Model.NewEmail    - the address this email was sent to (now on file)
+    Model.ChangeDate  - e.g. "August 6, 2026"
+    Model.ChangeTime  - e.g. "2:41 PM (GMT+8)"
+    Model.AppUrl      - deep link to sign in / continue in the app
+    Model.CurrentYear - e.g. "2026"
+*@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Your New Avera Email Is Confirmed</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style> @@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap'); </style>
+</head>
+<body style="margin:0; padding:0; background-color:#F1F4F9; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    @Model.NewEmail is now the email address on your Avera account.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1F4F9;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#FFFFFF; border-radius:12px; overflow:hidden; border:1px solid #E2E8F0;">
+
+          <tr>
+            <td style="padding:0;">
+              <a href="#" style="cursor: text !important; pointer-events: none;">
+                <img src="cid:@Model.Header" alt="Avera" width="600" style="display:block; width:100%; max-width:600px; height:auto; border:0;" />
+              </a>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:40px 40px 24px 40px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <h1 style="margin:0 0 16px 0; font-size:22px; line-height:28px; font-weight:700; color:#0F172A;">
+                This Is Now Your Account Email
+              </h1>
+              <p style="margin:0 0 8px 0; font-size:15px; line-height:22px; color:#0F172A;">
+                Hi @Model.FirstName,
+              </p>
+              <p style="margin:0; font-size:15px; line-height:22px; color:#0F172A;">
+                This confirms <strong>@Model.NewEmail</strong> is now the email address
+                on file for your Avera account, effective @Model.ChangeDate at
+                @Model.ChangeTime. You'll use this address to sign in and receive
+                account notifications going forward.
+              </p>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:8px 40px 32px 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="border-radius:10px; background-color:#1E6FD9;">
+                    <a href="@Model.AppUrl" target="_blank" style="display:inline-block; padding:14px 32px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:15px; font-weight:700; color:#FFFFFF; text-decoration:none; border-radius:10px;">
+                      Sign In to Avera
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px 40px 32px 40px; font-family:'Sora','Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <p style="margin:0 0 4px 0; font-size:13px; line-height:19px; color:#667085; text-align:center;">
+                Avera — Forensic Signature Verification
+              </p>
+              <p style="margin:0; font-size:12px; line-height:18px; color:#98A2B3; text-align:center;">
+                &copy; @Model.CurrentYear Avera. This is an automated message, please don't reply directly to this email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
