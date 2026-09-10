@@ -1,35 +1,30 @@
 ﻿using Avera.Application.Abstractions.Messaging;
-using Avera.Application.Authentication.ChangeEmail;
-using Avera.Application.Authentication.VerifyEmail;
+using Avera.Application.Authentication.VerifyPasswordCode;
 using Avera.WebApi.Extensions;
 using Avera.WebApi.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using SharedKernel;
 
 namespace Avera.WebApi.Endpoints.Auth
 {
-    internal sealed class VerifyEmail : IEndpoint
+    internal sealed class VerifyPasswordCode : IEndpoint
     {
         public sealed record Request(
-            Guid UserId,
-            string Token,
-            string? Type,
-            string? Email
+            string Email,
+            string Code
         );
 
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapPost("/auth/verify-email", async (
+            routeBuilder.MapPost("/auth/password/verify-code", async (
                 Request request,
-                ICommandHandler<VerifyEmailCommand> handler,
+                ICommandHandler<VerifyPasswordCodeCommand> handler,
                 CancellationToken cancellationToken
             ) =>
             {
-                
-                var command = new VerifyEmailCommand(
-                    request.UserId,
-                    request.Token,
-                    request.Type,
-                    request.Email);
+                var command = new VerifyPasswordCodeCommand(
+                    request.Email,
+                    request.Code);
 
                 var result = await handler.Handle(
                     command,
