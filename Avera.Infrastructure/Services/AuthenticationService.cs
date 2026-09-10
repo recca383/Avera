@@ -20,6 +20,7 @@ using SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Avera.Application.MemberRequests.Notifications;
 using Avera.Application.Abstractions.NotificationHub;
+using Microsoft.CodeAnalysis.Emit;
 
 namespace Avera.Infrastructure.Services
 {
@@ -107,6 +108,11 @@ namespace Avera.Infrastructure.Services
                 return Result.Failure<LoginResponse>(UserErrors.InvalidPassword);
             }
 
+            if (!user.EmailConfirmed)
+            {
+                return Result.Failure<LoginResponse>(UserErrors.EmailNotConfirmed);
+            }
+
             if (user.IsSuspended)
             {
                 Logger.Warning("Login failed because user {UserId} is suspended", user.Id);
@@ -178,6 +184,14 @@ namespace Avera.Infrastructure.Services
                 return HandleIdentityResult(roleResult);
             }
 
+            var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var verificationUrl = $"{configuration["App:DeepLinkBase"]}" +
+                                  $"verify-email?userId={user.Id}" +
+                                  $"&token={Uri.EscapeDataString(verificationToken)}";
+
+            await emailService.SendEmailVerificationAsync(user.Email, user.FirstName, verificationUrl, cancellationToken);
+
             Logger.Information("Registration completed successfully for user {UserId}", user.Id);
             return Result.Success();
         }
@@ -226,7 +240,6 @@ namespace Avera.Infrastructure.Services
 
             return Result.Success();
         }
-
         public async Task<Result> JoinInviteCodeAsync(string inviteCode, CancellationToken cancellationToken = default)
         {
             if(inviteCode is null)
@@ -274,6 +287,112 @@ namespace Avera.Infrastructure.Services
 
             return Result.Success();
         }
+        public async Task<Result> VerifyPasswordResetCodeAsync(
+            string email,
+            string code,
+            CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null)
+                return Result.Failure(UserErrors.EmailNotFound);
+
+            var isValid = await _userManager.VerifyUserTokenAsync(
+                user,
+                _userManager.Options.Tokens.PasswordResetTokenProvider,
+                UserManager<User>.ResetPasswordTokenPurpose,
+                code);
+
+            if (!isValid)
+                return Result.Failure(UserErrors.InvalidToken);
+
+            return Result.Success();
+        }
+        public async Task<Result> ChangeEmailAsync(
+            Guid userId,
+            string newEmail,
+            string currentPassword,
+            CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByIdAsync(
+                userId.ToString());
+
+            if (user is null)
+                return Result.Failure(UserErrors.UserNotFound);
+
+            var passwordValid = await _userManager.CheckPasswordAsync(
+                user,
+                currentPassword);
+
+            if (!passwordValid)
+                return Result.Failure(UserErrors.InvalidPassword);
+
+            var existingUser = await _userManager.FindByEmailAsync(
+                newEmail);
+
+            if (existingUser is not null &&
+                existingUser.Id != user.Id)
+            {
+                return Result.Failure(UserErrors.EmailAlreadyExists);
+            }
+
+            var token = await _userManager.GenerateChangeEmailTokenAsync(
+                user,
+                newEmail);
+
+            var verificationUrl =
+                $"{configuration["App:DeepLinkBase"]}" +
+                $"verify-email?" +
+                $"userId={user.Id}" +
+                $"&type=change-email" +
+                $"&email={Uri.EscapeDataString(newEmail)}" +
+                $"&token={Uri.EscapeDataString(token)}";
+
+            return await emailService.SendEmailChangeVerificationAsync(
+                newEmail,
+                user.FirstName ?? string.Empty,
+                verificationUrl,
+                cancellationToken);
+        }
+        public async Task<Result> VerifyEmailAsync(
+            Guid userId,
+            string token,
+            CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByIdAsync(
+                userId.ToString());
+
+            if (user is null)
+                return Result.Failure(UserErrors.UserNotFound);
+
+            if (user.EmailConfirmed)
+                return Result.Success();
+
+            var result = await _userManager.ConfirmEmailAsync(
+                user,
+                token);
+
+            if (!result.Succeeded)
+            {
+                Logger.Warning(
+                    "Email verification failed for user {UserId}: {Errors}",
+                    userId,
+                    result.Errors.Select(x => x.Description));
+
+                return HandleIdentityResult(result);
+            }
+
+            var appToken = configuration["App:DeepLinkBase"];
+
+            await emailService.SendEmailVerified(user.Email!, user.FirstName!, appToken!, cancellationToken);
+
+            Logger.Information(
+                "Email verified successfully for user {UserId}",
+                userId);
+
+            return Result.Success();
+        }
+
         private static Result HandleIdentityResult(IdentityResult result)
         {
             if (result.Succeeded)
@@ -305,6 +424,65 @@ namespace Avera.Infrastructure.Services
             var joiningMultipleTimes = await identityDbContext.MemberRequests.AnyAsync(mr => mr.UserId == userId, cancellationToken);
             if (joiningMultipleTimes)
                 return Result.Failure(UserErrors.MemberIsJoiningMultipleTimes);
+            return Result.Success();
+        }
+
+        public async Task<Result> VerifyEmailChangeAsync(Guid userId, string newEmail, string token, CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByIdAsync(
+             userId.ToString());
+
+            if (user is null)
+                return Result.Failure(UserErrors.UserNotFound);
+
+            var oldEmail = user.Email;
+            var appToken = configuration["App:DeepLinkBase"];
+
+            var existingUser = await _userManager.FindByEmailAsync(
+                newEmail);
+
+            if (existingUser is not null &&
+                existingUser.Id != user.Id)
+            {
+                return Result.Failure(UserErrors.EmailAlreadyExists);
+            }
+
+            var result = await _userManager.ChangeEmailAsync(
+                user,
+                newEmail,
+                token);
+
+            if (!result.Succeeded)
+                return HandleIdentityResult(result);
+
+            user.UserName = newEmail;
+
+            result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                return HandleIdentityResult(result);
+
+            await _userManager.UpdateSecurityStampAsync(user);
+
+            await Task.WhenAll(
+                emailService.SendEmailNotificationToNewEmail(
+                    user.Email!,
+                    user.FirstName!,
+                    DateOnly.FromDateTime(DateTime.UtcNow),
+                    TimeOnly.FromDateTime(DateTime.UtcNow),
+                    appToken!,
+                    cancellationToken
+                    ),
+                emailService.SendEmailNotificationToOldEmail(
+                    oldEmail!,
+                    user.FirstName!,
+                    user.Email!,
+                    DateOnly.FromDateTime(DateTime.UtcNow),
+                    TimeOnly.FromDateTime(DateTime.UtcNow),
+                    cancellationToken
+                    )
+                );
+
             return Result.Success();
         }
     }

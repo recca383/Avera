@@ -34,6 +34,7 @@ namespace Avera.Infrastructure
 {
     public static class DependencyInjection
     {
+        private const string PasswordResetCode = "PasswordResetCode";
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration) =>
             services.AddServices(configuration)
             .AddDatabase(configuration)
@@ -85,9 +86,13 @@ namespace Avera.Infrastructure
                 options.Password.RequireNonAlphanumeric = true;
 
                 options.User.RequireUniqueEmail = true;
+
+                options.Tokens.PasswordResetTokenProvider = PasswordResetCode;
+
             })
             .AddEntityFrameworkStores<IdentityDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddTokenProvider<EmailTokenProvider<User>>(PasswordResetCode);
 
             services.Configure<DataProtectionTokenProviderOptions>(options =>
             {

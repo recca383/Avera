@@ -196,7 +196,183 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-         private static string GetTemplatePath(string templateName)
+        public async Task<Result> SendEmailVerificationAsync(string recipient, string firstName, string verificationUrl, CancellationToken cancellationToken = default)
+        {
+            var result = await fluentEmail
+               .To(recipient)
+               .Subject("Verify Your Avera Email")
+               .UsingTemplateFromFile(
+                   GetTemplatePath("verify-email.cshtml"),
+                   new
+                   {
+                       Header = HEADER_REFERENCE,
+                       FirstName = firstName,
+                       VerificationUrl = verificationUrl,
+                       SupportEmail = SUPPORT_EMAIL,
+                       CurrentYear = DateTime.UtcNow.Year,
+                       ExpiryHours = 1
+                   })
+               .Attach(GetHeader())
+               .SendAsync();
+
+            if (!result.Successful)
+            {
+                var errors = result.ErrorMessages
+                    .Select(e => new Error(
+                        "Email.Failure",
+                        e,
+                        ErrorType.Failure))
+                    .ToArray();
+
+                return Result.Failure(
+                    new ValidationError(errors));
+            }
+
+            return Result.Success();
+        }
+        public async Task<Result> SendEmailChangeVerificationAsync(string recipient, string firstName, string verificationUrl, CancellationToken cancellationToken = default)
+        {
+            var result = await fluentEmail
+               .To(recipient)
+               .Subject("Confirm Your New Avera Email")
+               .UsingTemplateFromFile(
+                   GetTemplatePath("change-email-confirmation.cshtml"),
+                   new
+                   {
+                       Header = HEADER_REFERENCE,
+                       FirstName = firstName,
+                       NewEmail = recipient,
+                       ConfirmationUrl = verificationUrl,
+                       SupportEmail = SUPPORT_EMAIL,
+                       CurrentYear = DateTime.UtcNow.Year,
+                       ExpiryHours = 1
+                   })
+               .Attach(GetHeader())
+               .SendAsync();
+
+            if (!result.Successful)
+            {
+                var errors = result.ErrorMessages
+                    .Select(e => new Error(
+                        "Email.Failure",
+                        e,
+                        ErrorType.Failure))
+                    .ToArray();
+
+                return Result.Failure(
+                    new ValidationError(errors));
+            }
+
+            return Result.Success();
+        }
+
+        public async Task<Result> SendEmailNotificationToNewEmail(string recipient, string firstName, DateOnly ChangeDate, TimeOnly ChangeTime, string appUrl, CancellationToken cancellationToken = default)
+        {
+            var result = await fluentEmail
+               .To(recipient)
+               .Subject("Your New Avera Email Is Confirmed")
+               .UsingTemplateFromFile(
+                   GetTemplatePath("email-changed-notification-new.cshtml"),
+                   new
+                   {
+                       Header = HEADER_REFERENCE,
+                       FirstName = firstName,
+                       NewEmail = recipient,
+                       ChangeDate = ChangeDate.ToString("MMMM dd, yyyy"),
+                       ChangeTime = ChangeTime.ToString("hh:mm tt"),
+                       CurrentYear = DateTime.UtcNow.Year,
+                       AppUrl = appUrl,
+                   })
+               .Attach(GetHeader())
+               .SendAsync();
+
+            if (!result.Successful)
+            {
+                var errors = result.ErrorMessages
+                    .Select(e => new Error(
+                        "Email.Failure",
+                        e,
+                        ErrorType.Failure))
+                    .ToArray();
+
+                return Result.Failure(
+                    new ValidationError(errors));
+            }
+
+            return Result.Success();
+        }
+        
+        public async Task<Result> SendEmailVerified(string recipient, string firstName, string AppUrl, CancellationToken cancellationToken = default)
+        {
+            var result = await fluentEmail
+               .To(recipient)
+               .Subject("Your Avera Email Has Been Verified")
+               .UsingTemplateFromFile(
+                   GetTemplatePath("email-verified.cshtml"),
+                   new
+                   {
+                       Header = HEADER_REFERENCE,
+                       FirstName = firstName,
+                       AppUrl = AppUrl,
+                       EmailAddress = recipient,
+                       CurrentYear = DateTime.UtcNow.Year,
+                   })
+               .Attach(GetHeader())
+               .SendAsync();
+
+            if (!result.Successful)
+            {
+                var errors = result.ErrorMessages
+                    .Select(e => new Error(
+                        "Email.Failure",
+                        e,
+                        ErrorType.Failure))
+                    .ToArray();
+
+                return Result.Failure(
+                    new ValidationError(errors));
+            }
+
+            return Result.Success();
+        }
+
+        public async Task<Result> SendEmailNotificationToOldEmail(string recipient, string firstName, string newEmail, DateOnly ChangeDate, TimeOnly ChangeTime, CancellationToken cancellationToken = default)
+        {
+            var result = await fluentEmail
+               .To(recipient)
+               .Subject("Your Avera Account Email Was Changed")
+               .UsingTemplateFromFile(
+                   GetTemplatePath("email-changed-notification-old.cshtml"),
+                   new
+                   {
+                       Header = HEADER_REFERENCE,
+                       FirstName = firstName,
+                       OldEmail = recipient,
+                       NewEmail = newEmail,
+                       ChangeDate = ChangeDate,
+                       ChangeTime = ChangeTime,
+                       SupportEmail = SUPPORT_EMAIL,
+                       CurrentYear = DateTime.UtcNow.Year,
+                   })
+               .Attach(GetHeader())
+               .SendAsync();
+
+            if (!result.Successful)
+            {
+                var errors = result.ErrorMessages
+                    .Select(e => new Error(
+                        "Email.Failure",
+                        e,
+                        ErrorType.Failure))
+                    .ToArray();
+
+                return Result.Failure(
+                    new ValidationError(errors));
+            }
+
+            return Result.Success();
+        }
+        private static string GetTemplatePath(string templateName)
         {
             var assemblyLocation =
                 Path.GetDirectoryName(
