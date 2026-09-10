@@ -10,19 +10,15 @@ namespace Avera.Application.Abstractions.Authentication
             string email,
             string password,
             CancellationToken cancellationToken = default);
-
         Task<Result> RegisterAsync(
             RegisterRequest request,
             CancellationToken cancellationToken = default);
-
         Task<Result> LogoutAsync(
             Guid userId,
             CancellationToken cancellationToken = default);
-        
         Task<Result> ForgotPasswordAsync(
             string email,
             CancellationToken cancellationToken = default);
-
         Task<Result> ResetPasswordAsync(
             string email,
             string token,
@@ -40,5 +36,27 @@ namespace Avera.Application.Abstractions.Authentication
             Guid userId,
             CancellationToken cancellationToken
         );
+        Task<Result> VerifyPasswordResetCodeAsync(
+            string email,
+            string code,
+            CancellationToken cancellationToken = default
+        );
+        Task<Result> VerifyEmailAsync(
+            Guid userId,
+            string token,
+            CancellationToken cancellationToken
+        );
+        Task<Result> ChangeEmailAsync(
+            Guid userId,
+            string newEmail,
+            string currentPassword,
+            CancellationToken cancellationToken = default
+        );
+
+        Task<Result> VerifyEmailChangeAsync(
+            Guid userId,
+            string newEmail,
+            string token,
+            CancellationToken cancellationToken = default);
     }
 }
