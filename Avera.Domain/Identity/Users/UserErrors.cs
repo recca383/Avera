@@ -33,6 +33,13 @@ namespace Avera.Domain.Identity.Users
             "User is suspended",
             ErrorType.Unauthorized
         );
+
+        public static UserErrors EmailNotConfirmed => new UserErrors(
+            "User.EmailNotConfirmed",
+            "Email address has not been verified",
+            ErrorType.Unauthorized
+        );
+
         // Not Found Errors
 
         public static UserErrors UserNotFound => new UserErrors(
