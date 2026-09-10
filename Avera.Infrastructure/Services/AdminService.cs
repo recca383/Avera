@@ -1,22 +1,26 @@
-using System.Security.Cryptography;
 using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
+using Avera.Domain.Identity.Roles;
 using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
+using Avera.Infrastructure.Database.Application;
 using Avera.Infrastructure.Database.Identity;
 using Avera.Infrastructure.Identity.Tenants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
+using System.Security.Cryptography;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Avera.Infrastructure.Services
 {
     internal sealed class AdminService(
         UserManager<User> _userManager,
         IUserContext _userContext,
-        IIdentityDbContext _db,
-        JwtProvider jwtProvider
+        IIdentityDbContext _identityDbContext,
+        JwtProvider jwtProvider,
+        IApplicationDbContext _applicationDbContext
     ) : IAdminService
     {
         private const int INVITECODELENGTH = 8;
@@ -42,14 +46,14 @@ namespace Avera.Infrastructure.Services
 
             user.TenantId = tenant.Id;
 
-            _db.Tenants.Add(tenant);
+            _identityDbContext.Tenants.Add(tenant);
 
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
                 return HandleIdentityResult<string>(result);
 
-            await _db.SaveChangesAsync(cancellationToken);
+            await _identityDbContext.SaveChangesAsync(cancellationToken);
 
             var iListroles = await _userManager.GetRolesAsync(user);
 
@@ -69,11 +73,21 @@ namespace Avera.Infrastructure.Services
                     TenantErrors.NotMember);
 
             var user = await _userManager.Users
-                .FirstOrDefaultAsync(
-                    x =>
-                        x.Id == userId,
+                .FirstOrDefaultAsync(x =>
+                        x.Id == userId &&
+                        x.TenantId == tenantId.Value,
                     cancellationToken);
 
+            if (user == null)
+                return Result.Failure<TenantMemberDto>(
+                    UserErrors.UserNotFound);
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault() ?? "User";
+
+            var caseHandled = await _applicationDbContext.Cases.Where(c =>
+                              c.TenantId == user.TenantId &&
+                              c.CreatedByUserId == user.Id).CountAsync(cancellationToken);
             if (user is null)
                 return Result.Failure<TenantMemberDto>(
                     UserErrors.UserNotFound);
@@ -83,7 +97,10 @@ namespace Avera.Infrastructure.Services
                     user.Id,
                     user.FirstName,
                     user.LastName,
-                    user.Email!));
+                    user.Email!,
+                    role,
+                    user.IsSuspended,
+                    caseHandled));
         }
 
         public async Task<Result<List<TenantMemberDto>>> GetMembersAsync(
@@ -97,33 +114,64 @@ namespace Avera.Infrastructure.Services
             if (!tenantId.HasValue)
                 return Result.Failure<List<TenantMemberDto>>(TenantErrors.NotMember);
 
-            var users = _userManager.Users;
-            
+            var users = _userManager.Users.Where(x => x.TenantId == tenantId.Value);
+
+            var caseCounts = await _applicationDbContext.Cases
+               .Where(c =>
+                   c.TenantId == tenantId.Value &&
+                   c.DeletedAt == DateTime.MaxValue)
+               .GroupBy(c => c.CreatedByUserId)
+               .Select(g => new
+               {
+                   UserId = g.Key,
+                   Count = g.Count()
+               })
+               .ToDictionaryAsync(
+                   x => x.UserId,
+                   x => x.Count,
+                   cancellationToken);
+
+            var userList = await users.ToListAsync(cancellationToken);
+
+            var result = new List<TenantMemberDto>();
+
+            foreach (var user in userList)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                var role = roles.FirstOrDefault() ?? "User";
+
+                var casesHandled = caseCounts.TryGetValue(
+                    user.Id,
+                    out var count)
+                    ? count
+                    : 0;
+
+                result.Add(new TenantMemberDto(
+                    user.Id,
+                    user.FirstName,
+                    user.LastName,
+                    user.Email!,
+                    role,
+                    user.IsSuspended,
+                    casesHandled));
+            }
 
             if (IsAlphabetical.HasValue)
             {
-                users = users.OrderBy(x => x.FirstName);
+                result = [.. result.OrderBy(x => x.FirstName)];
             }
 
-            //if (IsMostCases.HasValue)
-            //{
-            //    users = users
-            //}
+            if (IsMostCases.HasValue)
+            {
+                result = [.. result.OrderBy(x => x.CasesHandled)];
+            }
 
             if (Name != null)
             {
-                users = users.Where(x => x.FirstName!.Contains(Name) 
-                || x.LastName!.Contains(Name));
+                result = [.. result.Where(x => x.FirstName!.Contains(Name) 
+                || x.LastName!.Contains(Name))];
             }
-
-            var result = await users
-                .Select(x => new TenantMemberDto(
-                    x.Id,
-                    x.FirstName,
-                    x.LastName,
-                    x.Email!))  
-                .ToListAsync(cancellationToken);
-
 
             return Result.Success(result);
         }
