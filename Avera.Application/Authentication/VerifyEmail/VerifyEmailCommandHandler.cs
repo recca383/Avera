@@ -12,6 +12,16 @@ namespace Avera.Application.Authentication.VerifyEmail
             VerifyEmailCommand command,
             CancellationToken cancellationToken)
         {
+            if(command.Type == "change-email")
+            {
+                return await authenticationService.VerifyEmailChangeAsync(
+                    command.UserId,
+                    command.Email,
+                    command.Token,
+                    cancellationToken
+                    );
+            }
+
             return await authenticationService.VerifyEmailAsync(
                 command.UserId,
                 command.Token,
