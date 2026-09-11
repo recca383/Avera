@@ -15,7 +15,7 @@ namespace Avera.WebApi.Endpoints.Admin
         {
             routeBuilder.MapPost("tenants", async (
                 Request request,
-                [FromServices] ICommandHandler<CreateTenantCommand, string> handler,
+                [FromServices] ICommandHandler<CreateTenantCommand, CreateTenantResponse> handler,
                 CancellationToken cancellationToken
             ) =>
             {
@@ -23,7 +23,7 @@ namespace Avera.WebApi.Endpoints.Admin
 
                 var results = await handler.Handle(command, cancellationToken);
 
-                return results.Match(Results.Created, CustomResults.Problem);
+                return results.Match(Results.Ok, CustomResults.Problem);
             })
             .WithTags(Tags.OrgAdmin)
             .RequireAuthorization(RolePolicy.Admin);

@@ -18,7 +18,9 @@ namespace Avera.WebApi.Endpoints.Admin
                 var result = await handler.Handle(new SuspendUserCommand(UserId), cancellationToken);
 
                 return result.Match(Results.NoContent, CustomResults.Problem);
-            });
+            })
+            .WithTags(Tags.OrgAdmin)
+            .RequireAuthorization(RolePolicy.Admin);
         }
     }
 }
