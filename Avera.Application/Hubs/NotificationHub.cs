@@ -24,7 +24,7 @@ namespace Avera.Application.Hubs
             }
             var isAdmin = await userManager.IsInRoleAsync(user, "Admin");
 
-            if (isAdmin)
+            if (isAdmin && tenantId.HasValue)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"tenant:{tenantId}:admins");
             }
