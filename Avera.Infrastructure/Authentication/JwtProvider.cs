@@ -7,12 +7,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using SharedKernel;
 
 namespace Avera.Infrastructure.Authentication
 {
     internal sealed class JwtProvider(
         IConfiguration configuration,
-        UserManager<User> userManager)
+        UserManager<User> userManager,
+        IDateTimeProvider dateTime)
     {
         private static readonly ILogger logger = Log.ForContext<AuthenticationService>();
         public async Task<string> GenerateAccessTokenAsync(User user, List<string> role, CancellationToken cancellationToken = default)
@@ -44,9 +46,9 @@ namespace Avera.Infrastructure.Authentication
                 }),
                 Issuer = configuration["Jwt:Issuer"],
                 Audience = configuration["Jwt:Audience"],
-                Expires = DateTime.UtcNow.AddDays(1),
-                IssuedAt = DateTime.UtcNow,
-                NotBefore = DateTime.UtcNow,
+                Expires = dateTime.PhilippineNow.AddDays(1),
+                IssuedAt = dateTime.PhilippineNow,
+                NotBefore = dateTime.PhilippineNow,
                 SigningCredentials = credentials
             };
 

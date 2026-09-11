@@ -1,6 +1,7 @@
 using Avera.Application.Abstractions.Services;
 using Avera.Domain.Identity.Users;
 using Microsoft.AspNetCore.Identity;
+using SharedKernel;
 
 namespace Avera.WebApi.Endpoints
 {
@@ -8,7 +9,7 @@ namespace Avera.WebApi.Endpoints
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapPost("test", async (IEmailService service, UserManager<User> _userManager, CancellationToken cancellationToken) =>
+            routeBuilder.MapPost("test", async (IEmailService service, UserManager<User> _userManager, IDateTimeProvider dateTime, CancellationToken cancellationToken) =>
             {
                 var testEmail = "sirpatrick121402@gmail.com";
                 var user = _userManager.FindByEmailAsync(testEmail).Result;
@@ -21,9 +22,9 @@ namespace Avera.WebApi.Endpoints
                 var appUrl = "avera://";
 
 
-                var date = DateOnly.FromDateTime(DateTime.UtcNow);
+                var date = DateOnly.FromDateTime(dateTime.PhilippineNow);
 
-                var time = TimeOnly.FromDateTime(DateTime.UtcNow);
+                var time = TimeOnly.FromDateTime(dateTime.PhilippineNow);
 
                 // return configuration["ApplicationDbConnectionString"] + "\n\n" + configuration["ApplicationIdentityDbConnectionString"];
 

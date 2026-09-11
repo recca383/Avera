@@ -5,7 +5,7 @@ namespace Avera.WebApi.Endpoints.Notifications
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapGet("notifications/read-all", ()=>
+            routeBuilder.MapPatch("notifications/read-all", ()=>
             {
                 
             })

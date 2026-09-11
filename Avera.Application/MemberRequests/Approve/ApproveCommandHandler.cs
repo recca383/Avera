@@ -17,7 +17,8 @@ namespace Avera.Application.MemberRequests.Approve
             IIdentityDbContext identityDbContext,
             IUserContext userContext,
             UserManager<User> userManager,
-            IEmailService emailService
+            IEmailService emailService,
+            IDateTimeProvider dateTime
         ): ICommandHandler<ApproveCommand>
     {
         public async Task<Result> Handle(ApproveCommand command, CancellationToken cancellationToken)
@@ -33,6 +34,8 @@ namespace Avera.Application.MemberRequests.Approve
             var reviewedByUserId = userContext.UserId;
 
             request.Approve(reviewedByUserId);
+
+            request.ReviewedAt = dateTime.PhilippineNow;
 
             var user = await userManager.FindByIdAsync(request.UserId.ToString());
 

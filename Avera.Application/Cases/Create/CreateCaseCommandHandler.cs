@@ -14,7 +14,8 @@ namespace Avera.Application.Cases.Create
     public sealed class CreateCaseCommandHandler(
         IApplicationDbContext dbContext,
         IUserContext userContext,
-        UserManager<User> userManager
+        UserManager<User> userManager,
+        IDateTimeProvider dateTime
         ) 
         : ICommandHandler<CreateCaseCommand, Case>
     {
@@ -41,7 +42,7 @@ namespace Avera.Application.Cases.Create
                 AnalysisType = command.AnalysisType,
                 Priority = command.Priority,
                 Notes = "",
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = dateTime.PhilippineNow,
                 Status = Status.Processing
             };         
 
@@ -68,8 +69,8 @@ namespace Avera.Application.Cases.Create
         {
             var numofcasesToday = dbContext
                                     .Cases
-                                    .Count(c => c.CreatedAt.Date == DateTime.UtcNow.Date) + 1;
-            return $"CASE-{DateTime.UtcNow:MMddyyyy}-{numofcasesToday:D3}";
+                                    .Count(c => c.CreatedAt.Date == dateTime.PhilippineNow.Date) + 1;
+            return $"CASE-{dateTime.PhilippineNow:MMddyyyy}-{numofcasesToday:D3}";
         }
     }
 }

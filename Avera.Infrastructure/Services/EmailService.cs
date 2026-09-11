@@ -20,11 +20,12 @@ namespace Avera.Infrastructure.Services
         IFluentEmail fluentEmail,
         UserManager<User> userManager,
         IIdentityDbContext identityDbContext,
-        IUserContext userContext
+        IUserContext userContext,
+        IDateTimeProvider dateTime
     ) : IEmailService
     {
         private const string HEADER_REFERENCE = "email-header";
-        private readonly string CURRENT_YEAR = DateTime.UtcNow.Year.ToString();
+        private readonly string CURRENT_YEAR = dateTime.PhilippineNow.Year.ToString();
         private readonly string DEEP_LINK_URL = "avera://";
         private readonly string SUPPORT_EMAIL = "sirpatrick121402@gmail.com";
 
@@ -45,8 +46,8 @@ namespace Avera.Infrastructure.Services
                         Header = HEADER_REFERENCE,
                         FirstName = userRecipient!.FirstName,
                         Email = recipient,
-                        ChangeDate = DateTime.UtcNow.ToString("MMMM dd, yyyy"),
-                        ChangeTime = DateTime.UtcNow.ToLongTimeString(),
+                        ChangeDate = dateTime.PhilippineNow.ToString("MMMM dd, yyyy"),
+                        ChangeTime = dateTime.PhilippineNow.ToLongTimeString(),
                         OrganizationName = organization!.Name,
                         AdminName = admin!.FirstName + " " + admin!.LastName,
                         SupportEmail = admin.Email,
@@ -209,7 +210,7 @@ namespace Avera.Infrastructure.Services
                        FirstName = firstName,
                        VerificationUrl = verificationUrl,
                        SupportEmail = SUPPORT_EMAIL,
-                       CurrentYear = DateTime.UtcNow.Year,
+                       CurrentYear =CURRENT_YEAR,
                        ExpiryHours = 1
                    })
                .Attach(GetHeader())
@@ -244,7 +245,7 @@ namespace Avera.Infrastructure.Services
                        NewEmail = recipient,
                        ConfirmationUrl = verificationUrl,
                        SupportEmail = SUPPORT_EMAIL,
-                       CurrentYear = DateTime.UtcNow.Year,
+                       CurrentYear = CURRENT_YEAR,
                        ExpiryHours = 1
                    })
                .Attach(GetHeader())
@@ -280,7 +281,7 @@ namespace Avera.Infrastructure.Services
                        NewEmail = recipient,
                        ChangeDate = ChangeDate.ToString("MMMM dd, yyyy"),
                        ChangeTime = ChangeTime.ToString("hh:mm tt"),
-                       CurrentYear = DateTime.UtcNow.Year,
+                       CurrentYear = CURRENT_YEAR,
                        AppUrl = appUrl,
                    })
                .Attach(GetHeader())
@@ -315,7 +316,7 @@ namespace Avera.Infrastructure.Services
                        FirstName = firstName,
                        AppUrl = AppUrl,
                        EmailAddress = recipient,
-                       CurrentYear = DateTime.UtcNow.Year,
+                       CurrentYear = CURRENT_YEAR,
                    })
                .Attach(GetHeader())
                .SendAsync();
@@ -352,7 +353,7 @@ namespace Avera.Infrastructure.Services
                        ChangeDate = ChangeDate,
                        ChangeTime = ChangeTime,
                        SupportEmail = SUPPORT_EMAIL,
-                       CurrentYear = DateTime.UtcNow.Year,
+                       CurrentYear = CURRENT_YEAR,
                    })
                .Attach(GetHeader())
                .SendAsync();

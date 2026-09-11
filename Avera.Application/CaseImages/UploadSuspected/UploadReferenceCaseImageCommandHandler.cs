@@ -18,7 +18,8 @@ namespace Avera.Application.CaseImages.UploadSuspected
     //Temporary logger
     ILogger<UploadSuspectedCaseImageCommandHandler> logger,
     IUserContext userContext,
-    UserManager<User> userManager) : ICommandHandler<UploadSuspectedCaseImageCommand, Guid>
+    UserManager<User> userManager,
+    IDateTimeProvider dateTime) : ICommandHandler<UploadSuspectedCaseImageCommand, Guid>
     {
         public async Task<Result<Guid>> Handle(UploadSuspectedCaseImageCommand command, CancellationToken cancellationToken)
         {
@@ -49,7 +50,7 @@ namespace Avera.Application.CaseImages.UploadSuspected
                 Index = command.Index,
                 Type = ImageType.Suspected,
                 Size = command.Size,
-                UploadedAt = DateTime.UtcNow,
+                UploadedAt = dateTime.PhilippineNow,
             };
 
             try

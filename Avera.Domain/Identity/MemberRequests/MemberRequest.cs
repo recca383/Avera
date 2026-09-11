@@ -10,7 +10,6 @@ namespace Avera.Domain.Identity.MemberRequests
         {
             Id = Guid.NewGuid();
             Status = MemberRequestStatus.Pending;
-            CreatedAt = DateTime.UtcNow;
             ReviewedAt = null;
             ReviewedByUserId = null;
 
@@ -40,8 +39,6 @@ namespace Avera.Domain.Identity.MemberRequests
 
             Status = MemberRequestStatus.Approved;
 
-            ReviewedAt = DateTime.UtcNow;
-
             ReviewedByUserId = reviewerId;
 
         }
@@ -50,7 +47,6 @@ namespace Avera.Domain.Identity.MemberRequests
         {
             Status = MemberRequestStatus.Rejected;
 
-            ReviewedAt = DateTime.UtcNow;
 
             ReviewedByUserId = reviewerId;
         }

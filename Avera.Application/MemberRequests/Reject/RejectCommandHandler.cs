@@ -19,7 +19,8 @@ namespace Avera.Application.MemberRequests.Reject
             IIdentityDbContext identityDbContext,
             IUserContext userContext,
             UserManager<User> userManager,
-            IEmailService emailService
+            IEmailService emailService,
+            IDateTimeProvider dateTime
         ) : ICommandHandler<RejectCommand>
     {
         public async Task<Result> Handle(RejectCommand command, CancellationToken cancellationToken)
@@ -35,6 +36,8 @@ namespace Avera.Application.MemberRequests.Reject
             var reviewedByUserId = userContext.UserId;
 
             request.Reject(reviewedByUserId);
+
+            request.ReviewedAt = dateTime.PhilippineNow;
 
             var user = await userManager.FindByIdAsync(request.UserId.ToString());
 

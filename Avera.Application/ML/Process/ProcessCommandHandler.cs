@@ -22,7 +22,8 @@ namespace Avera.Application.ML.Process
         // Temporary Logger
         ILogger<ProcessCommandHandler> logger,
         IUserContext userContext,
-        UserManager<User> userManager) : ICommandHandler<ProcessCommand, ProcessResponse>
+        UserManager<User> userManager,
+        IDateTimeProvider dateTime) : ICommandHandler<ProcessCommand, ProcessResponse>
     {
         public async Task<Result<ProcessResponse>> Handle(ProcessCommand command, CancellationToken cancellationToken)
         {
@@ -61,7 +62,7 @@ namespace Avera.Application.ML.Process
             {
                 if (blobId.EndsWith("output.pdf", StringComparison.OrdinalIgnoreCase))
                 {
-                    await AddExportedFileToCaseAsync(dbContext, selectedCase!.Id, blobId, cancellationToken);
+                    await AddExportedFileToCaseAsync(dbContext, selectedCase!.Id, blobId, dateTime, cancellationToken);
                     continue;
                 }
                 
@@ -132,14 +133,14 @@ namespace Avera.Application.ML.Process
 
         }
 
-        private static async Task AddExportedFileToCaseAsync(IApplicationDbContext dbContext, Guid caseId, string blobPath, CancellationToken cancellationToken)
+        private static async Task AddExportedFileToCaseAsync(IApplicationDbContext dbContext, Guid caseId, string blobPath, IDateTimeProvider dateTime, CancellationToken cancellationToken)
         {
             var exportedFile = new ExportedReport
             {
                 Id = Guid.NewGuid(),
                 CaseId = caseId,
                 BlobPath = blobPath,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = dateTime.PhilippineNow
 
             };
 

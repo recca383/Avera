@@ -17,7 +17,8 @@ namespace Avera.Application.CaseImages.UploadReference
     IBlobStorageService blobStorage,
     ILogger<UploadReferenceCaseImageCommandHandler> logger,
     IUserContext userContext,
-    UserManager<User> userManager) : ICommandHandler<UploadReferenceCaseImageCommand, Guid>
+    UserManager<User> userManager,
+    IDateTimeProvider dateTime) : ICommandHandler<UploadReferenceCaseImageCommand, Guid>
     {
         public async Task<Result<Guid>> Handle(UploadReferenceCaseImageCommand command, CancellationToken cancellationToken)
         {
@@ -48,7 +49,7 @@ namespace Avera.Application.CaseImages.UploadReference
                 Index = command.Index,
                 Type = ImageType.Reference,
                 Size = command.Size,
-                UploadedAt = DateTime.UtcNow,
+                UploadedAt = dateTime.PhilippineNow,
             };
 
             try
