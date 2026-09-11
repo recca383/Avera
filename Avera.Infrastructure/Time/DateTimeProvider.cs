@@ -9,6 +9,10 @@ namespace Avera.Infrastructure.Time
 {
     internal sealed class DateTimeProvider : IDateTimeProvider
     {
+        private static readonly TimeZoneInfo PhTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+
         public DateTime UtcNow => DateTime.UtcNow;
+
+        public DateTime PhilippineNow => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, PhTimeZone);
     }
 }
