@@ -26,6 +26,12 @@ namespace Avera.Domain.Identity.Users
             ErrorType.Conflict
         );
 
+        public static UserErrors EmailAlreadyVerified => new UserErrors(
+            "User.EmailAlreadyVerified",
+            "Member already has its email verified",
+            ErrorType.Conflict
+        );
+
         // Unauthorized Errors
 
         public static UserErrors IsSuspended => new UserErrors(
