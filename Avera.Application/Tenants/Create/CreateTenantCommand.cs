@@ -4,5 +4,5 @@ namespace Avera.Application.Tenants.Create
 {
     public sealed record CreateTenantCommand(
         string Name
-    ) : ICommand<string>;
+    ) : ICommand<CreateTenantResponse>;
 }

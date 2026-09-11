@@ -1,5 +1,6 @@
 using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
+using Avera.Application.Tenants.Create;
 using Avera.Domain.Identity.Roles;
 using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.Users;
@@ -20,20 +21,21 @@ namespace Avera.Infrastructure.Services
         IUserContext _userContext,
         IIdentityDbContext _identityDbContext,
         JwtProvider jwtProvider,
-        IApplicationDbContext _applicationDbContext
+        IApplicationDbContext _applicationDbContext,
+        IDateTimeProvider dateTime
     ) : IAdminService
     {
         private const int INVITECODELENGTH = 8;
-        public async Task<Result<string>> CreateTenantAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<Result<CreateTenantResponse>> CreateTenantAsync(string name, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(
             _userContext.UserId.ToString());
 
             if (user is null)
-                return Result.Failure<string>(UserErrors.UserNotFound);
+                return Result.Failure<CreateTenantResponse>(UserErrors.UserNotFound);
 
             if (user.TenantId.HasValue)
-                return Result.Failure<string>(TenantErrors.AlreadyBelongsToTenant);
+                return Result.Failure<CreateTenantResponse>(TenantErrors.AlreadyBelongsToTenant);
 
             var tenant = new Tenant
             {
@@ -41,7 +43,7 @@ namespace Avera.Infrastructure.Services
                 Name = name,
                 InviteCode = ProduceInviteCode(),
                 Status = TenantStatus.Active,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = dateTime.PhilippineNow
             };
 
             user.TenantId = tenant.Id;
@@ -51,7 +53,7 @@ namespace Avera.Infrastructure.Services
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
-                return HandleIdentityResult<string>(result);
+                return HandleIdentityResult<CreateTenantResponse>(result);
 
             await _identityDbContext.SaveChangesAsync(cancellationToken);
 
@@ -61,7 +63,7 @@ namespace Avera.Infrastructure.Services
 
             var newToken = await jwtProvider.GenerateAccessTokenAsync(user, listroles, cancellationToken);
 
-            return Result.Success<string>(newToken);
+            return Result.Success<CreateTenantResponse>(new CreateTenantResponse(newToken, dateTime.PhilippineNow.AddDays(1)));
         }
 
         public async Task<Result<TenantMemberDto>> GetMemberByIdAsync(Guid userId, CancellationToken cancellationToken = default)

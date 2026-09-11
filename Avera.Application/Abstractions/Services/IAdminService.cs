@@ -1,3 +1,4 @@
+using Avera.Application.Tenants.Create;
 using Avera.Domain.Identity.Tenants;
 using SharedKernel;
 
@@ -5,7 +6,7 @@ namespace Avera.Application.Abstractions.Authentication
 {
     public interface IAdminService
     {
-        Task<Result<string>> CreateTenantAsync(
+        Task<Result<CreateTenantResponse>> CreateTenantAsync(
             string name,
             CancellationToken cancellationToken = default);
 
