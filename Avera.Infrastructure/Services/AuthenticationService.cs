@@ -1,26 +1,28 @@
-using System.Reflection.Metadata;
-using System.Security.Cryptography.Pkcs;
-using System.Security.Principal;
 using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
+using Avera.Application.Abstractions.NotificationHub;
 using Avera.Application.Abstractions.Services;
 using Avera.Application.Authentication.ForgotPassword;
 using Avera.Application.Authentication.Login;
 using Avera.Application.Authentication.Register;
 using Avera.Application.Authentication.ResetPassword;
+using Avera.Application.MemberRequests.Notifications;
 using Avera.Domain.Identity.MemberRequests;
 using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.CodeAnalysis.Emit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using SharedKernel;
-using Microsoft.EntityFrameworkCore;
-using Avera.Application.MemberRequests.Notifications;
-using Avera.Application.Abstractions.NotificationHub;
-using Microsoft.CodeAnalysis.Emit;
+using System.Reflection.Metadata;
+using System.Security.Cryptography.Pkcs;
+using System.Security.Principal;
+using System.Text;
 
 namespace Avera.Infrastructure.Services
 {
@@ -33,7 +35,8 @@ namespace Avera.Infrastructure.Services
             IConfiguration configuration,
             IIdentityDbContext identityDbContext,
             IUserContext _userContext,
-            IMemberRequestNotifier memberRequestNotifier
+            IMemberRequestNotifier memberRequestNotifier,
+            IDateTimeProvider dateTime
         ) : IAuthenticationService
     {
         private static readonly ILogger Logger = Log.ForContext<AuthenticationService>();
@@ -128,7 +131,7 @@ namespace Avera.Infrastructure.Services
             LoginResponse response = new LoginResponse
             (
                 accessToken,
-                System.DateTime.UtcNow.AddDays(1)
+                dateTime.PhilippineNow.AddDays(1)
             );
 
             Logger.Information("Login completed successfully for user {UserId}", user.Id);
@@ -186,7 +189,7 @@ namespace Avera.Infrastructure.Services
 
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var verificationUrl = $"{configuration["App:DeepLinkBase"]}" +
+            var verificationUrl = $"{GetAppDeepLinkBase()}" +
                                   $"verify-email?userId={user.Id}" +
                                   $"&token={Uri.EscapeDataString(verificationToken)}";
 
@@ -261,6 +264,8 @@ namespace Avera.Infrastructure.Services
                 _userContext.UserId,
                 tenant.Id
              );
+
+            memberRequest.CreatedAt = dateTime.PhilippineNow;
 
             var results = await Task.WhenAll(
                CheckDuplicateMemberRequest(_userContext.UserId, tenant.Id, cancellationToken),
@@ -341,7 +346,7 @@ namespace Avera.Infrastructure.Services
                 newEmail);
 
             var verificationUrl =
-                $"{configuration["App:DeepLinkBase"]}" +
+                $"{GetAppDeepLinkBase()}" +
                 $"verify-email?" +
                 $"userId={user.Id}" +
                 $"&type=change-email" +
@@ -436,7 +441,6 @@ namespace Avera.Infrastructure.Services
                 return Result.Failure(UserErrors.UserNotFound);
 
             var oldEmail = user.Email;
-            var appToken = configuration["App:DeepLinkBase"];
 
             var existingUser = await _userManager.FindByEmailAsync(
                 newEmail);
@@ -468,22 +472,88 @@ namespace Avera.Infrastructure.Services
                 emailService.SendEmailNotificationToNewEmail(
                     user.Email!,
                     user.FirstName!,
-                    DateOnly.FromDateTime(DateTime.UtcNow),
-                    TimeOnly.FromDateTime(DateTime.UtcNow),
-                    appToken!,
+                    DateOnly.FromDateTime(dateTime.PhilippineNow),
+                    TimeOnly.FromDateTime(dateTime.PhilippineNow),
+                    GetAppDeepLinkBase()!,
                     cancellationToken
                     ),
                 emailService.SendEmailNotificationToOldEmail(
                     oldEmail!,
                     user.FirstName!,
                     user.Email!,
-                    DateOnly.FromDateTime(DateTime.UtcNow),
-                    TimeOnly.FromDateTime(DateTime.UtcNow),
+                    DateOnly.FromDateTime(dateTime.PhilippineNow),
+                    TimeOnly.FromDateTime(dateTime.PhilippineNow),
                     cancellationToken
                     )
                 );
 
             return Result.Success();
         }
+
+        public async Task<Result> ResendVerificationEmailAsync(string email, CancellationToken cancellation = default)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null)
+            {
+                return Result.Failure(
+                    UserErrors.UserNotFound);
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return Result.Failure(
+                    UserErrors.EmailAlreadyVerified);
+            }
+
+
+            var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var verificationUrl = $"{GetAppDeepLinkBase()}" +
+                                  $"verify-email?userId={user.Id}" +
+                                  $"&token={Uri.EscapeDataString(verificationToken)}";
+
+            return await emailService.SendEmailVerificationAsync(user.Email!, user.FirstName!, verificationUrl, cancellation);
+        }
+
+        public async Task<Result> ResendEmailChangeVerificationAsync(string email, string newEmail, CancellationToken cancellation = default)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null)
+            {
+                return Result.Failure(
+                    UserErrors.UserNotFound);
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return Result.Failure(
+                    UserErrors.EmailAlreadyVerified);
+            }
+
+
+            var token = await _userManager.GenerateChangeEmailTokenAsync(
+                user,
+                newEmail);
+
+            var verificationUrl =
+                $"{GetAppDeepLinkBase()}" +
+                $"verify-email?" +
+                $"userId={user.Id}" +
+                $"&type=change-email" +
+                $"&email={Uri.EscapeDataString(newEmail)}" +
+                $"&token={Uri.EscapeDataString(token)}";
+
+            return await emailService.SendEmailChangeVerificationAsync(
+                newEmail,
+                user.FirstName ?? string.Empty,
+                verificationUrl,
+                cancellation);
+        }
+
+
+
+        private string GetAppDeepLinkBase() => configuration["App:DeepLinkBase"]!;
     }
 }

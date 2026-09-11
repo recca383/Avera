@@ -58,5 +58,16 @@ namespace Avera.Application.Abstractions.Authentication
             string newEmail,
             string token,
             CancellationToken cancellationToken = default);
+
+        Task<Result> ResendVerificationEmailAsync(
+            string email,
+            CancellationToken cancellation = default
+            );
+
+        Task<Result> ResendEmailChangeVerificationAsync(
+            string email,
+            string newEmail,
+            CancellationToken cancellation = default
+            );
     }
 }
