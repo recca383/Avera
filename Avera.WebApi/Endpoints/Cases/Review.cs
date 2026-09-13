@@ -27,7 +27,8 @@ namespace Avera.WebApi.Endpoints.Cases
                 var results = await handler.Handle(command, cancellationToken);
 
                 return results.Match(Results.NoContent, CustomResults.Problem);
-            }).RequireAuthorization(RolePolicy.Admin);
+            }).RequireAuthorization(RolePolicy.Admin)
+            .WithTags(Tags.Cases);
 
         }
     }

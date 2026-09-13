@@ -12,7 +12,7 @@ namespace Avera.WebApi.Endpoints.Cases
         private sealed record Request(
             string SubjectName,
             Priority Priority,
-            AnalysisType AnalysisType
+            DocumentType AnalysisType
         );
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {

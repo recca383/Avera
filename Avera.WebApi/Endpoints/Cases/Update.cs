@@ -12,7 +12,7 @@ namespace Avera.WebApi.Endpoints.Cases
     {
         private record UpdateCaseRequest(
             string SubjectName,
-            AnalysisType AnalysisType,
+            DocumentType AnalysisType,
             Priority Priority
         );
 

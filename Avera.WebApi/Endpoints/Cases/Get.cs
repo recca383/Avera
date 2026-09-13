@@ -14,7 +14,7 @@ namespace Avera.WebApi.Endpoints.Cases
         private record GetCasesRequest(
             Status? CaseStatus,
             Priority? AnalysisPriority,
-            AnalysisType? AnalysisType,
+            DocumentType? AnalysisType,
             int? Page,
             int? PageSize
         );
