@@ -38,6 +38,11 @@ namespace Avera.Application.ML.GetResults
                 return Result.Failure<GetMLResultsResponse>(CaseErrors.CaseNotFound);
             }
 
+            if (!selectedCase.IsPdfExportAllowed)
+            {
+                return Result.Failure<GetMLResultsResponse>(CaseErrors.PdfExportNotAllowed);
+            }
+
             var caseOutput = $"{selectedCase.CaseCode}/{Case.OutputBlob}";
 
             try
