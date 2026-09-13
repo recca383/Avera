@@ -6,6 +6,7 @@ using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.OverlayImages;
+using Avera.Domain.Cases;
 using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.Users;
 using Microsoft.AspNetCore.Identity;
@@ -50,12 +51,26 @@ namespace Avera.Application.ML.Process
                                     .FirstOrDefault()!,
                 ReferenceImageUrls: selectedCase.CaseImages
                                     .Where(ci => ci.Type == ImageType.Reference)
+                                    .OrderBy(ci => ci.Index)
                                     .Select(ci => ci.FileName)
                                     .ToList()
             );
 
             logger.LogInformation("Sending process request for Case with Id: {CaseId}", selectedCase!.Id);  
             ProcessMLResponse? response = await mLService.ProcessAsync(processRequest, cancellationToken);
+
+            var MLresponse = new MLResponse()
+            {
+                ConfidenceForged = response.ConfidenceForged,
+                ConfidenceGenuine = response.ConfidenceGenuine,
+                Distance = response.Distance,
+                Threshold = response.Threshold,
+                Verdict = response.Verdict
+            };
+
+            selectedCase.MLResponse = MLresponse;
+            selectedCase.Status = Status.PendingReview;
+
             List<GradCamImageDto> gradCamImages = new List<GradCamImageDto>();
             
             foreach (var blobId in response.GradcamBlobId)
@@ -86,6 +101,7 @@ namespace Avera.Application.ML.Process
                     ImageId: gradCamImage.Id
                 );
                 gradCamImages.Add(GradCamImageDto);
+
                 await dbContext.GradCamImages.AddAsync(gradCamImage, cancellationToken);
             }
 
@@ -101,6 +117,7 @@ namespace Avera.Application.ML.Process
 
             logger.LogInformation("Received process response for Case with Id: {CaseId} with status: {Status}", selectedCase!.Id, response);
 
+            await dbContext.SaveChangesAsync(cancellationToken);
             
             return processReponse;
         }
