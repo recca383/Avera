@@ -31,19 +31,6 @@ namespace Avera.Application.Cases.GetById
                             c.Id == query.CaseId)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            //             .Select(c => new GetCaseByIdQueryResult(new CaseDto
-            // (
-            //     c.Id,
-            //     c.CaseCode,
-            //     c.SubjectName,
-            //     "Unknown",
-            //     c.Priority,
-            //     c.CreatedAt,
-            //     c.Status,
-            //     c.AnalysisType,
-            //     false
-            // )))
-
             if(queryResult == null)
                 return Result.Failure<GetCaseByIdQueryResult>(CaseErrors.CaseNotFound);
 
@@ -57,13 +44,15 @@ namespace Avera.Application.Cases.GetById
 
             MLResponseDto mlResponseDto = null;
 
+            var gradCamResults = queryResult.GradCamImages.Select(g => new GradCamDto(g.Slot, g.Type, g.Id)).ToList();
+
             if(queryResult.MLResponse != null)
             {
                 mlResponseDto = new MLResponseDto(
                 queryResult.MLResponse.ConfidenceForged,
                 queryResult.MLResponse.ConfidenceGenuine,
                 queryResult.MLResponse.Distance,
-                queryResult.MLResponse.GradcamBlobId,
+                gradCamResults,
                 queryResult.MLResponse.Threshold,
                 queryResult.MLResponse.Verdict
                 );
@@ -77,7 +66,8 @@ namespace Avera.Application.Cases.GetById
                 queryResult.Priority,
                 queryResult.CreatedAt,
                 queryResult.Status,
-                queryResult.AnalysisType,
+                queryResult.DocumentType,
+                queryResult.OptionalDocumentType!,
                 queryResult.DeletedAt.HasValue,
                 mlResponseDto,
                 queryResult.ReviewedBy,

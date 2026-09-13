@@ -6,6 +6,6 @@ namespace Avera.Application.UpdateCase
     public sealed record UpdateCaseCommand(
         Guid Id,
         string SubjectName,
-        AnalysisType AnalysisType,
+        DocumentType AnalysisType,
         Priority Priority) : ICommand<Guid>;
 }

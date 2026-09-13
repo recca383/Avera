@@ -24,7 +24,7 @@ namespace Avera.Application.Cases.UpdateCase
             }
 
             selectedCase.SubjectName = command.SubjectName;
-            selectedCase.AnalysisType = command.AnalysisType;
+            selectedCase.DocumentType = command.AnalysisType;
             selectedCase.Priority = command.Priority;
 
             applicationDbContext.Cases.Update(selectedCase);

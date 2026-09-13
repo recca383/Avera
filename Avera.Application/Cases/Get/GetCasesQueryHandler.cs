@@ -43,7 +43,7 @@ namespace Avera.Application.Cases.Get
                 cases = cases.Where(c => c.Priority == query.AnalysisPriority.Value);
 
             if (query.AnalysisType.HasValue)
-                cases = cases.Where(c => c.AnalysisType == query.AnalysisType.Value);
+                cases = cases.Where(c => c.DocumentType == query.AnalysisType.Value);
 
             int totalCount = cases.Count();
 
@@ -66,6 +66,8 @@ namespace Avera.Application.Cases.Get
 
                 var createdByUser_FullName = createdByUser.FirstName + " " + createdByUser.LastName;
 
+                var gradCamResults = pagedCase.GradCamImages.Select(g => new GradCamDto(g.Slot, g.Type, g.Id)).ToList();
+
                 MLResponseDto mlResponseDto = null;
 
                 if (pagedCase.MLResponse != null)
@@ -74,7 +76,7 @@ namespace Avera.Application.Cases.Get
                     pagedCase.MLResponse.ConfidenceForged,
                     pagedCase.MLResponse.ConfidenceGenuine,
                     pagedCase.MLResponse.Distance,
-                    pagedCase.MLResponse.GradcamBlobId,
+                    gradCamResults,
                     pagedCase.MLResponse.Threshold,
                     pagedCase.MLResponse.Verdict
                     );
@@ -88,7 +90,8 @@ namespace Avera.Application.Cases.Get
                     pagedCase.Priority,
                     pagedCase.CreatedAt,
                     pagedCase.Status,
-                    pagedCase.AnalysisType,
+                    pagedCase.DocumentType,
+                    pagedCase.OptionalDocumentType!,
                     pagedCase.DeletedAt.HasValue,
                     mlResponseDto,
                     pagedCase.ReviewedBy,

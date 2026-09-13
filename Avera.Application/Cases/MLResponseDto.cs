@@ -8,7 +8,7 @@ namespace Avera.Application.Cases
         float ConfidenceForged,
         float ConfidenceGenuine,
         float Distance,
-        List<string> GradcamBlobId,
+        List<GradCamDto> GradCamResults,
         float Threshold,
         string Verdict
     );

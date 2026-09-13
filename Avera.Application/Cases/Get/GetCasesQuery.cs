@@ -6,7 +6,7 @@ namespace Avera.Application.Cases.Get
     public sealed record GetCasesQuery(
         Status? CaseStatus,
         Priority? AnalysisPriority,
-        AnalysisType? AnalysisType,
+        DocumentType? AnalysisType,
         int? Page,
         int? PageSize
     ) : IQuery<GetCasesQueryResult>;
