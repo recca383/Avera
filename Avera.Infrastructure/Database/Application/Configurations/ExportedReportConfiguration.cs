@@ -15,7 +15,8 @@ namespace Avera.Infrastructure.Database.Application.Configurations
 
             builder.HasOne(er => er.Case)
                 .WithMany(c => c.ExportedReports)
-                .HasForeignKey(er => er.CaseId);
+                .HasForeignKey(er => er.CaseId)
+                .IsRequired();
         }
     }
 }

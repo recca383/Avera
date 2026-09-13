@@ -33,6 +33,9 @@ namespace Avera.Infrastructure.Database.Application
             //modelBuilder.HasDefaultSchema(Schemas.Default);
 
             modelBuilder.Entity<Case>().HasQueryFilter(c => c.TenantId == userContext.TenantId);
+            modelBuilder.Entity<CaseImage>().HasQueryFilter(c => c.Case.TenantId == userContext.TenantId);
+            modelBuilder.Entity<GradCamImage>().HasQueryFilter(c => c.Case.TenantId == userContext.TenantId);
+            modelBuilder.Entity<ExportedReport>().HasQueryFilter(c => c.Case.TenantId == userContext.TenantId);
 
             modelBuilder.Ignore<User>();
             modelBuilder.Ignore<Tenant>();

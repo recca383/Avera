@@ -1,6 +1,7 @@
 using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Application.ExportedReports;
+using Avera.Domain.Cases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -23,6 +24,18 @@ namespace Avera.Infrastructure.Database.Application.Configurations
             builder.HasMany<ExportedReport>(c => c.ExportedReports)
                 .WithOne(er => er.Case)
                 .HasForeignKey(er => er.CaseId);
+
+            builder.OwnsOne<MLResponse>(c => c.MLResponse, ml =>
+            {
+                ml.Property(x => x.ConfidenceForged);
+                ml.Property(x => x.ConfidenceGenuine);
+                ml.Property(x => x.Distance);
+                ml.Property(x => x.Threshold);
+                ml.Property(x => x.Verdict);
+
+                ml.Property(x => x.GradcamBlobId)
+                    .HasColumnName("GradcamBlobIds");
+            });
         }
     }
 }

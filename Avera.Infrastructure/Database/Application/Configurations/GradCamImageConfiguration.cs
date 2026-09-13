@@ -14,7 +14,8 @@ namespace Avera.Infrastructure.Database.Application.Configurations
 
             builder.HasOne<Case>(ci => ci.Case)
                 .WithMany(c => c.GradCamImages)
-                .HasForeignKey(ci => ci.CaseId);
+                .HasForeignKey(ci => ci.CaseId)
+                .IsRequired();
 
             builder.Property(oi => oi.Slot)
                 .HasConversion<string>();
