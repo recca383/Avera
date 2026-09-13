@@ -61,12 +61,26 @@ namespace Avera.Application.Cases.Get
             {
                 var createdByUser = await userManager.FindByIdAsync(pagedCase.CreatedByUserId.ToString());
 
-                if(createdByUser == null)
-                    return Result.Failure<GetCasesQueryResult>(UserErrors.UserNotFound);
+                if (createdByUser == null)
+                    continue;
 
                 var createdByUser_FullName = createdByUser.FirstName + " " + createdByUser.LastName;
 
-                var selectedCase = new CaseDto(
+                MLResponseDto mlResponseDto = null;
+
+                if (pagedCase.MLResponse != null)
+                {
+                    mlResponseDto = new MLResponseDto(
+                    pagedCase.MLResponse.ConfidenceForged,
+                    pagedCase.MLResponse.ConfidenceGenuine,
+                    pagedCase.MLResponse.Distance,
+                    pagedCase.MLResponse.GradcamBlobId,
+                    pagedCase.MLResponse.Threshold,
+                    pagedCase.MLResponse.Verdict
+                    );
+                }
+
+                var finalCase = new CaseDto(
                     pagedCase.Id,
                     pagedCase.CaseCode,
                     pagedCase.SubjectName,
@@ -75,10 +89,16 @@ namespace Avera.Application.Cases.Get
                     pagedCase.CreatedAt,
                     pagedCase.Status,
                     pagedCase.AnalysisType,
-                    IS_CASE_DELETED
+                    pagedCase.DeletedAt.HasValue,
+                    mlResponseDto,
+                    pagedCase.ReviewedBy,
+                    pagedCase.ReviewedAt,
+                    pagedCase.ReviewNote,
+                    pagedCase.FinalVerdict,
+                    pagedCase.IsPdfExportAllowed
                 );
 
-                pagedCasesList.Add( selectedCase );
+                pagedCasesList.Add(finalCase);
             }
 
             GetCasesQueryResult? result = new(

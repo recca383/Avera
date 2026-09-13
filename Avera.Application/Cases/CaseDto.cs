@@ -1,5 +1,6 @@
 using Avera.Application.CaseImages;
 using Avera.Domain.Application.Cases;
+using Avera.Domain.Cases;
 
 namespace Avera.Application.Cases
 {
@@ -13,7 +14,13 @@ namespace Avera.Application.Cases
         DateTime CreatedAt,
         Status CaseStatus,
         AnalysisType AnalysisType,
-        bool IsDeleted
+        bool IsDeleted,
+        MLResponseDto? MLResponse,
+        Guid? ReviewedByUserId,
+        DateTimeOffset? ReviewedAt,
+        string? ReviewNote,
+        FinalVerdict? FinalVerdict,
+        bool IsPdfExportAllowed
     );
 
 }

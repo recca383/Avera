@@ -53,7 +53,22 @@ namespace Avera.Application.Cases.GetById
                 return Result.Failure<GetCaseByIdQueryResult>(UserErrors.UserNotFound);
 
             var createdByUser_FullName = createdByUser.FirstName + " " + createdByUser.LastName;
-            
+
+
+            MLResponseDto mlResponseDto = null;
+
+            if(queryResult.MLResponse != null)
+            {
+                mlResponseDto = new MLResponseDto(
+                queryResult.MLResponse.ConfidenceForged,
+                queryResult.MLResponse.ConfidenceGenuine,
+                queryResult.MLResponse.Distance,
+                queryResult.MLResponse.GradcamBlobId,
+                queryResult.MLResponse.Threshold,
+                queryResult.MLResponse.Verdict
+                );
+            }
+
             var finalCase = new CaseDto(
                 queryResult.Id,
                 queryResult.CaseCode,
@@ -63,7 +78,13 @@ namespace Avera.Application.Cases.GetById
                 queryResult.CreatedAt,
                 queryResult.Status,
                 queryResult.AnalysisType,
-                IS_CASE_DELETED
+                queryResult.DeletedAt.HasValue,
+                mlResponseDto,
+                queryResult.ReviewedBy,
+                queryResult.ReviewedAt,
+                queryResult.ReviewNote,
+                queryResult.FinalVerdict,
+                queryResult.IsPdfExportAllowed
             );
 
             return Result.Success(new GetCaseByIdQueryResult(finalCase!));
