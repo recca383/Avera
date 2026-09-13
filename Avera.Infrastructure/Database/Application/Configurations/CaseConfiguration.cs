@@ -32,9 +32,6 @@ namespace Avera.Infrastructure.Database.Application.Configurations
                 ml.Property(x => x.Distance);
                 ml.Property(x => x.Threshold);
                 ml.Property(x => x.Verdict);
-
-                ml.Property(x => x.GradcamBlobId)
-                    .HasColumnName("GradcamBlobIds");
             });
         }
     }
