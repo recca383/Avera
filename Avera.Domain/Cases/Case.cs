@@ -12,7 +12,8 @@ namespace Avera.Domain.Application.Cases
         public Guid Id { get; set; }
         public string CaseCode { get; set; } = string.Empty;
         public string SubjectName { get; set; } = "No Subject";
-        public AnalysisType AnalysisType { get; set; }
+        public DocumentType DocumentType { get; set; }
+        public string? OptionalDocumentType { get; set; }
         public Priority Priority { get; set; }
         public string Notes { get; set; } = string.Empty;
         public Status Status { get; set; }
