@@ -46,7 +46,6 @@
 
   <ItemGroup>
     <Folder Include="Endpoints\ML\" />
-    <Folder Include="Endpoints\Notifications\" />
   </ItemGroup>
 
   <ItemGroup>
