@@ -13,6 +13,9 @@ namespace Avera.Infrastructure.Time
 
         public DateTime UtcNow => DateTime.UtcNow;
 
-        public DateTime PhilippineNow => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, PhTimeZone);
+        // Temporary
+        public DateTime PhilippineNow => UtcNow;
+
+        public DateTimeOffset PhilippineNowOffset => new(DateTime.UtcNow, PhTimeZone.GetUtcOffset(DateTime.UtcNow));
     }
 }

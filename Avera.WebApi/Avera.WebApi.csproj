@@ -45,7 +45,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Endpoints\Cases\" />
     <Folder Include="Endpoints\ML\" />
     <Folder Include="Endpoints\Notifications\" />
   </ItemGroup>

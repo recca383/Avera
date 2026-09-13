@@ -9,8 +9,8 @@ namespace Avera.Domain.Application.OverlayImages
          public GradCamSlot Slot { get; set;}
          public GradCamVariant Type { get; set; }
          public string BlobPath { get; set; } = string.Empty;
-         
-         // Navigation property
-         public Case? Case { get; set; }
+
+        // Navigation property
+        public Case? Case { get; set; }
     }
 }
