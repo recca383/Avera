@@ -12,7 +12,7 @@ namespace Avera.Application.Hubs
 
         ) : Hub
     {
-        public override async Task<Result> OnConnectedAsync()
+        public override async Task OnConnectedAsync()
         {
             var tenantId = userContext.TenantId;
 
@@ -20,7 +20,7 @@ namespace Avera.Application.Hubs
 
             if (user == null)
             {
-                return Result.Failure(UserErrors.UserNotFound);
+                throw new Exception("User not Found");
             }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, $"user:{user.Id}");
@@ -31,18 +31,11 @@ namespace Avera.Application.Hubs
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"tenant:{tenantId}:admins");
             }
-
-            
-
-
-            return Result.Success();
         }
 
-        public override async Task<Result> OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             await base.OnDisconnectedAsync(exception);
-
-            return Result.Success(exception == null ? null : new Error("Hub.DisconnectedError", exception.Message, ErrorType.ServerError));
         }
     }
 }
