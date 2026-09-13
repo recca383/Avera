@@ -24,7 +24,8 @@ namespace Avera.WebApi.Endpoints.Auth
                 var results = await handler.Handle(command, cancellationToken);
 
                 return results.Match(Results.NoContent, CustomResults.Problem);
-            });
+            })
+                .WithTags(Tags.Auth);
         }
     }
 }

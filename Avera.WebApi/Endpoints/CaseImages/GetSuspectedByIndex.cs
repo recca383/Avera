@@ -27,7 +27,9 @@ namespace Avera.WebApi.Endpoints.CaseImages
                 var result = await handler.Handle(query, cancellationToken);
 
                 return result.Match(
-                    onsuccess => Results.Stream(result.Value.ImageStream),
+                    onsuccess => Results.Stream(
+                        result.Value.ImageStream,
+                        result.Value.ContentType),
                     CustomResults.Problem);
             })
             .RequireAuthorization()
