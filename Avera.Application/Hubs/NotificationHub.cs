@@ -22,12 +22,18 @@ namespace Avera.Application.Hubs
             {
                 return Result.Failure(UserErrors.UserNotFound);
             }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"user:{user.Id}");
+
             var isAdmin = await userManager.IsInRoleAsync(user, "Admin");
 
-            if (isAdmin && tenantId.HasValue)
+            if (isAdmin)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"tenant:{tenantId}:admins");
             }
+
+            
+
 
             return Result.Success();
         }
