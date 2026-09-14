@@ -14,10 +14,10 @@ namespace Avera.WebApi.Endpoints.Auth
             );
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapPost("auth/resend-verification-email", async (
-                Request request,
+            routeBuilder.MapGet("auth/resend-verification-email", async (
+                [AsParameters] Request request,
                 ICommandHandler<ResendVerificationEmailCommand> handler,
-                CancellationToken cancellationToken)=>
+                CancellationToken cancellationToken) =>
             {
                 var command = new ResendVerificationEmailCommand(request.email, request.type, request.newEmail);
 
@@ -25,7 +25,8 @@ namespace Avera.WebApi.Endpoints.Auth
 
                 return results.Match(Results.NoContent, CustomResults.Problem);
             })
-                .WithTags(Tags.Auth);
+                .WithTags(Tags.Auth)
+                .AllowAnonymous();
         }
     }
 }

@@ -347,17 +347,18 @@ namespace Avera.Infrastructure.Services
                 return Result.Failure(UserErrors.EmailAlreadyExists);
             }
 
-            var token = await _userManager.GenerateChangeEmailTokenAsync(
+            var verificationToken = await _userManager.GenerateChangeEmailTokenAsync(
                 user,
                 newEmail);
 
+            var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
+
             var verificationUrl =
-                $"{GetAppDeepLinkBase()}" +
-                $"verify-email?" +
-                $"userId={user.Id}" +
+                $"{apiUrl}/auth/verify-email" +
+                $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
                 $"&type=change-email" +
                 $"&email={Uri.EscapeDataString(newEmail)}" +
-                $"&token={Uri.EscapeDataString(token)}";
+                $"&token={Uri.EscapeDataString(verificationToken)}";
 
             return await emailService.SendEmailChangeVerificationAsync(
                 newEmail,
@@ -489,13 +490,15 @@ namespace Avera.Infrastructure.Services
 
             await _userManager.UpdateSecurityStampAsync(user);
 
+            var app = appOptions.Value.DeepLinkBase + "_login/_signup/VerifyEmailInstruction";
+
             await Task.WhenAll(
                 emailService.SendEmailNotificationToNewEmail(
                     user.Email!,
                     user.FirstName!,
                     DateOnly.FromDateTime(dateTime.PhilippineNow),
                     TimeOnly.FromDateTime(dateTime.PhilippineNow),
-                    GetAppDeepLinkBase()!,
+                    app,
                     cancellationToken
                     ),
                 emailService.SendEmailNotificationToOldEmail(
@@ -508,9 +511,6 @@ namespace Avera.Infrastructure.Services
                     )
                 );
 
-            var app = appOptions.Value.DeepLinkBase + "_login/_signup/VerifyEmailInstruction";
-
-
             return Result.Success<string>(app);
         }
 
@@ -520,22 +520,25 @@ namespace Avera.Infrastructure.Services
 
             if (user is null)
             {
-                return Result.Failure(
+                return Result.Failure<string>(
                     UserErrors.UserNotFound);
             }
 
             if (user.EmailConfirmed)
             {
-                return Result.Failure(
+                return Result.Failure<string>(
                     UserErrors.EmailAlreadyVerified);
             }
 
 
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var verificationUrl = $"{GetAppDeepLinkBase()}" +
-                                  $"verify-email?userId={user.Id}" +
-                                  $"&token={Uri.EscapeDataString(verificationToken)}";
+            var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
+
+            var verificationUrl =
+                $"{apiUrl}/auth/verify-email" +
+                $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
+                $"&token={Uri.EscapeDataString(verificationToken)}";
 
             return await emailService.SendEmailVerificationAsync(user.Email!, user.FirstName!, verificationUrl, cancellation);
         }
@@ -556,18 +559,18 @@ namespace Avera.Infrastructure.Services
                     UserErrors.EmailAlreadyVerified);
             }
 
-
-            var token = await _userManager.GenerateChangeEmailTokenAsync(
+            var verificationToken = await _userManager.GenerateChangeEmailTokenAsync(
                 user,
                 newEmail);
 
+            var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
+
             var verificationUrl =
-                $"{GetAppDeepLinkBase()}" +
-                $"verify-email?" +
-                $"userId={user.Id}" +
+                $"{apiUrl}/auth/verify-email" +
+                $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
                 $"&type=change-email" +
                 $"&email={Uri.EscapeDataString(newEmail)}" +
-                $"&token={Uri.EscapeDataString(token)}";
+                $"&token={Uri.EscapeDataString(verificationToken)}";
 
             return await emailService.SendEmailChangeVerificationAsync(
                 newEmail,
@@ -575,8 +578,6 @@ namespace Avera.Infrastructure.Services
                 verificationUrl,
                 cancellation);
         }
-
-
 
         private string GetAppDeepLinkBase() => configuration["App:DeepLinkBase"]!;
     }

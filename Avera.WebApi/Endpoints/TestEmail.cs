@@ -20,7 +20,7 @@ namespace Avera.WebApi.Endpoints
                 [FromServices] IOptions<AppOptions> appOptions,
                 CancellationToken cancellationToken) =>
             {
-                var testEmail = "sirpatrick121402@gmail.com";
+                var testEmail = "crusitwincel@gmail.com";
                 var user = _userManager.FindByEmailAsync(testEmail).Result;
 
                 var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user!);
@@ -56,7 +56,7 @@ namespace Avera.WebApi.Endpoints
 
                 //await service.SendEmailNotificationToOldEmail(user.Email, user.FirstName, newEmail, date, time);
 
-                
+
             });
             
         }
