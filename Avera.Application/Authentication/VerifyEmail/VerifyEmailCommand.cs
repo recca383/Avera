@@ -10,5 +10,5 @@ namespace Avera.Application.Authentication.VerifyEmail
         string Token,
         string? Type,
         string? Email
-        ) : ICommand;
+        ) : ICommand<string>;
 }

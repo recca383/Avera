@@ -41,7 +41,7 @@ namespace Avera.Application.Abstractions.Authentication
             string code,
             CancellationToken cancellationToken = default
         );
-        Task<Result> VerifyEmailAsync(
+        Task<Result<string>> VerifyEmailAsync(
             Guid userId,
             string token,
             CancellationToken cancellationToken
@@ -53,7 +53,7 @@ namespace Avera.Application.Abstractions.Authentication
             CancellationToken cancellationToken = default
         );
 
-        Task<Result> VerifyEmailChangeAsync(
+        Task<Result<string>> VerifyEmailChangeAsync(
             Guid userId,
             string newEmail,
             string token,

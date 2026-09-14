@@ -6,13 +6,11 @@ namespace Avera.Application.Authentication.VerifyEmail
 {
     internal sealed class VerifyEmailCommandHandler(
         IAuthenticationService authenticationService
-    ) : ICommandHandler<VerifyEmailCommand>
+    ) : ICommandHandler<VerifyEmailCommand, string>
     {
-        public async Task<Result> Handle(
-            VerifyEmailCommand command,
-            CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(VerifyEmailCommand command, CancellationToken cancellationToken)
         {
-            if(command.Type == "change-email")
+            if (command.Type == "change-email")
             {
                 return await authenticationService.VerifyEmailChangeAsync(
                     command.UserId,
