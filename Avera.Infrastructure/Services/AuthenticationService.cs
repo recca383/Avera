@@ -10,6 +10,7 @@ using Avera.Application.MemberRequests.Notifications;
 using Avera.Domain.Identity.MemberRequests;
 using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
+using Avera.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Serilog;
 using SharedKernel;
 using System.Reflection.Metadata;
@@ -36,7 +38,8 @@ namespace Avera.Infrastructure.Services
             IIdentityDbContext identityDbContext,
             IUserContext _userContext,
             IMemberRequestNotifier memberRequestNotifier,
-            IDateTimeProvider dateTime
+            IDateTimeProvider dateTime,
+            IOptions<AppOptions> appOptions
         ) : IAuthenticationService
     {
         private static readonly ILogger Logger = Log.ForContext<AuthenticationService>();
@@ -189,9 +192,12 @@ namespace Avera.Infrastructure.Services
 
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var verificationUrl = $"{GetAppDeepLinkBase()}" +
-                                  $"verify-email?userId={user.Id}" +
-                                  $"&token={Uri.EscapeDataString(verificationToken)}";
+            var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
+
+            var verificationUrl =
+                $"{apiUrl}/auth/verify-email" +
+                $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
+                $"&token={Uri.EscapeDataString(verificationToken)}";
 
             await emailService.SendEmailVerificationAsync(user.Email, user.FirstName, verificationUrl, cancellationToken);
 
@@ -359,7 +365,7 @@ namespace Avera.Infrastructure.Services
                 verificationUrl,
                 cancellationToken);
         }
-        public async Task<Result> VerifyEmailAsync(
+        public async Task<Result<string>> VerifyEmailAsync(
             Guid userId,
             string token,
             CancellationToken cancellationToken = default)
@@ -368,10 +374,10 @@ namespace Avera.Infrastructure.Services
                 userId.ToString());
 
             if (user is null)
-                return Result.Failure(UserErrors.UserNotFound);
+                return Result.Failure<string>(UserErrors.UserNotFound);
 
             if (user.EmailConfirmed)
-                return Result.Success();
+                return Result.Failure<string>(UserErrors.EmailAlreadyVerified);
 
             var result = await _userManager.ConfirmEmailAsync(
                 user,
@@ -384,18 +390,18 @@ namespace Avera.Infrastructure.Services
                     userId,
                     result.Errors.Select(x => x.Description));
 
-                return HandleIdentityResult(result);
+                return HandleIdentityResult<string>(result);
             }
 
-            var appToken = configuration["App:DeepLinkBase"];
+            var app = appOptions.Value.DeepLinkBase + "_login/_signup/VerifyEmailInstruction";
 
-            await emailService.SendEmailVerified(user.Email!, user.FirstName!, appToken!, cancellationToken);
+            await emailService.SendEmailVerified(user.Email!, user.FirstName!, app!, cancellationToken);
 
             Logger.Information(
                 "Email verified successfully for user {UserId}",
                 userId);
 
-            return Result.Success();
+            return Result.Success<string>(app);
         }
 
         private static Result HandleIdentityResult(IdentityResult result)
@@ -416,6 +422,21 @@ namespace Avera.Infrastructure.Services
             var validationErrors = new ValidationError(errors);
             return Result.Failure(validationErrors);
         }
+
+        private static Result<T> HandleIdentityResult<T>(IdentityResult result)
+        {
+            var errors = result.Errors.Select(
+                e => new Error(
+                    string.IsNullOrWhiteSpace(e.Code) ? "Identity.Unknown" : e.Code,
+                    string.IsNullOrWhiteSpace(e.Description) ? "Identity validation failed" : e.Description,
+                    ErrorType.Validation)
+            ).
+            ToArray();
+
+            var validationErrors = new ValidationError(errors);
+            return Result.Failure<T>(validationErrors);
+        }
+
         private async Task<Result> CheckDuplicateMemberRequest(Guid userId, Guid tenantId, CancellationToken cancellationToken = default)
         {
             var duplicateRequest = await identityDbContext.MemberRequests.AnyAsync(mr => mr.UserId == userId && mr.TenantId == tenantId, cancellationToken);
@@ -432,13 +453,13 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public async Task<Result> VerifyEmailChangeAsync(Guid userId, string newEmail, string token, CancellationToken cancellationToken = default)
+        public async Task<Result<string>> VerifyEmailChangeAsync(Guid userId, string newEmail, string token, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(
              userId.ToString());
 
             if (user is null)
-                return Result.Failure(UserErrors.UserNotFound);
+                return Result.Failure<string>(UserErrors.UserNotFound);
 
             var oldEmail = user.Email;
 
@@ -448,7 +469,7 @@ namespace Avera.Infrastructure.Services
             if (existingUser is not null &&
                 existingUser.Id != user.Id)
             {
-                return Result.Failure(UserErrors.EmailAlreadyExists);
+                return Result.Failure<string>(UserErrors.EmailAlreadyExists);
             }
 
             var result = await _userManager.ChangeEmailAsync(
@@ -457,14 +478,14 @@ namespace Avera.Infrastructure.Services
                 token);
 
             if (!result.Succeeded)
-                return HandleIdentityResult(result);
+                return HandleIdentityResult<string>(result);
 
             user.UserName = newEmail;
 
             result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
-                return HandleIdentityResult(result);
+                return HandleIdentityResult<string>(result);
 
             await _userManager.UpdateSecurityStampAsync(user);
 
@@ -487,7 +508,10 @@ namespace Avera.Infrastructure.Services
                     )
                 );
 
-            return Result.Success();
+            var app = appOptions.Value.DeepLinkBase + "_login/_signup/VerifyEmailInstruction";
+
+
+            return Result.Success<string>(app);
         }
 
         public async Task<Result> ResendVerificationEmailAsync(string email, CancellationToken cancellation = default)

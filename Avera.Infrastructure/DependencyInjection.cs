@@ -11,6 +11,7 @@ using Avera.Domain.Identity.Roles;
 using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
 using Avera.Infrastructure.Authorization;
+using Avera.Infrastructure.Configuration;
 using Avera.Infrastructure.Database.Application;
 using Avera.Infrastructure.Database.Identity;
 using Avera.Infrastructure.ML;
@@ -37,11 +38,19 @@ namespace Avera.Infrastructure
         private const string PasswordResetCode = "PasswordResetCode";
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration) =>
             services.AddServices(configuration)
+            .AddConfiguration(configuration)
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
             .AddAuthorizationInternal();
 
+        private static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<AppOptions>(configuration.GetSection("App"));
+
+            return services;
+        }
+        
         private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IMLService, MLService>();    
