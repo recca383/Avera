@@ -13,7 +13,7 @@ namespace Avera.Application.Cases
         Priority Priority,
         DateTime CreatedAt,
         Status CaseStatus,
-        DocumentType AnalysisType,
+        DocumentType DocumentType,
         string OptionalDocumentType,
         bool IsDeleted,
         MLResponseDto? MLResponse,
