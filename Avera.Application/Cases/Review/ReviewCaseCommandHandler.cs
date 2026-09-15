@@ -54,8 +54,6 @@ namespace Avera.Application.Cases.Review
                 dateTime.PhilippineNow
                 );
 
-            await applicationDbContext.SaveChangesAsync();
-
             selectedCase.Raise(new CaseReviewCompletedDomainEvent(
                 selectedCase.Id,
                 userContext.TenantId.Value,
@@ -63,6 +61,10 @@ namespace Avera.Application.Cases.Review
                 command.FinalVerdict,
                 dateTime.PhilippineNow
                 ));
+
+            await applicationDbContext.SaveChangesAsync();
+
+            
             return Result.Success();
         }
     }

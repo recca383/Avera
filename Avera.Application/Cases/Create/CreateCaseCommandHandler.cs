@@ -39,7 +39,7 @@ namespace Avera.Application.Cases.Create
                 SubjectName = command.SubjectName,
                 CreatedByUserId = userContext.UserId,
                 TenantId = userContext.TenantId,
-                DocumentType = command.AnalysisType,
+                DocumentType = command.DocumentType,
                 Priority = command.Priority,
                 Notes = "",
                 CreatedAt = dateTime.PhilippineNow,

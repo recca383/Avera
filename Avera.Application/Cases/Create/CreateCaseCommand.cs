@@ -7,7 +7,7 @@ namespace Avera.Application.Cases.Create
     (
             string SubjectName,
             Priority Priority,
-            DocumentType AnalysisType
+            DocumentType DocumentType
     ) : ICommand<Case>;
     
 }
