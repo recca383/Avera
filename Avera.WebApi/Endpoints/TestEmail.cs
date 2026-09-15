@@ -20,30 +20,30 @@ namespace Avera.WebApi.Endpoints
                 [FromServices] IOptions<AppOptions> appOptions,
                 CancellationToken cancellationToken) =>
             {
-                var testEmail = "crusitwincel@gmail.com";
-                var user = _userManager.FindByEmailAsync(testEmail).Result;
+                //var testEmail = "crusitwincel@gmail.com";
+                //var user = _userManager.FindByEmailAsync(testEmail).Result;
 
-                var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user!);
+                //var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user!);
 
-                var newEmail = "patrickfernandez.dev@gmail.com";
-                var changeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user!, newEmail);
+                //var newEmail = "patrickfernandez.dev@gmail.com";
+                //var changeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user!, newEmail);
 
-                var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
+                //var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
 
 
-                var verificationUrl =
-                    $"{apiUrl}/auth/verify-email" +
-                    $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
-                    $"&token={Uri.EscapeDataString(verificationToken)}";
+                //var verificationUrl =
+                //    $"{apiUrl}/auth/verify-email" +
+                //    $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
+                //    $"&token={Uri.EscapeDataString(verificationToken)}";
  
-                var date = DateOnly.FromDateTime(dateTime.PhilippineNow);
+                //var date = DateOnly.FromDateTime(dateTime.PhilippineNow);
 
-                var time = TimeOnly.FromDateTime(dateTime.PhilippineNow);
+                //var time = TimeOnly.FromDateTime(dateTime.PhilippineNow);
 
-                // return configuration["ApplicationDbConnectionString"] + "\n\n" + configuration["ApplicationIdentityDbConnectionString"];
+                //// return configuration["ApplicationDbConnectionString"] + "\n\n" + configuration["ApplicationIdentityDbConnectionString"];
 
-                await service.SendEmailVerificationAsync(user.Email, user.FirstName,
-                verificationUrl, cancellationToken);
+                //await service.SendEmailVerificationAsync(user.Email, user.FirstName,
+                //verificationUrl, cancellationToken);
 
                 //await service.SendEmailChangeVerificationAsync(user.Email, user.FirstName,
                 //$"{changeEmailToken}", cancellationToken);

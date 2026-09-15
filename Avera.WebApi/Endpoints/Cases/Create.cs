@@ -12,7 +12,7 @@ namespace Avera.WebApi.Endpoints.Cases
         private sealed record Request(
             string SubjectName,
             Priority Priority,
-            DocumentType AnalysisType
+            DocumentType DocumentType
         );
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
@@ -25,7 +25,7 @@ namespace Avera.WebApi.Endpoints.Cases
                 var command = new CreateCaseCommand(
                     request.SubjectName,
                     request.Priority,
-                    request.AnalysisType
+                    request.DocumentType
                 );
 
                 var result = await handler.Handle(command, cancellationToken);
