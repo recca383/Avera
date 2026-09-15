@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Serilog;
 using SharedKernel;
+using System.Net.WebSockets;
 using System.Reflection.Metadata;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Principal;
@@ -43,6 +44,8 @@ namespace Avera.Infrastructure.Services
         ) : IAuthenticationService
     {
         private static readonly ILogger Logger = Log.ForContext<AuthenticationService>();
+
+        private const string TEMP_SUPPORT_EMAIL = "sirpatrick121402@gmail.com";
 
         public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
         {
@@ -72,7 +75,7 @@ namespace Avera.Infrastructure.Services
         {
             Logger.Information("Starting forgot password flow for email {Email}", email);
             
-            string codeExpiryInMinutes = configuration["Identity:TokenExpiryInMinutes"]!;
+            var codeExpiryInMinutes = Convert.ToInt32(configuration["Identity:TokenExpiryInMinutes"]!);
 
             User? user = await _userManager.FindByEmailAsync(email);
 
@@ -83,11 +86,17 @@ namespace Avera.Infrastructure.Services
             }
 
             Logger.Information("Generating reset token for user {UserId}", user.Id);
-            string token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            string code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             Logger.Information("Forgot password token generated for user {UserId}", user.Id);
 
-            return await emailService.SendForgotPasswordEmailAsync(email, token, codeExpiryInMinutes, cancellationToken);
+            return await emailService.SendForgotPasswordEmailAsync(
+                email,
+                user.FirstName!,
+                code,
+                TEMP_SUPPORT_EMAIL,
+                codeExpiryInMinutes,
+                cancellationToken);
         }
         public async Task<Result<LoginResponse>> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
         {
@@ -194,12 +203,20 @@ namespace Avera.Infrastructure.Services
 
             var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
 
+            var codeExpiryInMinutes = Convert.ToInt32(configuration["Identity:TokenExpiryInMinutes"]!);
+
             var verificationUrl =
                 $"{apiUrl}/auth/verify-email" +
                 $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
                 $"&token={Uri.EscapeDataString(verificationToken)}";
 
-            await emailService.SendEmailVerificationAsync(user.Email, user.FirstName, verificationUrl, cancellationToken);
+            await emailService.SendEmailVerificationAsync(
+                user.Email,
+                user.FirstName, 
+                verificationUrl, 
+                TEMP_SUPPORT_EMAIL,
+                codeExpiryInMinutes,
+                cancellationToken);
 
             Logger.Information("Registration completed successfully for user {UserId}", user.Id);
             return Result.Success();
@@ -227,7 +244,19 @@ namespace Avera.Infrastructure.Services
 
             Logger.Information("Password reset completed successfully for user {UserId}", email);
 
-            await emailService.ResetPasswordNotificationAsync(email, cancellationToken);
+            var tenant = await identityDbContext.Tenants.SingleOrDefaultAsync(t => t.Id == user.TenantId);
+
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+
+            var admin = admins.SingleOrDefault(a => a.TenantId == tenant.Id);
+
+            await emailService.ResetPasswordNotificationAsync(
+                email,
+                user.FirstName,
+                tenant.Name,
+                admin.FirstName + " " + admin.LastName,
+                TEMP_SUPPORT_EMAIL,
+                cancellationToken);
 
             return Result.Success();
         }
@@ -254,9 +283,10 @@ namespace Avera.Infrastructure.Services
             if(inviteCode is null)
                 return Result.Failure(UserErrors.InvalidInviteCode);
 
-            var tenant = identityDbContext.Tenants.SingleOrDefault(t => t.InviteCode == inviteCode);
+            var tenant = await identityDbContext.Tenants.SingleOrDefaultAsync(
+                t => t.InviteCode == inviteCode, cancellationToken);
 
-            if(tenant is null)
+            if (tenant is null)
                 return Result.Failure(UserErrors.JoinInviteCodeFailed);
 
             var user = await _userManager.FindByIdAsync(_userContext.UserId.ToString());
@@ -273,12 +303,17 @@ namespace Avera.Infrastructure.Services
 
             memberRequest.CreatedAt = dateTime.PhilippineNow;
 
-            var results = await Task.WhenAll(
-               CheckDuplicateMemberRequest(_userContext.UserId, tenant.Id, cancellationToken),
-               CheckJoiningMultipleTenants(_userContext.UserId, cancellationToken));
+            var duplicateRequestResult = await CheckDuplicateMemberRequest(_userContext.UserId, tenant.Id, cancellationToken);
 
-            if (results.Any(t => t.IsFailure))
-                return results.First(t => t.IsFailure);
+            if (duplicateRequestResult.IsFailure)
+                return duplicateRequestResult;
+
+            var multipleTenantsResult = await CheckJoiningMultipleTenants(
+                _userContext.UserId,
+                cancellationToken);
+
+            if (multipleTenantsResult.IsFailure)
+                return multipleTenantsResult;
 
             await identityDbContext.MemberRequests.AddAsync(memberRequest, cancellationToken);
 
@@ -353,6 +388,8 @@ namespace Avera.Infrastructure.Services
 
             var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
 
+            var codeExpiryInMinutes = Convert.ToInt32(configuration["Identity:TokenExpiryInMinutes"]!);
+
             var verificationUrl =
                 $"{apiUrl}/auth/verify-email" +
                 $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
@@ -362,8 +399,10 @@ namespace Avera.Infrastructure.Services
 
             return await emailService.SendEmailChangeVerificationAsync(
                 newEmail,
-                user.FirstName ?? string.Empty,
+                TEMP_SUPPORT_EMAIL,
+                user.FirstName,
                 verificationUrl,
+                codeExpiryInMinutes,
                 cancellationToken);
         }
         public async Task<Result<string>> VerifyEmailAsync(
@@ -394,7 +433,7 @@ namespace Avera.Infrastructure.Services
                 return HandleIdentityResult<string>(result);
             }
 
-            var app = appOptions.Value.DeepLinkBase + "_login/_signup/VerifyEmailInstruction";
+            var app = appOptions.Value.DeepLinkBase + "_sucessPage/emailVerified";
 
             await emailService.SendEmailVerified(user.Email!, user.FirstName!, app!, cancellationToken);
 
@@ -490,7 +529,16 @@ namespace Avera.Infrastructure.Services
 
             await _userManager.UpdateSecurityStampAsync(user);
 
-            var app = appOptions.Value.DeepLinkBase + "_login/_signup/VerifyEmailInstruction";
+            string app = string.Empty;
+            
+            if(await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                app = appOptions.Value.DeepLinkBase + "Admin/profileScreens/EditProfileScreen";
+            }
+            else
+            {
+                app = appOptions.Value.DeepLinkBase + "_User/user_profile";
+            }
 
             await Task.WhenAll(
                 emailService.SendEmailNotificationToNewEmail(
@@ -507,6 +555,7 @@ namespace Avera.Infrastructure.Services
                     user.Email!,
                     DateOnly.FromDateTime(dateTime.PhilippineNow),
                     TimeOnly.FromDateTime(dateTime.PhilippineNow),
+                    TEMP_SUPPORT_EMAIL,
                     cancellationToken
                     )
                 );
@@ -535,12 +584,20 @@ namespace Avera.Infrastructure.Services
 
             var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
 
+            var codeExpiryInMinutes = Convert.ToInt32(configuration["Identity:TokenExpiryInMinutes"]!);
+
             var verificationUrl =
                 $"{apiUrl}/auth/verify-email" +
                 $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
                 $"&token={Uri.EscapeDataString(verificationToken)}";
 
-            return await emailService.SendEmailVerificationAsync(user.Email!, user.FirstName!, verificationUrl, cancellation);
+            return await emailService.SendEmailVerificationAsync(
+                user.Email!,
+                user.FirstName!,
+                verificationUrl,
+                TEMP_SUPPORT_EMAIL,
+                codeExpiryInMinutes,
+                cancellation);
         }
 
         public async Task<Result> ResendEmailChangeVerificationAsync(string email, string newEmail, CancellationToken cancellation = default)
@@ -565,6 +622,8 @@ namespace Avera.Infrastructure.Services
 
             var apiUrl = appOptions.Value.PublicBaseUrl.TrimEnd('/');
 
+            var codeExpiryInMinutes = Convert.ToInt32(configuration["Identity:TokenExpiryInMinutes"]!);
+
             var verificationUrl =
                 $"{apiUrl}/auth/verify-email" +
                 $"?userId={Uri.EscapeDataString(user.Id.ToString())}" +
@@ -574,8 +633,10 @@ namespace Avera.Infrastructure.Services
 
             return await emailService.SendEmailChangeVerificationAsync(
                 newEmail,
+                TEMP_SUPPORT_EMAIL,
                 user.FirstName ?? string.Empty,
                 verificationUrl,
+                codeExpiryInMinutes,
                 cancellation);
         }
 

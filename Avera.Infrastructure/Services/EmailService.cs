@@ -1,4 +1,3 @@
-using System.Net.Mail;
 using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Services;
@@ -7,6 +6,7 @@ using Avera.Infrastructure.Authentication;
 using Avera.Infrastructure.Database.Identity;
 using Azure.Core;
 using FluentEmail.Core;
+using FluentEmail.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,23 +18,20 @@ namespace Avera.Infrastructure.Services
     public class EmailService
     (
         IFluentEmail fluentEmail,
-        UserManager<User> userManager,
-        IIdentityDbContext identityDbContext,
-        IUserContext userContext,
         IDateTimeProvider dateTime
     ) : IEmailService
     {
         private const string HEADER_REFERENCE = "email-header";
         private readonly string CURRENT_YEAR = dateTime.PhilippineNow.Year.ToString();
-        private readonly string DEEP_LINK_URL = "avera://";
-        private readonly string SUPPORT_EMAIL = "sirpatrick121402@gmail.com";
 
-        public async Task<Result> ResetPasswordNotificationAsync(string recipient, CancellationToken cancellationToken = default)
+        public async Task<Result> ResetPasswordNotificationAsync(
+            string recipient,
+            string firstName,
+            string organizationName,
+            string adminFullName,
+            string supportEmail,
+            CancellationToken cancellationToken = default)
         {
-            var userRecipient = await userManager.FindByEmailAsync(recipient);
-            var organization = await identityDbContext.Tenants
-                    .FirstOrDefaultAsync(t => t.Id == userContext.TenantId, cancellationToken);
-            var admin = await userManager.FindByIdAsync(userContext.UserId.ToString());
 
             var result =  await fluentEmail
                 .To(recipient)
@@ -44,18 +41,18 @@ namespace Avera.Infrastructure.Services
                     new
                     {
                         Header = HEADER_REFERENCE,
-                        FirstName = userRecipient!.FirstName,
+                        FirstName = firstName,
                         Email = recipient,
                         ChangeDate = dateTime.PhilippineNow.ToString("MMMM dd, yyyy"),
                         ChangeTime = dateTime.PhilippineNow.ToLongTimeString(),
-                        OrganizationName = organization!.Name,
-                        AdminName = admin!.FirstName + " " + admin!.LastName,
-                        SupportEmail = admin.Email,
+                        OrganizationName = organizationName,
+                        AdminName = adminFullName,
+                        SupportEmail = supportEmail,
                         CurrentYear = CURRENT_YEAR
                     }
                 )
                 .Attach(GetHeader())
-                .SendAsync();
+                .SendAsync(cancellationToken);
 
             if(!result.Successful)
             {
@@ -74,13 +71,14 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public async Task<Result> SendForgotPasswordEmailAsync(string recipient, string code, string ExpiryInMinutes, CancellationToken cancellationToken = default)
-        {
-            var userRecipient = await userManager.FindByEmailAsync(recipient);
-            var organization = await identityDbContext.Tenants
-                    .FirstOrDefaultAsync(t => t.Id == userContext.TenantId, cancellationToken);
-            var admin = await userManager.FindByIdAsync(userContext.UserId.ToString());
-
+        public async Task<Result> SendForgotPasswordEmailAsync(
+            string recipient,
+            string firstName,
+            string code,
+            string supportEmail,
+            int ExpiryInMinutes,
+            CancellationToken cancellationToken = default)
+        { 
             var result =  await fluentEmail
                 .To(recipient)
                 .Subject("Forgot Password")
@@ -89,16 +87,16 @@ namespace Avera.Infrastructure.Services
                     new
                     {
                         Header = HEADER_REFERENCE,
-                        FirstName = userRecipient!.FirstName,
+                        FirstName = firstName,
                         Email = recipient,
                         Code = code,
                         ExpiryMinutes = ExpiryInMinutes,
-                        SupportEmail = admin!.Email,
+                        SupportEmail = supportEmail,
                         CurrentYear = CURRENT_YEAR
                     }
                 )
                 .Attach(GetHeader())
-                .SendAsync();
+                .SendAsync(cancellationToken);
 
             if(!result.Successful)
             {
@@ -117,13 +115,13 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public async Task<Result> SendRequestApprovedAsync(string recipient, CancellationToken cancellationToken = default)
+        public async Task<Result> SendRequestApprovedAsync(
+            string recipient,
+            string firstName,
+            string organizationName, 
+            string adminFullName, 
+            CancellationToken cancellationToken = default)
         {
-            var userRecipient = await userManager.FindByEmailAsync(recipient);
-            var organization = await identityDbContext.Tenants
-                    .FirstOrDefaultAsync(t => t.Id == userContext.TenantId, cancellationToken);
-            var admin = await userManager.FindByIdAsync(userContext.UserId.ToString());
-
             var result =  await fluentEmail
                 .To(recipient)
                 .Subject("Request Approved")
@@ -132,14 +130,14 @@ namespace Avera.Infrastructure.Services
                     new
                     {
                         Header = HEADER_REFERENCE,
-                        FirstName = userRecipient!.FirstName,
-                        OrganizationName = organization!.Name,
-                        AdminName = admin!.FirstName + " " + admin!.LastName,
+                        FirstName = firstName,
+                        OrganizationName = organizationName,
+                        AdminName = adminFullName,
                         CurrentYear = CURRENT_YEAR
                     }
                 )
                 .Attach(GetHeader())
-                .SendAsync();
+                .SendAsync(cancellationToken);
 
             if(!result.Successful)
             {
@@ -158,12 +156,14 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public async Task<Result> SendRequestRejectedAsync(string recipient, CancellationToken cancellationToken = default)
+        public async Task<Result> SendRequestRejectedAsync(
+            string recipient,
+            string firstName,
+            string organizationName,
+            string adminFullName,
+            string supportEmail,
+            CancellationToken cancellationToken = default)
         {
-            var userRecipient = await userManager.FindByEmailAsync(recipient);
-            var organization = await identityDbContext.Tenants
-                    .FirstOrDefaultAsync(t => t.Id == userContext.TenantId, cancellationToken);
-            var admin = await userManager.FindByIdAsync(userContext.UserId.ToString());
             var result =  await fluentEmail
                 .To(recipient)
                 .Subject("Request Rejected")
@@ -172,16 +172,15 @@ namespace Avera.Infrastructure.Services
                     new
                     {
                         Header = HEADER_REFERENCE,
-                        FirstName = userRecipient!.FirstName,
-                        OrganizationName = "Philippine National Police", //organization!.Name,
-                        AdminName = "Patrick Fernandez",//admin!.FirstName + " " + admin!.LastName,
+                        FirstName = firstName,
+                        OrganizationName = organizationName,
+                        AdminName = adminFullName,
                         CurrentYear = CURRENT_YEAR,
-                        LoginUrl = DEEP_LINK_URL,
-                        SupportEmail = SUPPORT_EMAIL
+                        SupportEmail = supportEmail
                     }
                 )
                 .Attach(GetHeader())
-                .SendAsync();
+                .SendAsync(cancellationToken);
             if(!result.Successful)
             {
                 var errors = result.ErrorMessages.Select(
@@ -197,7 +196,13 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public async Task<Result> SendEmailVerificationAsync(string recipient, string firstName, string verificationUrl, CancellationToken cancellationToken = default)
+        public async Task<Result> SendEmailVerificationAsync(
+            string recipient, 
+            string firstName,
+            string verificationUrl,
+            string supportEmail,
+            int expiryHours,
+            CancellationToken cancellationToken = default)
         {
             var result = await fluentEmail
                .To(recipient)
@@ -209,12 +214,12 @@ namespace Avera.Infrastructure.Services
                        Header = HEADER_REFERENCE,
                        FirstName = firstName,
                        VerificationUrl = verificationUrl,
-                       SupportEmail = SUPPORT_EMAIL,
+                       SupportEmail = supportEmail,
                        CurrentYear =CURRENT_YEAR,
-                       ExpiryHours = 1
+                       ExpiryHours = expiryHours
                    })
                .Attach(GetHeader())
-               .SendAsync();
+               .SendAsync(cancellationToken);
 
             if (!result.Successful)
             {
@@ -231,7 +236,14 @@ namespace Avera.Infrastructure.Services
 
             return Result.Success();
         }
-        public async Task<Result> SendEmailChangeVerificationAsync(string recipient, string firstName, string verificationUrl, CancellationToken cancellationToken = default)
+
+        public async Task<Result> SendEmailChangeVerificationAsync(
+            string recipient,
+            string supportEmail,
+            string firstName, 
+            string verificationUrl, 
+            int expiryHours,
+            CancellationToken cancellationToken = default)
         {
             var result = await fluentEmail
                .To(recipient)
@@ -244,12 +256,12 @@ namespace Avera.Infrastructure.Services
                        FirstName = firstName,
                        NewEmail = recipient,
                        ConfirmationUrl = verificationUrl,
-                       SupportEmail = SUPPORT_EMAIL,
+                       SupportEmail = supportEmail,
                        CurrentYear = CURRENT_YEAR,
-                       ExpiryHours = 1
+                       ExpiryHours = expiryHours
                    })
                .Attach(GetHeader())
-               .SendAsync();
+               .SendAsync(cancellationToken);
 
             if (!result.Successful)
             {
@@ -267,7 +279,13 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public async Task<Result> SendEmailNotificationToNewEmail(string recipient, string firstName, DateOnly ChangeDate, TimeOnly ChangeTime, string appUrl, CancellationToken cancellationToken = default)
+        public async Task<Result> SendEmailNotificationToNewEmail(
+            string recipient,
+            string firstName,
+            DateOnly ChangeDate,
+            TimeOnly ChangeTime,
+            string appUrl,
+            CancellationToken cancellationToken = default)
         {
             var result = await fluentEmail
                .To(recipient)
@@ -303,7 +321,11 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
         
-        public async Task<Result> SendEmailVerified(string recipient, string firstName, string AppUrl, CancellationToken cancellationToken = default)
+        public async Task<Result> SendEmailVerified(
+            string recipient, 
+            string firstName,
+            string appUrl,
+            CancellationToken cancellationToken = default)
         {
             var result = await fluentEmail
                .To(recipient)
@@ -314,12 +336,12 @@ namespace Avera.Infrastructure.Services
                    {
                        Header = HEADER_REFERENCE,
                        FirstName = firstName,
-                       AppUrl = AppUrl,
+                       AppUrl = appUrl,
                        EmailAddress = recipient,
                        CurrentYear = CURRENT_YEAR,
                    })
                .Attach(GetHeader())
-               .SendAsync();
+               .SendAsync(cancellationToken);
 
             if (!result.Successful)
             {
@@ -337,7 +359,14 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
-        public async Task<Result> SendEmailNotificationToOldEmail(string recipient, string firstName, string newEmail, DateOnly ChangeDate, TimeOnly ChangeTime, CancellationToken cancellationToken = default)
+        public async Task<Result> SendEmailNotificationToOldEmail(
+            string recipient,
+            string firstName,
+            string newEmail, 
+            DateOnly changeDate, 
+            TimeOnly changeTime, 
+            string supportEmail,
+            CancellationToken cancellationToken = default)
         {
             var result = await fluentEmail
                .To(recipient)
@@ -350,13 +379,13 @@ namespace Avera.Infrastructure.Services
                        FirstName = firstName,
                        OldEmail = recipient,
                        NewEmail = newEmail,
-                       ChangeDate = ChangeDate,
-                       ChangeTime = ChangeTime,
-                       SupportEmail = SUPPORT_EMAIL,
+                       ChangeDate = changeDate,
+                       ChangeTime = changeTime,
+                       SupportEmail = supportEmail,
                        CurrentYear = CURRENT_YEAR,
                    })
                .Attach(GetHeader())
-               .SendAsync();
+               .SendAsync(cancellationToken);
 
             if (!result.Successful)
             {
@@ -384,7 +413,7 @@ namespace Avera.Infrastructure.Services
                 "EmailTemplates",
                 templateName);
         }
-        private FluentEmail.Core.Models.Attachment GetHeader()
+        private static Attachment GetHeader()
         {
             string HEADER_PATH = Path.Combine(Path.GetDirectoryName(typeof(EmailService).Assembly.Location)!,
                                     "EmailTemplates",
