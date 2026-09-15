@@ -6,6 +6,7 @@ using Avera.Domain.Identity.MemberRequests;
 using Avera.Domain.Identity.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 using System;
 using System.Collections.Generic;
@@ -46,9 +47,22 @@ namespace Avera.Application.MemberRequests.Reject
                 return Result.Failure(UserErrors.UserNotFound);
             }
 
+            var tenant = await identityDbContext.Tenants.SingleOrDefaultAsync(t => t.Id == request.TenantId, cancellationToken);
+
+            var admin = await userManager.FindByIdAsync(reviewedByUserId.ToString());
+
+            user.TenantId = request.TenantId;
+
             await identityDbContext.SaveChangesAsync(cancellationToken);
 
-            await emailService.SendRequestRejectedAsync(user.Email!, cancellationToken);
+            // Move to Domain Event
+            await emailService.SendRequestRejectedAsync(
+                user.Email!,
+                user.FirstName!,
+                tenant!.Name,
+                admin!.FirstName + " " + admin.LastName,
+                admin.Email!,
+                cancellationToken);
 
             return Result.Success();
         }
