@@ -192,14 +192,6 @@ namespace Avera.Infrastructure.Services
             // Remove the user from the tenant
             user.TenantId = null;
 
-            var role = await _userManager.GetRolesAsync(user);
-
-            // Remove user roles
-            var roleresult = await _userManager.RemoveFromRoleAsync(user, role.FirstOrDefault()!);
-
-            if (!roleresult.Succeeded)
-                return HandleIdentityResult(roleresult);
-
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
@@ -282,5 +274,20 @@ namespace Avera.Infrastructure.Services
             return Result.Failure(validationErrors);
         }
 
+        public async Task<Result> RenameOrganization(string newName, CancellationToken cancellationToken = default)
+        {
+            var tenant = await _identityDbContext.Tenants.FirstOrDefaultAsync(t => t.Id == _userContext.TenantId, cancellationToken);
+
+            if (tenant == null)
+            {
+                Result.Failure(TenantErrors.TenantNotFound);
+            }
+
+            tenant!.Name = newName;
+
+            await _identityDbContext.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
     }
 }

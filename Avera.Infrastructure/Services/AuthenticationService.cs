@@ -479,7 +479,13 @@ namespace Avera.Infrastructure.Services
 
         private async Task<Result> CheckDuplicateMemberRequest(Guid userId, Guid tenantId, CancellationToken cancellationToken = default)
         {
-            var duplicateRequest = await identityDbContext.MemberRequests.AnyAsync(mr => mr.UserId == userId && mr.TenantId == tenantId, cancellationToken);
+            var duplicateRequest = await identityDbContext
+                .MemberRequests
+                .AnyAsync(mr => mr.UserId == userId 
+                             && mr.TenantId == tenantId 
+                             && mr.Status != MemberRequestStatus.Pending,
+                             cancellationToken);
+
             if (duplicateRequest)
                 return Result.Failure(UserErrors.MemberRequestIsDuplicate);
             return Result.Success();
@@ -487,7 +493,12 @@ namespace Avera.Infrastructure.Services
 
         private async Task<Result> CheckJoiningMultipleTenants(Guid userId, CancellationToken cancellationToken = default)
         {
-            var joiningMultipleTimes = await identityDbContext.MemberRequests.AnyAsync(mr => mr.UserId == userId, cancellationToken);
+            var joiningMultipleTimes = await identityDbContext
+                .MemberRequests
+                .AnyAsync(mr => mr.UserId == userId 
+                             && mr.Status == MemberRequestStatus.Pending,
+                             cancellationToken);
+
             if (joiningMultipleTimes)
                 return Result.Failure(UserErrors.MemberIsJoiningMultipleTimes);
             return Result.Success();

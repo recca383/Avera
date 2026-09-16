@@ -7,6 +7,12 @@ namespace Avera.Domain.Identity.Tenants
         private TenantErrors(string code, string description, ErrorType errorType)
             : base(code, description, errorType) { }
 
+        public static TenantErrors TenantNotFound => new TenantErrors(
+            "Tenant.NotFound",
+            "No tenant found.",
+            ErrorType.NotFound
+        );
+
         public static TenantErrors AlreadyBelongsToTenant => new TenantErrors(
             "Tenant.AlreadyBelongsToTenant",
             "User already belongs to a tenant",
