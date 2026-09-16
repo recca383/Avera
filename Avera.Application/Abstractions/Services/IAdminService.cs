@@ -28,5 +28,9 @@ namespace Avera.Application.Abstractions.Authentication
         Task<Result<TenantMemberDto>> GetMemberByIdAsync(
             Guid userId,
             CancellationToken cancellationToken = default);
+
+        Task<Result> RenameOrganization(
+            string newName,
+            CancellationToken cancellationToken = default);
     }
 }
