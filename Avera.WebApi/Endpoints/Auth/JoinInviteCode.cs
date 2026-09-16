@@ -8,15 +8,18 @@ namespace Avera.WebApi.Endpoints.Auth
 {
     internal sealed class JoinInviteCode : IEndpoint
     {
+        private sealed record Request(
+            string InviteCode
+            );
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
             routeBuilder.MapPost("/auth/join-invite-code", async (
-                [FromBody] string InviteCode,
+                 Request request,
                 ICommandHandler<JoinInviteCodeCommand> handler,
                 CancellationToken cancellationToken
             ) =>
             {
-                var command = new JoinInviteCodeCommand(InviteCode);
+                var command = new JoinInviteCodeCommand(request.InviteCode);
 
                 var results = await handler.Handle(command, cancellationToken);
 
