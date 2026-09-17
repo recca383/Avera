@@ -1,6 +1,6 @@
 ﻿using Avera.Application.Hubs;
 
-namespace Avera.WebApi.Endpoints.Hubs
+namespace Avera.WebApi.Endpoints.SignalR
 {
     internal sealed class Notification : IEndpoint
     {
