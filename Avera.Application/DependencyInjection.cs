@@ -5,7 +5,6 @@ using FluentValidation;
 using Avera.Application.Abstractions.Behaviors;
 using Avera.Application.MemberRequests.Notifications;
 using Avera.Application.Abstractions.NotificationHub;
-using Avera.WebApi.Endpoints.Admin.MemberRequests;
 using Avera.Application.Cases.Notifications;
 
 namespace Avera.Application
@@ -39,7 +38,6 @@ namespace Avera.Application
 
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
-            services.AddScoped<IMemberRequestNotifier, SignalRMemberRequestNotifier>();
             services.AddScoped<ICaseNotificationNotifier, SignalRCaseNotifier>();
 
             return services;
