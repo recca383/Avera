@@ -42,6 +42,11 @@ namespace Avera.Application.ML.Process
                                                     .FirstOrDefaultAsync(c => c.Id == command.CaseId
                                                         , cancellationToken);
 
+            if (selectedCase == null)
+            {
+                return Result.Failure<ProcessResponse>(CaseErrors.CaseNotFound);
+            }
+
             logger.LogInformation("Selected Case with Id: {CaseId} has {NumberOfImages} images", selectedCase!.Id, selectedCase.CaseImages.Count);
             var processRequest = new ProcessRequest(
                 CaseName: selectedCase!.CaseCode,

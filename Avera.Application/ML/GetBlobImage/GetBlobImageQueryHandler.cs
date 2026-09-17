@@ -52,6 +52,11 @@ namespace Avera.Application.ML.GetBlobImage
             
             var imageBlobPath = image?.BlobPath;
 
+            if(imageBlobPath == null)
+            {
+                return Result.Failure<GetBlobImageResponse>(CaseImageErrors.CaseImageNotFound);
+            }
+
             var stream = await blobStorageService.DownloadAsync(imageBlobPath!, cancellationToken);
 
             if (stream is null)

@@ -40,7 +40,7 @@ namespace Avera.Application
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
             services.AddScoped<IMemberRequestNotifier, SignalRMemberRequestNotifier>();
-            services.AddScoped<ICaseNotifier, SignalRCaseNotifier>();
+            services.AddScoped<ICaseNotificationNotifier, SignalRCaseNotifier>();
 
             return services;
         }
