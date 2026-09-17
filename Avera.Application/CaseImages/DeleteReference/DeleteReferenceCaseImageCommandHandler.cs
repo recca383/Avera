@@ -2,6 +2,7 @@ using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Abstractions.Storage;
+using Avera.Domain.Application.CaseImages;
 using Avera.Domain.Application.Cases;
 using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.Users;
@@ -36,10 +37,19 @@ namespace Avera.Application.CaseImages.DeleteReference
                 .Include(c => c.CaseImages)
                 .FirstOrDefaultAsync(c => c.Id == command.CaseId, cancellationToken);
             
+            if (selectedCase == null)
+            {
+                return Result.Failure(CaseErrors.CaseNotFound);
+            }
+
             var CaseImageToDelete = selectedCase?.CaseImages
                 .FirstOrDefault(ci => ci.Type == Domain.Application.CaseImages.ImageType.Reference 
                                 && ci.Index == command.Index);
 
+            if (CaseImageToDelete == null)
+            {
+                return Result.Failure(CaseImageErrors.CaseImageNotFound);
+            }
             logger.LogInformation("Selected Case with Id: {CaseId} has {NumberOfImages} images. Image to delete: {ImageToDelete}", 
                 selectedCase!.Id, selectedCase.CaseImages.Count, CaseImageToDelete != null ? $"Id: {CaseImageToDelete.Id}, FileName: {CaseImageToDelete.FileName}" : "Not Found");
 

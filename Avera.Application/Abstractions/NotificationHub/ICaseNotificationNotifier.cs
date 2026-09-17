@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Avera.Application.Abstractions.NotificationHub
 {
-    internal interface ICaseNotifier
+    internal interface ICaseNotificationNotifier
     {
         Task NotifyReviewCompletedAsync(
             Guid analystUserId,
