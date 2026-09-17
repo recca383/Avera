@@ -11,6 +11,7 @@ namespace Avera.Infrastructure.Storage
     public class AzureBlobStorageService : IBlobStorageService
     {
         private readonly BlobContainerClient _containerClient;
+        private readonly BlobServiceClient _serviceClient;
 
         public AzureBlobStorageService(IConfiguration configuration)
         {
@@ -20,20 +21,23 @@ namespace Avera.Infrastructure.Storage
 
             var credential = new DefaultAzureCredential();
 
-            var blobServiceClient = new BlobServiceClient(new Uri(serviceUrl!), credential);
+            _serviceClient = new BlobServiceClient(new Uri(serviceUrl!), credential);
 
-            _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            _containerClient = _serviceClient.GetBlobContainerClient(containerName);
         }
         
-        public Task DeleteFolderAsync(string folderUrl, CancellationToken cancellationToken = default)
+        public async Task DeleteFolderAsync(string folderUrl, CancellationToken cancellationToken = default)
         {
-            if(!folderUrl.EndsWith('/'))
-            {
+            if (!folderUrl.EndsWith('/'))
                 folderUrl += "/";
-            }
 
-            var blobClient = _containerClient.GetBlobClient(folderUrl);
-            return blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+            var options = new GetBlobsOptions { Prefix = folderUrl };
+
+            await foreach (BlobItem blob in _containerClient.GetBlobsAsync(options))
+            {
+                await _containerClient.GetBlobClient(blob.Name)
+                    .DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);
+            }
         }
         public Task DeleteAsync(string fileUrl, CancellationToken cancellationToken = default)
         {

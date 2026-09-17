@@ -3,6 +3,7 @@ using System.Net.Mime;
 using Avera.Application.Abstractions.ML;
 using Avera.Application.ML.Health;
 using Avera.Application.ML.Process;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -37,13 +38,23 @@ namespace Avera.Infrastructure.ML
         public async Task<ProcessMLResponse> ProcessAsync(ProcessRequest request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Sending process request for Case with Name: {CaseName}", request.CaseName);
-            
-            var response = await _httpClient.PostAsJsonAsync("/process", request, cancellationToken);
 
-            response.EnsureSuccessStatusCode();
-            _logger.LogInformation("Received process response for Case with Name: {CaseName} with status: {Status}", request.CaseName, response.StatusCode);
-            return await response.Content.ReadFromJsonAsync<ProcessMLResponse>(cancellationToken) ?? 
-                   throw new InvalidOperationException("Failed to deserialize ML process response.");
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/process", request, cancellationToken);
+
+                response.EnsureSuccessStatusCode();
+
+                _logger.LogInformation("Received process response for Case with Name: {CaseName} with status: {Status}", request.CaseName, response.StatusCode);
+
+                return await response.Content.ReadFromJsonAsync<ProcessMLResponse>(cancellationToken) ??
+                       throw new InvalidOperationException("Failed to deserialize ML process response.");
+            }
+            catch (Exception)
+            {
+                throw new ApplicationException("Error on Processing in ML Api");
+            }
         }
     }
 }

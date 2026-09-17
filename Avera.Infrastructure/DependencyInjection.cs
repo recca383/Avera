@@ -1,10 +1,7 @@
-﻿using System.Net;
-using System.Net.Mail;
-using System.Security.Claims;
-using System.Text;
-using Avera.Application.Abstractions.Authentication;
+﻿using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Databases;
 using Avera.Application.Abstractions.ML;
+using Avera.Application.Abstractions.NotificationHub;
 using Avera.Application.Abstractions.Services;
 using Avera.Application.Abstractions.Storage;
 using Avera.Domain.Identity.Roles;
@@ -15,6 +12,7 @@ using Avera.Infrastructure.Configuration;
 using Avera.Infrastructure.Database.Application;
 using Avera.Infrastructure.Database.Identity;
 using Avera.Infrastructure.ML;
+using Avera.Infrastructure.Notifications;
 using Avera.Infrastructure.Services;
 using Avera.Infrastructure.Storage;
 using Avera.Infrastructure.Time;
@@ -30,6 +28,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using SharedKernel;
+using System.Net;
+using System.Net.Mail;
+using System.Security.Claims;
+using System.Text;
 
 namespace Avera.Infrastructure
 {
@@ -71,6 +73,7 @@ namespace Avera.Infrastructure
                 .AddRazorRenderer();
                 
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IMemberRequestNotifier, SignalRMemberRequestNotifier>();
             return services;
         }
 
