@@ -9,6 +9,7 @@ using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.TenantSubscriptions;
 using Avera.Domain.Identity.Users;
 using Infrastructure.DomainEvents;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
@@ -16,7 +17,8 @@ namespace Avera.Infrastructure.Database.Application
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
      IDomainEventsDispatcher domainEventsDispatcher,
-     IUserContext userContext)
+     IUserContext userContext,
+     UserManager<User> userManager)
     : DbContext(options), IApplicationDbContext
     {
         public DbSet<Case> Cases { get; set; }
@@ -29,13 +31,40 @@ namespace Avera.Infrastructure.Database.Application
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly,
             type => type.Namespace == "Avera.Infrastructure.Database.Application.Configurations");
-            
+
             //modelBuilder.HasDefaultSchema(Schemas.Default);
 
-            modelBuilder.Entity<Case>().HasQueryFilter(c => c.TenantId == userContext.TenantId);
-            modelBuilder.Entity<CaseImage>().HasQueryFilter(c => c.Case.TenantId == userContext.TenantId);
-            modelBuilder.Entity<GradCamImage>().HasQueryFilter(c => c.Case.TenantId == userContext.TenantId);
-            modelBuilder.Entity<ExportedReport>().HasQueryFilter(c => c.Case.TenantId == userContext.TenantId);
+            modelBuilder.Entity<Case>()
+            .HasQueryFilter(c =>
+                c.TenantId == userContext.TenantId &&
+                (
+                    !userContext.IsUser ||
+                    c.CreatedByUserId == userContext.UserId
+                ));
+
+            modelBuilder.Entity<CaseImage>()
+                .HasQueryFilter(c =>
+                c.Case.TenantId == userContext.TenantId &&
+                (
+                    !userContext.IsUser ||
+                    c.Case.CreatedByUserId == userContext.UserId
+                ));
+
+            modelBuilder.Entity<GradCamImage>()
+                .HasQueryFilter(c =>
+                c.Case.TenantId == userContext.TenantId &&
+                (
+                    !userContext.IsUser ||
+                    c.Case.CreatedByUserId == userContext.UserId
+                ));
+
+            modelBuilder.Entity<ExportedReport>()
+                .HasQueryFilter(c =>
+                c.Case.TenantId == userContext.TenantId &&
+                (
+                    !userContext.IsUser ||
+                    c.Case.CreatedByUserId == userContext.UserId
+                ));
 
             modelBuilder.Ignore<User>();
             modelBuilder.Ignore<Tenant>();

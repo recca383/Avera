@@ -47,5 +47,12 @@ namespace Avera.Infrastructure.Authentication
                 .User
                 .GetSecurityStamp() ??
                 throw new ApplicationException("Invalid Token, please log in again");
+
+        public bool IsUser =>
+            httpContextAccessor
+                .HttpContext?
+                .User
+                .IsUser() ??
+                throw new ApplicationException("Roles context is unavailable");
     }
 }

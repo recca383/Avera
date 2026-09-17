@@ -47,5 +47,16 @@ namespace Avera.Infrastructure.Authentication
         {
             return principal?.FindFirstValue("SecurityStamp")!;
         }
+
+        public static bool IsUser(this ClaimsPrincipal? principal)
+        {
+            var roles = principal?.FindAll(ClaimTypes.Role)
+               .Select(c => c.Value)
+               .ToList();
+
+            return roles is { Count: > 0 } &&
+                   roles.All(role => role == "User");
+
+        }
     }
 }
