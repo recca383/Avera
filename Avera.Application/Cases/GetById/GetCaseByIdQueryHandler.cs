@@ -15,7 +15,6 @@ namespace Avera.Application.Cases.GetById
         IUserContext userContext,
         UserManager<User> userManager) : IQueryHandler<GetCaseByIdQuery, GetCaseByIdQueryResult>
     {
-        private const bool IS_CASE_DELETED = false;
         public async Task<Result<GetCaseByIdQueryResult>> Handle(GetCaseByIdQuery query, CancellationToken cancellationToken)
         {
             if (userContext.TenantId == null)
@@ -29,6 +28,7 @@ namespace Avera.Application.Cases.GetById
             var queryResult = await dbContext.Cases
                         .Where(c => 
                             c.Id == query.CaseId)
+                        .Include(c => c.GradCamImages)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if(queryResult == null)

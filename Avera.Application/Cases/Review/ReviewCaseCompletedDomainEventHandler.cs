@@ -10,7 +10,7 @@ using System.Text;
 namespace Avera.Application.Cases.Review
 {
     internal sealed class ReviewCaseCompletedDomainEventHandler(
-        ICaseNotifier caseNotifier
+        ICaseNotificationNotifier caseNotifier
         ) : IDomainEventHandler<CaseReviewCompletedDomainEvent>
     {
         public async Task Handle(CaseReviewCompletedDomainEvent domainEvent, CancellationToken cancellationToken)

@@ -11,7 +11,7 @@ namespace Avera.Application.Cases.Notifications
     public sealed class SignalRCaseNotifier(
     IHubContext<NotificationHub> hubContext,
     ILogger<SignalRCaseNotifier> logger)
-    : ICaseNotifier
+    : ICaseNotificationNotifier
     {
         public async Task NotifyReviewCompletedAsync(
             Guid analystUserId,
