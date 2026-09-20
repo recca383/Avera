@@ -218,6 +218,42 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
+        public async Task<Result> UnsuspendUserAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user is null)
+                return Result.Failure(UserErrors.UserNotFound);
+
+            // Ensure user belongs to the same tenant as the caller
+            if (user.TenantId != _userContext.TenantId)
+            {
+                return Result.Failure(TenantErrors.UserNotInTenant);
+            }
+
+            if (!user.IsSuspended)
+                return Result.Failure(UserErrors.NotSuspended);
+
+            user.IsSuspended = false;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                return HandleIdentityResult(result);
+
+            // Notify the user that they have been unsuspended
+            await domainEventsDispatcher.DispatchAsync(new IDomainEvent[] {
+                new Avera.Domain.Identity.Users.Events.UserUnsuspendedDomainEvent(
+                    user.Id,
+                    user.TenantId,
+                    DateTime.UtcNow)
+            }, cancellationToken);
+
+            await _userManager.UpdateSecurityStampAsync(user);
+
+            return Result.Success();
+        }
+
         public async Task<Result> SuspendUserAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());

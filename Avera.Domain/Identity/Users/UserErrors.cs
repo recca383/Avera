@@ -104,6 +104,12 @@ namespace Avera.Domain.Identity.Users
             ErrorType.Conflict
         );
 
+        public static UserErrors NotSuspended => new UserErrors(
+            "User.NotSuspended",
+            "User is not suspended",
+            ErrorType.Validation
+        );
+
         // Failure Errors
 
         public static UserErrors PasswordResetFailed => new UserErrors(
