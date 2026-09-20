@@ -32,6 +32,9 @@ using System.Net;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
+using Polly;
+using Polly.Extensions.Http;
+using System.Net.Http;
 
 namespace Avera.Infrastructure
 {
@@ -55,7 +58,18 @@ namespace Avera.Infrastructure
         
         private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddScoped<IMLService, MLService>();    
+            // Configure MLService as a typed HttpClient with resilience policies
+            services.AddHttpClient<IMLService, MLService>(client =>
+            {
+                client.BaseAddress = new Uri(configuration["MLApi:Uri"]!);
+                client.DefaultRequestHeaders.Add(Microsoft.Net.Http.Headers.HeaderNames.Accept, System.Net.Mime.MediaTypeNames.Application.Json);
+            })
+            .AddPolicyHandler(HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
+            .AddPolicyHandler(HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .CircuitBreakerAsync(2, TimeSpan.FromSeconds(30)));
             services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
@@ -75,6 +89,7 @@ namespace Avera.Infrastructure
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IMemberRequestNotifier, SignalRMemberRequestNotifier>();
             services.AddScoped<IUserNotificationNotifier, SignalRUserNotifier>();
+            services.AddScoped<INotificationHubNotifier, NotificationHubNotifier>();
             return services;
         }
 

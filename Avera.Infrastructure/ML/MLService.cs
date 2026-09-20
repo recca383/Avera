@@ -16,11 +16,8 @@ namespace Avera.Infrastructure.ML
         private readonly HttpClient _httpClient;
         private readonly ILogger<MLService> _logger;
 
-        public MLService(HttpClient httpClient, IConfiguration configuration, ILogger<MLService> logger)
+        public MLService(HttpClient httpClient, ILogger<MLService> logger)
         {
-            httpClient.BaseAddress = new Uri(configuration["MLApi:Uri"]!);
-            httpClient.DefaultRequestHeaders.Add(HeaderNames.Accept, MediaTypeNames.Application.Json);
-
             _httpClient = httpClient;
             _logger = logger;
         }
@@ -51,9 +48,10 @@ namespace Avera.Infrastructure.ML
                 return await response.Content.ReadFromJsonAsync<ProcessMLResponse>(cancellationToken) ??
                        throw new InvalidOperationException("Failed to deserialize ML process response.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ApplicationException("Error on Processing in ML Api");
+                _logger.LogError(ex, "MLService.ProcessAsync failed for Case {CaseName}", request.CaseName);
+                throw new ApplicationException("Error on Processing in ML Api", ex);
             }
         }
     }

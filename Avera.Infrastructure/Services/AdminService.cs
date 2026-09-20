@@ -200,6 +200,9 @@ namespace Avera.Infrastructure.Services
             if (!result.Succeeded)
                 return HandleIdentityResult(result);
 
+            // Persist any identity changes to the identity DB context
+            await _identityDbContext.SaveChangesAsync(cancellationToken);
+
             // Notify the user that they have been removed before invalidating session
             await domainEventsDispatcher.DispatchAsync(new IDomainEvent[] {
                 new Avera.Domain.Identity.Users.Events.UserRemovedFromTenantDomainEvent(
@@ -305,7 +308,22 @@ namespace Avera.Infrastructure.Services
 
             tenant!.Name = newName;
 
+            var oldName = tenant.Name;
+
+            tenant.Name = newName;
+
             await _identityDbContext.SaveChangesAsync(cancellationToken);
+
+            // Raise domain event so notifiers (SignalR) can broadcast tenant rename
+            await domainEventsDispatcher.DispatchAsync(new SharedKernel.IDomainEvent[]
+            {
+                new Avera.Domain.Identity.Tenants.Events.TenantRenamedDomainEvent(
+                    tenant.Id,
+                    oldName,
+                    newName,
+                    _userContext.UserId,
+                    DateTime.UtcNow)
+            }, cancellationToken);
 
             return Result.Success();
         }

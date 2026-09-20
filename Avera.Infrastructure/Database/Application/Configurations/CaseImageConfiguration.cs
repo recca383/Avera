@@ -13,6 +13,8 @@ namespace Avera.Infrastructure.Database.Application.Configurations
             
             builder.HasIndex(ci => ci.CaseId);
             builder.HasIndex(ci => ci.UploadedAt);
+            // Prevent duplicate images for same case + type + index
+            builder.HasIndex(ci => new { ci.CaseId, ci.Type, ci.Index }).IsUnique();
             
             builder.HasOne<Case>(ci => ci.Case)
                 .WithMany(c => c.CaseImages)
