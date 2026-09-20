@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Serilog;
 using SharedKernel;
+using Infrastructure.DomainEvents;
 using System.Net.WebSockets;
 using System.Reflection.Metadata;
 using System.Security.Cryptography.Pkcs;
@@ -40,7 +41,8 @@ namespace Avera.Infrastructure.Services
             IUserContext _userContext,
             IMemberRequestNotifier memberRequestNotifier,
             IDateTimeProvider dateTime,
-            IOptions<AppOptions> appOptions
+            IOptions<AppOptions> appOptions,
+            IDomainEventsDispatcher domainEventsDispatcher
         ) : IAuthenticationService
     {
         private static readonly ILogger Logger = Log.ForContext<AuthenticationService>();
@@ -269,6 +271,16 @@ namespace Avera.Infrastructure.Services
                 return Result.Failure<Result>(UserErrors.UserNotFound);
             }
 
+            var tenantId = user.TenantId;
+
+            // Notify admins (if any) that the user deleted their account
+            await domainEventsDispatcher.DispatchAsync(new IDomainEvent[] {
+                new Avera.Domain.Identity.Users.Events.UserDeletedDomainEvent(
+                    user.Id,
+                    tenantId,
+                    DateTime.UtcNow)
+            }, cancellationToken);
+
             var result = await _userManager.DeleteAsync(user);
 
             if(!result.Succeeded)
@@ -317,19 +329,15 @@ namespace Avera.Infrastructure.Services
 
             await identityDbContext.MemberRequests.AddAsync(memberRequest, cancellationToken);
 
-            await identityDbContext.SaveChangesAsync(cancellationToken);
-
-            var memberRequestCreated = new MemberRequestCreatedNotification(
+            // Raise domain event so notification is dispatched through the domain event pipeline
+            memberRequest.Raise(new Avera.Domain.Identity.MemberRequests.Events.MemberRequestCreatedDomainEvent(
                 memberRequest.Id,
+                memberRequest.TenantId,
                 memberRequest.UserId,
-                user.FirstName!,
-                user.LastName!,
-                user.Email!,
-                tenant.Id,
                 memberRequest.CreatedAt
-            );
+            ));
 
-            await memberRequestNotifier.NotifyMemberRequestCreatedAsync(memberRequestCreated, cancellationToken);
+            await identityDbContext.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

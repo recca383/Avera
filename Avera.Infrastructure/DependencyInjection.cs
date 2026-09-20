@@ -74,6 +74,7 @@ namespace Avera.Infrastructure
                 
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IMemberRequestNotifier, SignalRMemberRequestNotifier>();
+            services.AddScoped<IUserNotificationNotifier, SignalRUserNotifier>();
             return services;
         }
 

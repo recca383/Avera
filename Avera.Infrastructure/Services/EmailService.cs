@@ -336,7 +336,6 @@ namespace Avera.Infrastructure.Services
                    {
                        Header = HEADER_REFERENCE,
                        FirstName = firstName,
-                       AppUrl = appUrl,
                        EmailAddress = recipient,
                        CurrentYear = CURRENT_YEAR,
                    })

@@ -11,6 +11,7 @@ using Avera.Infrastructure.Identity.Tenants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
+using Infrastructure.DomainEvents;
 using System.Security.Cryptography;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -22,7 +23,8 @@ namespace Avera.Infrastructure.Services
         IIdentityDbContext _identityDbContext,
         JwtProvider jwtProvider,
         IApplicationDbContext _applicationDbContext,
-        IDateTimeProvider dateTime
+        IDateTimeProvider dateTime,
+        IDomainEventsDispatcher domainEventsDispatcher
     ) : IAdminService
     {
         private const int INVITECODELENGTH = 8;
@@ -190,12 +192,22 @@ namespace Avera.Infrastructure.Services
                 return Result.Failure(TenantErrors.UserNotInTenant);
 
             // Remove the user from the tenant
+            var previousTenantId = user.TenantId;
             user.TenantId = null;
 
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
                 return HandleIdentityResult(result);
+
+            // Notify the user that they have been removed before invalidating session
+            await domainEventsDispatcher.DispatchAsync(new IDomainEvent[] {
+                new Avera.Domain.Identity.Users.Events.UserRemovedFromTenantDomainEvent(
+                    user.Id,
+                    previousTenantId ?? Guid.Empty,
+                    _userContext.UserId,
+                    DateTime.UtcNow)
+            }, cancellationToken);
 
             // Invalidate the user's security stamp to force re-authentication
             await _userManager.UpdateSecurityStampAsync(user);
@@ -218,6 +230,14 @@ namespace Avera.Infrastructure.Services
             {
                 return HandleIdentityResult(result);
             }
+
+            // Dispatch domain event to notify the user first
+            await domainEventsDispatcher.DispatchAsync(new IDomainEvent[] {
+                new Avera.Domain.Identity.Users.Events.UserSuspendedDomainEvent(
+                    user.Id,
+                    user.TenantId,
+                    DateTime.UtcNow)
+            }, cancellationToken);
 
             await _userManager.UpdateSecurityStampAsync(user);
 
