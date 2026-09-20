@@ -31,6 +31,6 @@ internal sealed class UserUnsuspendedDomainEventHandler : SharedKernel.IDomainEv
 
         // Use the user notifier to send unsuspend message. If a dedicated method exists, it will be used via interface implementation.
         // Fallback to NotifyUserSuspendedAsync is not desired; instead send a UserRemoved/UserDeleted style where appropriate.
-        await _userNotifier.NotifyUserSuspendedAsync(new UserSuspendedNotification(domainEvent.UserId, domainEvent.TenantId, domainEvent.UnsuspendedAt, ""), cancellationToken);
+        await _userNotifier.NotifyUserUnsuspendedAsync(new UserUnsuspendedNotification(unsuspendedNotification.UserId, unsuspendedNotification.TenantId, unsuspendedNotification.UnsuspendedAt, unsuspendedNotification.Message), cancellationToken);
     }
 }

@@ -17,6 +17,8 @@ internal sealed class UnsuspendUser : IEndpoint
         {
             var result = await handler.Handle(new UnsuspendUserCommand(UserId), cancellationToken);
             return result.Match(Results.NoContent, CustomResults.Problem);
-        });
+        })
+        .RequireAuthorization(RolePolicy.Admin)
+        .WithTags(Tags.OrgAdmin);
     }
 }

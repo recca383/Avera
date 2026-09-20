@@ -10,5 +10,7 @@ namespace Avera.Application.Abstractions.NotificationHub
         Task NotifyUserRemovedAsync(UserRemovedNotification notification, CancellationToken cancellationToken = default);
 
         Task NotifyUserDeletedAsync(UserDeletedNotification notification, CancellationToken cancellationToken = default);
+
+        Task NotifyUserUnsuspendedAsync(UserUnsuspendedNotification notification, CancellationToken cancellationToken = default);
     }
 }

@@ -35,5 +35,13 @@ namespace Avera.Infrastructure.Notifications
                     .SendAsync("UserDeleted", notification, cancellationToken);
             }
         }
+
+        public async Task NotifyUserUnsuspendedAsync(UserUnsuspendedNotification notification, CancellationToken cancellationToken = default)
+        {
+            await hubContext
+                .Clients
+                .Group($"user:{notification.UserId}")
+                .SendAsync("UserUnsuspended", notification, cancellationToken);
+        }
     }
 }
