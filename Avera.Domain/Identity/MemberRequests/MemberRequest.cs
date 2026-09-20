@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Avera.Domain.Identity.MemberRequests
 {
-    public class MemberRequest
+    public class MemberRequest : SharedKernel.Entity
     {
         public MemberRequest(Guid UserRequestedId, Guid TenantRequestedToId)
         {

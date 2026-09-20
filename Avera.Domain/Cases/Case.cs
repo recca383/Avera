@@ -26,7 +26,9 @@ namespace Avera.Domain.Application.Cases
         public FinalVerdict FinalVerdict { get; set; } = FinalVerdict.None;
         public bool IsPdfExportAllowed { get; set; } = false;
         public MLResponse? MLResponse { get; set; }
-
+        public bool IsFlaggedForInternalReview { get; set; } = false;
+        public Guid? ToggledByUserId { get; set; }
+        public DateTime? ToggledAt { get; set; }
 
         // Navigation Properties
         public Guid CreatedByUserId { get; set; }
@@ -51,6 +53,11 @@ namespace Avera.Domain.Application.Cases
             FinalVerdict = finalVerdict;
             IsPdfExportAllowed = isPdfExportAllowed;
             Status = Status.Reviewed;
+        }
+
+        public void ToggleFlag(Guid toggledByUserId, bool isFlagged, DateTime toggledAt)
+        {
+            IsFlaggedForInternalReview = isFlagged;
         }
     }
 }
