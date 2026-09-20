@@ -19,6 +19,11 @@ namespace Avera.Application.Abstractions.Authentication
             CancellationToken cancellationToken = default
         );
 
+        Task<Result> UnsuspendUserAsync(
+            Guid userId,
+            CancellationToken cancellationToken = default
+        );
+
         Task<Result<List<TenantMemberDto>>> GetMembersAsync(
             bool? IsAlphabetical,
             bool? IsMostCases,
