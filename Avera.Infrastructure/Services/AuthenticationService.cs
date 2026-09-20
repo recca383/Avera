@@ -178,7 +178,8 @@ namespace Avera.Infrastructure.Services
                 Email = request.Email,
                 UserName = request.Email,
                 FirstName = request.FirstName,
-                LastName = request.LastName
+                LastName = request.LastName,
+                DailyCaseLimit = 5
             };
 
             Logger.Information("Creating identity user {UserName} for email {Email}", user.UserName, user.Email);
