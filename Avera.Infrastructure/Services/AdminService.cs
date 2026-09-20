@@ -104,7 +104,8 @@ namespace Avera.Infrastructure.Services
                     user.Email!,
                     role,
                     user.IsSuspended,
-                    caseHandled));
+                    caseHandled,
+                    user.DailyCaseLimit!));
         }
 
         public async Task<Result<List<TenantMemberDto>>> GetMembersAsync(
@@ -158,7 +159,8 @@ namespace Avera.Infrastructure.Services
                     user.Email!,
                     role,
                     user.IsSuspended,
-                    casesHandled));
+                    casesHandled,
+                    user.DailyCaseLimit));
             }
 
             if (IsAlphabetical.HasValue)
@@ -228,7 +230,8 @@ namespace Avera.Infrastructure.Services
             if (user.TenantId != _userContext.TenantId)
                 return Result.Failure(TenantErrors.UserNotInTenant);
 
-            user.DailyCaseLimit = dailyLimit;
+            // If dailyLimit is null, reset to default (5)
+            user.DailyCaseLimit = dailyLimit ?? 5;
 
             var result = await _userManager.UpdateAsync(user);
 

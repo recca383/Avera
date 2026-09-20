@@ -31,10 +31,10 @@ namespace Avera.Application.Cases.Create
             if (user is null)
                 return Result.Failure<Case>(UserErrors.UserNotFound);
 
-            if (user.DailyCaseLimit.HasValue)
+            if (user.DailyCaseLimit > 0)
             {
                 var todayCount = await dbContext.Cases.CountAsync(c => c.CreatedByUserId == user.Id && c.CreatedAt.Date == dateTime.PhilippineNow.Date, cancellationToken);
-                if (todayCount >= user.DailyCaseLimit.Value)
+                if (todayCount >= user.DailyCaseLimit)
                 {
                     return Result.Failure<Case>(new SharedKernel.Error("User.DailyLimitReached", "Daily case creation limit reached", SharedKernel.ErrorType.Conflict));
                 }

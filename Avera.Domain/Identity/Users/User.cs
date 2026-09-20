@@ -9,8 +9,8 @@ namespace Avera.Domain.Identity.Users
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public bool IsSuspended { get; set; } = false;
-        // Optional per-user daily case creation cap. Null means no limit.
-        public int? DailyCaseLimit { get; set; }
+        // Per-user daily case creation cap. Defaults to 5 per day.
+        public int DailyCaseLimit { get; set; } = 5;
 
         // Navigation 
         public List<Notification> Notifications { get; set; } = new();

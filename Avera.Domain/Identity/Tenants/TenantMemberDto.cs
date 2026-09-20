@@ -7,6 +7,7 @@ namespace Avera.Domain.Identity.Tenants
     string Email,
     string Role,
     bool IsSuspended,
-    int CasesHandled
+    int CasesHandled,
+    int DailyCaseLimit
 );
 }
