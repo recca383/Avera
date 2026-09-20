@@ -22,6 +22,8 @@ namespace Avera.Application.Cases
         string? ReviewNote,
         FinalVerdict? FinalVerdict,
         bool IsPdfExportAllowed
+        ,
+        bool ResultViewed
     );
 
 }

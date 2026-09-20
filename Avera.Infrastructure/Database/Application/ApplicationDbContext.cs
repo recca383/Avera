@@ -26,6 +26,7 @@ namespace Avera.Infrastructure.Database.Application
         public DbSet<GradCamImage> GradCamImages { get; set; }
         public DbSet<ExportedReport> ExportedReports { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Avera.Domain.Application.CaseViews.CaseView> CaseViews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

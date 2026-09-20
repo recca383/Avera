@@ -19,6 +19,7 @@ namespace Avera.Application.Abstractions.Databases
         DbSet<ExportedReport> ExportedReports {get; set; }
         DbSet<Notification> Notifications { get; set; }
         DbSet<GradCamImage> GradCamImages { get; set; }
+        DbSet<Avera.Domain.Application.CaseViews.CaseView> CaseViews { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

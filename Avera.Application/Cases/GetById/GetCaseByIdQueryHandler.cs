@@ -58,6 +58,8 @@ namespace Avera.Application.Cases.GetById
                 );
             }
 
+            var IsCaseViewed = await dbContext.CaseViews.AnyAsync(c => c.CaseId == queryResult.Id, cancellationToken);
+
             var finalCase = new CaseDto(
                 queryResult.Id,
                 queryResult.CaseCode,
@@ -74,7 +76,8 @@ namespace Avera.Application.Cases.GetById
                 queryResult.ReviewedAt,
                 queryResult.ReviewNote,
                 queryResult.FinalVerdict,
-                queryResult.IsPdfExportAllowed
+                queryResult.IsPdfExportAllowed,
+                IsCaseViewed
             );
 
             return Result.Success(new GetCaseByIdQueryResult(finalCase!));

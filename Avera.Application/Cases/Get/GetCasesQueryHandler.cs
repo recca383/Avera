@@ -21,6 +21,7 @@ namespace Avera.Application.Cases.Get
     {
         private static readonly ILogger logger = Log.ForContext<GetCaseQueryHandler>();
         private const bool IS_CASE_DELETED = false;
+        // noop to trigger rebuild
         public async Task<Result<GetCasesQueryResult>> Handle(GetCasesQuery query, CancellationToken cancellationToken)
         {
             if (userContext.TenantId == null)
@@ -82,6 +83,9 @@ namespace Avera.Application.Cases.Get
                     );
                 }
 
+                // determine if the current user has viewed this case result
+                var hasViewed = await applicationDbContext.CaseViews.AnyAsync(cv => cv.CaseId == pagedCase.Id && cv.UserId == userContext.UserId, cancellationToken);
+
                 var finalCase = new CaseDto(
                     pagedCase.Id,
                     pagedCase.CaseCode,
@@ -98,7 +102,8 @@ namespace Avera.Application.Cases.Get
                     pagedCase.ReviewedAt,
                     pagedCase.ReviewNote,
                     pagedCase.FinalVerdict,
-                    pagedCase.IsPdfExportAllowed
+                    pagedCase.IsPdfExportAllowed,
+                    hasViewed
                 );
 
                 pagedCasesList.Add(finalCase);
