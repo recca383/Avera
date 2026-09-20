@@ -218,6 +218,28 @@ namespace Avera.Infrastructure.Services
             return Result.Success();
         }
 
+        public async Task<Result> SetUserDailyCaseLimitAsync(Guid userId, int? dailyLimit, CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user is null)
+                return Result.Failure(UserErrors.UserNotFound);
+
+            if (user.TenantId != _userContext.TenantId)
+                return Result.Failure(TenantErrors.UserNotInTenant);
+
+            user.DailyCaseLimit = dailyLimit;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                return HandleIdentityResult(result);
+
+            await _identityDbContext.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
+
         public async Task<Result> UnsuspendUserAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());

@@ -37,5 +37,10 @@ namespace Avera.Application.Abstractions.Authentication
         Task<Result> RenameOrganization(
             string newName,
             CancellationToken cancellationToken = default);
+
+        Task<Result> SetUserDailyCaseLimitAsync(
+            Guid userId,
+            int? dailyLimit,
+            CancellationToken cancellationToken = default);
     }
 }

@@ -68,6 +68,17 @@ internal sealed class CaseCreationQueue : ICaseCreationQueue, IDisposable
                     continue;
                 }
 
+                // Enforce per-user daily creation limit if set
+                if (user.DailyCaseLimit.HasValue)
+                {
+                    var todayCount = await db.Cases.CountAsync(c => c.CreatedByUserId == user.Id && c.CreatedAt.Date == dateTime.PhilippineNow.Date, CancellationToken.None);
+                    if (todayCount >= user.DailyCaseLimit.Value)
+                    {
+                        item.Tcs.SetResult(Result.Failure<Domain.Application.Cases.Case>(new SharedKernel.Error("User.DailyLimitReached", "Daily case creation limit reached", SharedKernel.ErrorType.Conflict)));
+                        continue;
+                    }
+                }
+
                 // Generate case code deterministically under lock (single reader provides sequencing)
                 var newCase = new Domain.Application.Cases.Case()
                 {
