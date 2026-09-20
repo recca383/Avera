@@ -40,6 +40,7 @@ namespace Avera.WebApi.Endpoints.Auth
                     email = user.Email,
                     role = roles.FirstOrDefault() ?? string.Empty,
                     organization = organization ?? string.Empty,
+                    dailyCaseLimit = user.DailyCaseLimit,
                     avatarUri = (string?)null
                 });
             })

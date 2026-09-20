@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SharedKernel;
+using Avera.Application.Abstractions.Queues;
 
 namespace Avera.Application.Cases.Create
 {
@@ -24,8 +25,22 @@ namespace Avera.Application.Cases.Create
         
         public async Task<Result<Case>> Handle(CreateCaseCommand command, CancellationToken cancellationToken)
         {
+            // Early-enforce user's daily limit to avoid enqueueing if already reached.
+            var user = await userManager.FindByIdAsync(userContext.UserId.ToString());
+
+            if (user is null)
+                return Result.Failure<Case>(UserErrors.UserNotFound);
+
+            if (user.DailyCaseLimit.HasValue)
+            {
+                var todayCount = await dbContext.Cases.CountAsync(c => c.CreatedByUserId == user.Id && c.CreatedAt.Date == dateTime.PhilippineNow.Date, cancellationToken);
+                if (todayCount >= user.DailyCaseLimit.Value)
+                {
+                    return Result.Failure<Case>(new SharedKernel.Error("User.DailyLimitReached", "Daily case creation limit reached", SharedKernel.ErrorType.Conflict));
+                }
+            }
+
             // Enqueue creation to preserve ordering of case codes when multiple requests arrive concurrently
-            // Resolve ICaseCreationQueue from DI via the handler's constructor services
             var queue = (Avera.Application.Abstractions.Queues.ICaseCreationQueue)AppServices.ServiceProvider.GetService(typeof(Avera.Application.Abstractions.Queues.ICaseCreationQueue))!;
 
             var result = await queue.EnqueueAsync(command, userContext.UserId, userContext.TenantId, cancellationToken);
