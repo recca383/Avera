@@ -47,18 +47,33 @@ namespace Avera.Application.ML.Process
                 return Result.Failure<ProcessResponse>(CaseErrors.CaseNotFound);
             }
 
-            logger.LogInformation("Selected Case with Id: {CaseId} has {NumberOfImages} images", selectedCase!.Id, selectedCase.CaseImages.Count);
+            logger.LogInformation("Selected Case with Id: {CaseId} has {NumberOfImages} images", selectedCase.Id, selectedCase.CaseImages.Count);
+
+            // Build deterministic image lists: take latest suspected image and up to 4 reference images ordered by index
+            var questionedImageUrl = selectedCase.CaseImages
+                                        .Where(ci => ci.Type == ImageType.Suspected)
+                                        .OrderByDescending(ci => ci.UploadedAt)
+                                        .Select(ci => ci.FileName)
+                                        .FirstOrDefault();
+
+            var referenceImageUrls = selectedCase.CaseImages
+                                        .Where(ci => ci.Type == ImageType.Reference)
+                                        .OrderBy(ci => ci.Index)
+                                        .Select(ci => ci.FileName)
+                                        .Take(4)
+                                        .ToList();
+
+            // Guard: require one suspected and four reference images before calling external ML service
+            if (string.IsNullOrEmpty(questionedImageUrl) || referenceImageUrls.Count < 4)
+            {
+                logger.LogWarning("Case {CaseId} does not have required images for ML processing. Suspect: {Suspect}, ReferenceCount: {RefCount}", selectedCase.Id, questionedImageUrl, referenceImageUrls.Count);
+                return Result.Failure<ProcessResponse>(CaseErrors.MLResultsNotFound);
+            }
+
             var processRequest = new ProcessRequest(
-                CaseName: selectedCase!.CaseCode,
-                QuestionedImageUrl: selectedCase.CaseImages
-                                    .Where(ci => ci.Type == ImageType.Suspected)
-                                    .Select(ci => ci.FileName)
-                                    .FirstOrDefault()!,
-                ReferenceImageUrls: selectedCase.CaseImages
-                                    .Where(ci => ci.Type == ImageType.Reference)
-                                    .OrderBy(ci => ci.Index)
-                                    .Select(ci => ci.FileName)
-                                    .ToList()
+                CaseName: selectedCase.CaseCode,
+                QuestionedImageUrl: questionedImageUrl,
+                ReferenceImageUrls: referenceImageUrls
             );
 
             logger.LogInformation("Sending process request for Case with Id: {CaseId}", selectedCase!.Id);  

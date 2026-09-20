@@ -40,6 +40,24 @@ namespace Avera.Application.CaseImages.UploadReference
                 return Result.Failure<Guid>(CaseErrors.CaseNotFound);
             }
 
+            // If an image already exists for this case/type/index, delete it first (upsert behavior)
+            var existingImage = selectedCase.CaseImages.FirstOrDefault(ci => ci.Type == ImageType.Reference && ci.Index == command.Index);
+
+            if (existingImage != null)
+            {
+                try
+                {
+                    await blobStorage.DeleteAsync(existingImage.BlobName, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to delete existing blob {Blob} before replacing", existingImage.BlobName);
+                }
+
+                selectedCase.CaseImages.Remove(existingImage);
+                applicationDbContext.CaseImages.Remove(existingImage);
+            }
+
             var newImage = new CaseImage
             {
                 Id = Guid.NewGuid(),

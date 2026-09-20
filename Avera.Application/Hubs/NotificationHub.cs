@@ -36,6 +36,10 @@ namespace Avera.Application.Hubs
                         Context.ConnectionId,
                         $"tenant:{tenantId}:admins");
                 }
+                // Add all connected members to a tenant-wide members group so we can broadcast tenant events
+                await Groups.AddToGroupAsync(
+                    Context.ConnectionId,
+                    $"tenant:{tenantId}:members");
             }
 
             await base.OnConnectedAsync();
