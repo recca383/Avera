@@ -90,6 +90,7 @@ namespace Avera.Infrastructure
             services.AddScoped<IMemberRequestNotifier, SignalRMemberRequestNotifier>();
             services.AddScoped<IUserNotificationNotifier, SignalRUserNotifier>();
             services.AddScoped<INotificationHubNotifier, NotificationHubNotifier>();
+            services.AddSingleton<Avera.Application.Abstractions.Queues.ICaseCreationQueue, Avera.Infrastructure.Queues.CaseCreationQueue>();
             return services;
         }
 

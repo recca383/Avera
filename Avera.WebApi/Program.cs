@@ -30,7 +30,10 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
 
-var app = builder.Build();
+            var app = builder.Build();
+
+            // Populate AppServices.ServiceProvider so command handlers can resolve services when necessary
+            Avera.Application.Infrastructure.AppServices.ServiceProvider = app.Services;
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
