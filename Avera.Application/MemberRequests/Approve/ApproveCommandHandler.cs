@@ -53,17 +53,18 @@ namespace Avera.Application.MemberRequests.Approve
 
             await userManager.AddToRoleAsync(user, "User");
 
+            // Raise domain event so notifications and emails are handled by event handlers
+            request.Raise(new Avera.Domain.Identity.MemberRequests.Events.MemberRequestApprovedDomainEvent(
+                request.Id,
+                request.TenantId,
+                request.UserId,
+                reviewedByUserId,
+                request.ReviewedAt ?? dateTime.PhilippineNow
+            ));
+
             await identityDbContext.SaveChangesAsync(cancellationToken);
 
             await userManager.UpdateSecurityStampAsync(user);
-            
-            // Move to Domain Event
-            await emailService.SendRequestApprovedAsync(
-                user.Email!,
-                user.FirstName!,
-                tenant!.Name,
-                admin!.FirstName + " " + admin.LastName,
-                cancellationToken);
 
             return Result.Success();
         }

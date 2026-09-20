@@ -10,5 +10,13 @@ namespace Avera.Application.Abstractions.NotificationHub
         Task NotifyMemberRequestCreatedAsync(
             MemberRequestCreatedNotification notification,
             CancellationToken cancellationToken = default);
+
+        Task NotifyMemberRequestApprovedAsync(
+            MemberRequestApprovedNotification notification,
+            CancellationToken cancellationToken = default);
+
+        Task NotifyMemberRequestRejectedAsync(
+            MemberRequestRejectedNotification notification,
+            CancellationToken cancellationToken = default);
     }
 }

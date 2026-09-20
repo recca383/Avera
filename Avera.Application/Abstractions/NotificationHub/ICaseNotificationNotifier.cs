@@ -11,5 +11,15 @@ namespace Avera.Application.Abstractions.NotificationHub
             Guid analystUserId,
             CaseReviewCompletedNotification notification,
             CancellationToken cancellation);
+
+        Task NotifyCaseResultCreatedAsync(
+            Guid tenantId,
+            NewCaseResultNotification notification,
+            CancellationToken cancellationToken);
+
+        Task NotifyCaseFlaggedAsync(
+            Guid caseOwnerUserId,
+            CaseFlaggedNotification notification,
+            CancellationToken cancellationToken);
     }
 }

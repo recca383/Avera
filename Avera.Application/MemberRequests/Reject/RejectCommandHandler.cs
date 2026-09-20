@@ -53,16 +53,16 @@ namespace Avera.Application.MemberRequests.Reject
 
             user.TenantId = request.TenantId;
 
-            await identityDbContext.SaveChangesAsync(cancellationToken);
+            // Raise domain event so notifications and emails are handled by event handlers
+            request.Raise(new Avera.Domain.Identity.MemberRequests.Events.MemberRequestRejectedDomainEvent(
+                request.Id,
+                request.TenantId,
+                request.UserId,
+                reviewedByUserId,
+                request.ReviewedAt ?? dateTime.PhilippineNow
+            ));
 
-            // Move to Domain Event
-            await emailService.SendRequestRejectedAsync(
-                user.Email!,
-                user.FirstName!,
-                tenant!.Name,
-                admin!.FirstName + " " + admin.LastName,
-                admin.Email!,
-                cancellationToken);
+            await identityDbContext.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

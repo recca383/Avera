@@ -122,6 +122,14 @@ namespace Avera.Application.ML.Process
 
             logger.LogInformation("Received process response for Case with Id: {CaseId} with status: {Status}", selectedCase!.Id, response);
 
+            // Raise domain event to notify tenant admins that a new case result is available
+            selectedCase.Raise(new Avera.Domain.Cases.Events.CaseResultCreatedDomainEvent(
+                selectedCase.Id,
+                selectedCase.TenantId!.Value,
+                userContext.UserId,
+                dateTime.PhilippineNow
+            ));
+
             await dbContext.SaveChangesAsync(cancellationToken);
             
             return processReponse;
