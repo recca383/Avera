@@ -1,4 +1,5 @@
 ﻿using Avera.Domain.Application.CaseImages;
+using Avera.Domain.Application.CaseViews;
 using Avera.Domain.Application.ExportedReports;
 using Avera.Domain.Application.OverlayImages;
 using Avera.Domain.Cases;
@@ -36,6 +37,7 @@ namespace Avera.Domain.Application.Cases
         public List<CaseImage> CaseImages { get; set; } = new();
         public List<ExportedReport> ExportedReports { get; set; } = new();
         public List<GradCamImage> GradCamImages { get; set; } = new();
+        public List<CaseView> CaseViews { get; set; }
 
         // Static Properties
         public static string OutputBlob => $"output.pdf";

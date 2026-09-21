@@ -8,6 +8,7 @@ namespace Avera.Domain.Identity.Tenants
     string Role,
     bool IsSuspended,
     int CasesHandled,
-    int DailyCaseLimit
+    int DailyCaseLimit,
+    DateTime? JoinedAt
 );
 }
