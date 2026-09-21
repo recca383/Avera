@@ -1,15 +1,16 @@
-using Avera.Application.Cases.Get;
-using SharedKernel;
-using Avera.Application.Abstractions.Databases;
-using Avera.Domain.Application.Cases;
-using Avera.Application.CaseImages;
-using Microsoft.EntityFrameworkCore;
-using Avera.Application.Abstractions.Messaging;
-using Serilog;
 using Avera.Application.Abstractions.Authentication;
-using Avera.Domain.Identity.Users;
+using Avera.Application.Abstractions.Databases;
+using Avera.Application.Abstractions.Messaging;
+using Avera.Application.CaseImages;
+using Avera.Application.Cases.Get;
+using Avera.Domain.Application.Cases;
 using Avera.Domain.Identity.Tenants;
+using Avera.Domain.Identity.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+using SharedKernel;
 
 namespace Avera.Application.Cases.Get
 {
@@ -58,7 +59,7 @@ namespace Avera.Application.Cases.Get
 
             List<CaseDto> pagedCasesList = new();
 
-            foreach(var pagedCase in pagedCases)
+            foreach (var pagedCase in pagedCases)
             {
                 var createdByUser = await userManager.FindByIdAsync(pagedCase.CreatedByUserId.ToString());
 
@@ -84,7 +85,6 @@ namespace Avera.Application.Cases.Get
                 }
 
                 // determine if the current user has viewed this case result
-                var hasViewed = await applicationDbContext.CaseViews.AnyAsync(cv => cv.CaseId == pagedCase.Id && cv.UserId == userContext.UserId, cancellationToken);
 
                 var finalCase = new CaseDto(
                     pagedCase.Id,
@@ -103,7 +103,7 @@ namespace Avera.Application.Cases.Get
                     pagedCase.ReviewNote,
                     pagedCase.FinalVerdict,
                     pagedCase.IsPdfExportAllowed,
-                    hasViewed
+                    pagedCase.CaseImages.Any()
                 );
 
                 pagedCasesList.Add(finalCase);
