@@ -105,7 +105,8 @@ namespace Avera.Infrastructure.Services
                     role,
                     user.IsSuspended,
                     caseHandled,
-                    user.DailyCaseLimit!));
+                    user.DailyCaseLimit!,
+                    null));
         }
 
         public async Task<Result<List<TenantMemberDto>>> GetMembersAsync(
@@ -160,7 +161,8 @@ namespace Avera.Infrastructure.Services
                     role,
                     user.IsSuspended,
                     casesHandled,
-                    user.DailyCaseLimit));
+                    user.DailyCaseLimit,
+                    null));
             }
 
             if (IsAlphabetical.HasValue)
