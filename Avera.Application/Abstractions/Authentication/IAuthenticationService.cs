@@ -1,3 +1,4 @@
+using Avera.Application.Authentication.Common;
 using Avera.Application.Authentication.Login;
 using Avera.Application.Authentication.Register;
 using SharedKernel;
@@ -16,7 +17,7 @@ namespace Avera.Application.Abstractions.Authentication
         Task<Result> LogoutAsync(
             Guid userId,
             CancellationToken cancellationToken = default);
-        Task<Result> ForgotPasswordAsync(
+        Task<Result<TokenExpiryResponse>> ForgotPasswordAsync(
             string email,
             CancellationToken cancellationToken = default);
         Task<Result> ResetPasswordAsync(
@@ -46,7 +47,7 @@ namespace Avera.Application.Abstractions.Authentication
             string token,
             CancellationToken cancellationToken
         );
-        Task<Result> ChangeEmailAsync(
+        Task<Result<TokenExpiryResponse>> ChangeEmailAsync(
             Guid userId,
             string newEmail,
             string currentPassword,
@@ -59,15 +60,19 @@ namespace Avera.Application.Abstractions.Authentication
             string token,
             CancellationToken cancellationToken = default);
 
-        Task<Result> ResendVerificationEmailAsync(
+        Task<Result<TokenExpiryResponse>> ResendVerificationEmailAsync(
             string email,
             CancellationToken cancellation = default
             );
 
-        Task<Result> ResendEmailChangeVerificationAsync(
+        Task<Result<TokenExpiryResponse>> ResendEmailChangeVerificationAsync(
             string email,
             string newEmail,
             CancellationToken cancellation = default
             );
+
+        Task<Result<bool>> GetEmailVerificationStatusAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
     }
 }

@@ -76,7 +76,9 @@ namespace Avera.Application.Cases.GetById
                 queryResult.ReviewedAt,
                 queryResult.ReviewNote,
                 queryResult.FinalVerdict,
+                
                 queryResult.IsPdfExportAllowed,
+                queryResult.IsFlaggedForInternalReview,
                 IsCaseViewed
             );
 

@@ -15,10 +15,9 @@ namespace Avera.Application.Authentication.ForgotPassword
     {
         public async Task<Result<TokenExpiryResponse>> Handle(ForgotPasswordCommand command, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-            //return await authenticationServices.ForgotPasswordAsync(
-            //   command.Email,
-            //   cancellationToken);
+            return await authenticationServices.ForgotPasswordAsync(
+               command.Email,
+               cancellationToken);
         }
     }
 }

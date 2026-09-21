@@ -4,6 +4,7 @@ using Avera.Application.Authentication.Common;
 using Avera.Application.Authentication.ForgotPassword;
 using Avera.WebApi.Extensions;
 using Avera.WebApi.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using SharedKernel;
 
 namespace Avera.WebApi.Endpoints.Auth
@@ -12,18 +13,22 @@ namespace Avera.WebApi.Endpoints.Auth
     {
         public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
         {
-            routeBuilder.MapPost("/auth/forgot-password", async (
-                ForgotPasswordCommand command,
-                ICommandHandler<ForgotPasswordCommand, TokenExpiryResponse> handler,
-                CancellationToken cancellationToken
-                ) =>
-            {
-                var result = await handler.Handle(command, cancellationToken);
+            routeBuilder.MapPost(
+                "/auth/forgot-password",
+                async (
+                    [FromBody] ForgotPasswordCommand command,
+                    ICommandHandler<ForgotPasswordCommand, TokenExpiryResponse> handler,
+                    CancellationToken cancellationToken) =>
+                {
+                    var result = await handler.Handle(
+                        command,
+                        cancellationToken);
 
-                return result.Match(Results.NoContent, CustomResults.Problem);
-            })
-           . WithTags(Tags.Auth)
-           ;
+                    return result.Match(
+                        Results.Ok,
+                        CustomResults.Problem);
+                })
+                .WithTags(Tags.Auth);
         }
     }
 }

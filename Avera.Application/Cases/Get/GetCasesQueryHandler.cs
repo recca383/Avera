@@ -103,6 +103,7 @@ namespace Avera.Application.Cases.Get
                     pagedCase.ReviewNote,
                     pagedCase.FinalVerdict,
                     pagedCase.IsPdfExportAllowed,
+                    pagedCase.IsFlaggedForInternalReview,
                     pagedCase.CaseImages.Any()
                 );
 

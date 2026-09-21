@@ -1,9 +1,10 @@
 ﻿using Avera.Application.Abstractions.Messaging;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Avera.Application.Authentication.Common;
 
-namespace Avera.Application.Authentication.ResendVerificationEmail
-{
-    public sealed record ResendVerificationEmailCommand(string Email, string? Type, string? NewEmail) : ICommand;
-}
+namespace Avera.Application.Authentication.ResendVerificationEmail;
+
+public sealed record ResendVerificationEmailCommand(
+    string Email,
+    string? Type,
+    string? NewEmail
+) : ICommand<TokenExpiryResponse>;

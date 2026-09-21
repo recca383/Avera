@@ -1,5 +1,7 @@
 ﻿using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Messaging;
+using Avera.Application.Authentication.Common;
+using Avera.Domain.Identity.Users;
 using SharedKernel;
 using System;
 using System.Collections.Generic;
@@ -9,16 +11,32 @@ namespace Avera.Application.Authentication.ResendVerificationEmail
 {
     internal sealed class ResendVerificationEmailCommandHandler(
          IAuthenticationService authenticationService)
-    : ICommandHandler<ResendVerificationEmailCommand>
+    : ICommandHandler<ResendVerificationEmailCommand, TokenExpiryResponse>
     {
-        public Task<Result> Handle(ResendVerificationEmailCommand command, CancellationToken cancellationToken)
+        public async Task<Result<TokenExpiryResponse>> Handle(
+        ResendVerificationEmailCommand command,
+        CancellationToken cancellationToken)
         {
-            if(command.Type == "change-email")
+            if (command.Type == "change-email")
             {
-                return authenticationService.ResendEmailChangeVerificationAsync(command.Email, command.NewEmail!, cancellationToken);
+                if (string.IsNullOrWhiteSpace(command.NewEmail))
+                {
+                    return Result.Failure<TokenExpiryResponse>(
+                        UserErrors.InvalidEmail);
+                }
+
+                return await authenticationService
+                    .ResendEmailChangeVerificationAsync(
+                        command.Email,
+                        command.NewEmail,
+                        cancellationToken);
             }
 
-            return authenticationService.ResendVerificationEmailAsync(command.Email, cancellationToken);
+            return await authenticationService
+                .ResendVerificationEmailAsync(
+                    command.Email,
+                    cancellationToken);
         }
+
     }
 }

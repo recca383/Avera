@@ -21,8 +21,8 @@ namespace Avera.Application.Cases
         DateTimeOffset? ReviewedAt,
         string? ReviewNote,
         FinalVerdict? FinalVerdict,
-        bool IsPdfExportAllowed
-        ,
+        bool IsPdfExportAllowed,
+        bool IsFlaggedForInternalReview,
         bool ResultViewed
     );
 
