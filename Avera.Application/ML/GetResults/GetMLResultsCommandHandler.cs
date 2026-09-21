@@ -49,6 +49,11 @@ namespace Avera.Application.ML.GetResults
             {
                 var mlResults = await blobStorageService.DownloadAsync(caseOutput, cancellationToken);
 
+                if (mlResults == null)
+                {
+                    return Result.Failure<GetMLResultsResponse>(CaseErrors.MLResultsNotFound);
+                }
+
                 var result = new GetMLResultsResponse(selectedCase.Id, mlResults!);
 
                 return Result.Success(result);

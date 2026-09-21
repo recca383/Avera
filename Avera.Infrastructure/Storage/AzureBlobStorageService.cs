@@ -36,7 +36,7 @@ namespace Avera.Infrastructure.Storage
             await foreach (BlobItem blob in _containerClient.GetBlobsAsync(options))
             {
                 await _containerClient.GetBlobClient(blob.Name)
-                    .DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);
+                    .DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
             }
         }
         public Task DeleteAsync(string fileUrl, CancellationToken cancellationToken = default)

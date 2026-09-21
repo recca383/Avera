@@ -104,7 +104,7 @@ namespace Avera.Application.Cases.Get
                     pagedCase.FinalVerdict,
                     pagedCase.IsPdfExportAllowed,
                     pagedCase.IsFlaggedForInternalReview,
-                    pagedCase.CaseImages.Any()
+                    pagedCase.CaseViews.Any()
                 );
 
                 pagedCasesList.Add(finalCase);
