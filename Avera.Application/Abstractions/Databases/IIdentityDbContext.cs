@@ -4,6 +4,7 @@ using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.TenantSubscriptions;
 using Avera.Domain.Identity.Users;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Avera.Application.Abstractions.Databases
 {
@@ -14,6 +15,7 @@ namespace Avera.Application.Abstractions.Databases
         public DbSet<TenantSubscription> TenantSubscriptions { get; set; }
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
         public DbSet<MemberRequest> MemberRequests { get; set; }
+        DatabaseFacade Database { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

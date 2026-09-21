@@ -1,6 +1,7 @@
 ﻿using Avera.Application.Abstractions.Authentication;
 using Avera.Application.Abstractions.Messaging;
 using SharedKernel;
+using Avera.Domain.Identity.Users;
 
 namespace Avera.Application.Authentication.VerifyEmail
 {
@@ -12,6 +13,9 @@ namespace Avera.Application.Authentication.VerifyEmail
         {
             if (command.Type == "change-email")
             {
+                if (string.IsNullOrWhiteSpace(command.Email))
+                    return Result.Failure<string>(UserErrors.InvalidEmail);
+
                 return await authenticationService.VerifyEmailChangeAsync(
                     command.UserId,
                     command.Email,

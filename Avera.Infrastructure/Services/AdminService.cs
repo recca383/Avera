@@ -91,6 +91,7 @@ namespace Avera.Infrastructure.Services
 
             var caseHandled = await _applicationDbContext.Cases.Where(c =>
                               c.TenantId == user.TenantId &&
+                              c.DeletedAt == DateTime.MaxValue &&
                               c.CreatedByUserId == user.Id).CountAsync(cancellationToken);
             if (user is null)
                 return Result.Failure<TenantMemberDto>(
@@ -106,7 +107,7 @@ namespace Avera.Infrastructure.Services
                     user.IsSuspended,
                     caseHandled,
                     user.DailyCaseLimit!,
-                    null));
+                    user.JoinedAt));
         }
 
         public async Task<Result<List<TenantMemberDto>>> GetMembersAsync(
@@ -162,17 +163,17 @@ namespace Avera.Infrastructure.Services
                     user.IsSuspended,
                     casesHandled,
                     user.DailyCaseLimit,
-                    null));
+                    user.JoinedAt));
             }
 
-            if (IsAlphabetical.HasValue)
+            if (IsAlphabetical == true)
             {
                 result = [.. result.OrderBy(x => x.FirstName)];
             }
 
-            if (IsMostCases.HasValue)
+            if (IsMostCases == true)
             {
-                result = [.. result.OrderBy(x => x.CasesHandled)];
+                result = [.. result.OrderByDescending(x => x.CasesHandled)];
             }
 
             if (Name != null)

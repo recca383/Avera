@@ -16,12 +16,12 @@ internal sealed class EmailVerificationStatus : IEndpoint
         routeBuilder.MapGet(
             "/auth/email-verification-status",
             async (
-                [FromBody] GetEmailVerificationStatusQuery query,
                 IQueryHandler<
                     GetEmailVerificationStatusQuery,
                     EmailVerificationStatusResponse> handler,
                 CancellationToken cancellationToken) =>
             {
+                var query = new GetEmailVerificationStatusQuery();
                 var result = await handler.Handle(
                     query,
                     cancellationToken);

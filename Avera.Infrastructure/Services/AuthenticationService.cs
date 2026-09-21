@@ -94,8 +94,7 @@ namespace Avera.Infrastructure.Services
                     "Forgot password failed because email {Email} was not found",
                     email);
 
-                return Result.Failure<TokenExpiryResponse>(
-                    UserErrors.EmailNotFound);
+                return Result.Success(new TokenExpiryResponse(codeExpiryInMinutes));
             }
 
             Logger.Information(
@@ -120,8 +119,7 @@ namespace Avera.Infrastructure.Services
 
             if (emailResult.IsFailure)
             {
-                return Result.Failure<TokenExpiryResponse>(
-                    emailResult.Error);
+                Logger.Warning("Forgot password email delivery failed for {Email}: {Error}", email, emailResult.Error);
             }
 
             return Result.Success(
@@ -206,7 +204,8 @@ namespace Avera.Infrastructure.Services
                 UserName = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                DailyCaseLimit = 5
+                DailyCaseLimit = 5,
+                JoinedAt = dateTime.PhilippineNow
             };
 
             Logger.Information("Creating identity user {UserName} for email {Email}", user.UserName, user.Email);
@@ -280,13 +279,18 @@ namespace Avera.Infrastructure.Services
 
             var admin = admins.SingleOrDefault(a => a.TenantId == tenant.Id);
 
-            await emailService.ResetPasswordNotificationAsync(
+            var notificationResult = await emailService.ResetPasswordNotificationAsync(
                 email,
                 user.FirstName,
-                tenant.Name,
-                admin.FirstName + " " + admin.LastName,
+                tenant?.Name ?? string.Empty,
+                admin is null ? string.Empty : admin.FirstName + " " + admin.LastName,
                 TEMP_SUPPORT_EMAIL,
                 cancellationToken);
+
+            if (notificationResult.IsFailure)
+            {
+                Logger.Warning("Password reset notification failed for user {UserId}: {Error}", user.Id, notificationResult.Error);
+            }
 
             return Result.Success();
         }
@@ -456,8 +460,7 @@ namespace Avera.Infrastructure.Services
 
             if (emailResult.IsFailure)
             {
-                return Result.Failure<TokenExpiryResponse>(
-                    emailResult.Error);
+                Logger.Warning("Verification email delivery failed for {Email}: {Error}", newEmail, emailResult.Error);
             }
 
             return Result.Success(
@@ -565,6 +568,9 @@ namespace Avera.Infrastructure.Services
 
         public async Task<Result<string>> VerifyEmailChangeAsync(Guid userId, string newEmail, string token, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(newEmail) || !newEmail.Contains('@'))
+                return Result.Failure<string>(UserErrors.InvalidEmail);
+
             var user = await _userManager.FindByIdAsync(
              userId.ToString());
 
@@ -582,13 +588,14 @@ namespace Avera.Infrastructure.Services
                 return Result.Failure<string>(UserErrors.EmailAlreadyExists);
             }
 
-            var result = await _userManager.ChangeEmailAsync(
-                user,
-                newEmail,
-                token);
+            await using var transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
 
             if (!result.Succeeded)
                 return HandleIdentityResult<string>(result);
+
+            await transaction.CommitAsync(cancellationToken);
 
             user.UserName = newEmail;
 
@@ -639,14 +646,14 @@ namespace Avera.Infrastructure.Services
 
             if (user is null)
             {
-                return Result.Failure<TokenExpiryResponse>(
-                    UserErrors.UserNotFound);
+                return Result.Success(new TokenExpiryResponse(
+                    Convert.ToInt32(configuration["Identity:TokenExpiryInMinutes"]!)));
             }
 
             if (user.EmailConfirmed)
             {
-                return Result.Failure<TokenExpiryResponse>(
-                    UserErrors.EmailAlreadyVerified);
+                return Result.Success(new TokenExpiryResponse(
+                    Convert.ToInt32(configuration["Identity:TokenExpiryInMinutes"]!)));
             }
 
 
@@ -700,9 +707,12 @@ namespace Avera.Infrastructure.Services
                 string newEmail,
                 CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(newEmail) || !newEmail.Contains('@'))
+                return Result.Failure<TokenExpiryResponse>(UserErrors.InvalidEmail);
+
             var user = await _userManager.FindByEmailAsync(email);
 
-            if (user is null)
+            if (user is null || user.Id != _userContext.UserId)
             {
                 return Result.Failure<TokenExpiryResponse>(
                     UserErrors.UserNotFound);

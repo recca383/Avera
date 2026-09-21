@@ -21,9 +21,16 @@ namespace Avera.WebApi.Endpoints.Auth
                 "/auth/resend-verification-email",
                 async (
                     Request request,
+                    HttpContext httpContext,
                     ICommandHandler<ResendVerificationEmailCommand, TokenExpiryResponse> handler,
                     CancellationToken cancellationToken) =>
                 {
+                    if (request.Type == "change-email" &&
+                        httpContext.User.Identity?.IsAuthenticated != true)
+                    {
+                        return Results.Unauthorized();
+                    }
+
                     var command =
                         new ResendVerificationEmailCommand(
                             request.Email,
@@ -38,6 +45,7 @@ namespace Avera.WebApi.Endpoints.Auth
                         Results.Ok,
                         CustomResults.Problem);
                 })
+                .RequireRateLimiting("resend-verification")
                 .WithTags(Tags.Auth);
         }
     }

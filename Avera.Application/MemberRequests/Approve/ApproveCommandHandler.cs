@@ -50,6 +50,7 @@ namespace Avera.Application.MemberRequests.Approve
             var admin = await userManager.FindByIdAsync(reviewedByUserId.ToString());
 
             user.TenantId = request.TenantId;
+            user.JoinedAt = request.ReviewedAt;
 
             await userManager.AddToRoleAsync(user, "User");
 

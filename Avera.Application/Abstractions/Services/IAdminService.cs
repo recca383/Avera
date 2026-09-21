@@ -27,7 +27,7 @@ namespace Avera.Application.Abstractions.Authentication
         Task<Result<List<TenantMemberDto>>> GetMembersAsync(
             bool? IsAlphabetical,
             bool? IsMostCases,
-            string Name,
+            string? Name,
             CancellationToken cancellationToken = default);
 
         Task<Result<TenantMemberDto>> GetMemberByIdAsync(
