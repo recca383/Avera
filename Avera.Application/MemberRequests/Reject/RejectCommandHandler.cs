@@ -60,6 +60,8 @@ namespace Avera.Application.MemberRequests.Reject
                 request.ReviewedAt ?? dateTime.PhilippineNow
             ));
 
+            identityDbContext.MemberRequests.Remove(request);
+
             await identityDbContext.SaveChangesAsync(cancellationToken);
 
             return Result.Success();

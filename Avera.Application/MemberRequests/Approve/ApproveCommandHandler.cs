@@ -63,6 +63,8 @@ namespace Avera.Application.MemberRequests.Approve
                 request.ReviewedAt ?? dateTime.PhilippineNow
             ));
 
+            identityDbContext.MemberRequests.Remove(request);
+
             await identityDbContext.SaveChangesAsync(cancellationToken);
 
             await userManager.UpdateSecurityStampAsync(user);
