@@ -617,16 +617,16 @@ namespace Avera.Infrastructure.Services
                 app = appOptions.Value.DeepLinkBase + "_User/user_profile";
             }
 
-            await Task.WhenAll(
-                emailService.SendEmailNotificationToNewEmail(
+            await emailService.SendEmailNotificationToNewEmail(
                     user.Email!,
                     user.FirstName!,
                     DateOnly.FromDateTime(dateTime.PhilippineNow),
                     TimeOnly.FromDateTime(dateTime.PhilippineNow),
                     app,
                     cancellationToken
-                    ),
-                emailService.SendEmailNotificationToOldEmail(
+                    );
+
+            await emailService.SendEmailNotificationToOldEmail(
                     oldEmail!,
                     user.FirstName!,
                     user.Email!,
@@ -634,8 +634,7 @@ namespace Avera.Infrastructure.Services
                     TimeOnly.FromDateTime(dateTime.PhilippineNow),
                     TEMP_SUPPORT_EMAIL,
                     cancellationToken
-                    )
-                );
+                    );
 
             return Result.Success<string>(app);
         }

@@ -51,8 +51,6 @@ namespace Avera.Application.MemberRequests.Reject
 
             var admin = await userManager.FindByIdAsync(reviewedByUserId.ToString());
 
-            user.TenantId = request.TenantId;
-
             // Raise domain event so notifications and emails are handled by event handlers
             request.Raise(new Avera.Domain.Identity.MemberRequests.Events.MemberRequestRejectedDomainEvent(
                 request.Id,
