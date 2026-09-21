@@ -1,5 +1,6 @@
 ﻿
 using Avera.Application.Abstractions.Messaging;
+using Avera.Application.Authentication.Common;
 using Avera.Application.Authentication.ForgotPassword;
 using Avera.WebApi.Extensions;
 using Avera.WebApi.Infrastructure;
@@ -13,7 +14,7 @@ namespace Avera.WebApi.Endpoints.Auth
         {
             routeBuilder.MapPost("/auth/forgot-password", async (
                 ForgotPasswordCommand command,
-                ICommandHandler<ForgotPasswordCommand> handler,
+                ICommandHandler<ForgotPasswordCommand, TokenExpiryResponse> handler,
                 CancellationToken cancellationToken
                 ) =>
             {
