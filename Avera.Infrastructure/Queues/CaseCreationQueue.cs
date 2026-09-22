@@ -7,6 +7,7 @@ using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Avera.Domain.Application.Cases;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Avera.Infrastructure.Queues;
 
@@ -71,7 +72,14 @@ internal sealed class CaseCreationQueue : ICaseCreationQueue, IDisposable
                 // Enforce per-user daily creation limit if set
                 if (user.DailyCaseLimit > 0)
                 {
-                    var todayCount = await db.Cases.CountAsync(c => c.CreatedByUserId == user.Id && c.CreatedAt.Date == dateTime.PhilippineNow.Date, CancellationToken.None);
+                    var todayCount = await db.Cases
+                        .IgnoreQueryFilters()
+                        .CountAsync(
+                            c => c.TenantId == item.CallerTenantId &&
+                                 c.CreatedByUserId == item.CallerUserId &&
+                                 c.CreatedAt.Date == dateTime.PhilippineNow.Date,
+                            CancellationToken.None);
+
                     if (todayCount >= user.DailyCaseLimit)
                     {
                         item.Tcs.SetResult(Result.Failure<Domain.Application.Cases.Case>(new SharedKernel.Error("User.DailyLimitReached", "Daily case creation limit reached", SharedKernel.ErrorType.Conflict)));
@@ -80,30 +88,52 @@ internal sealed class CaseCreationQueue : ICaseCreationQueue, IDisposable
                 }
 
                 // Generate case code deterministically under lock (single reader provides sequencing)
-                var newCase = new Domain.Application.Cases.Case()
-                {
-                    Id = Guid.NewGuid(),
-                    CaseCode = GenerateCaseCode(db, dateTime),
-                    SubjectName = item.Command.SubjectName,
-                    CreatedByUserId = item.CallerUserId,
-                    TenantId = item.CallerTenantId,
-                    DocumentType = item.Command.DocumentType,
-                    Priority = item.Command.Priority,
-                    Notes = "",
-                    CreatedAt = dateTime.PhilippineNow,
-                    Status = Domain.Application.Cases.Status.Processing
-                };
+                Domain.Application.Cases.Case? newCase = null;
 
-                if (await db.Cases.AnyAsync(c => c.CaseCode == newCase.CaseCode, CancellationToken.None))
+                for (int attempt = 0; attempt < 5; attempt++)
                 {
-                    item.Tcs.SetResult(Result.Failure<Domain.Application.Cases.Case>(CaseErrors.CaseAlreadyExists));
-                    continue;
+                    newCase = new Domain.Application.Cases.Case()
+                    {
+                        Id = Guid.NewGuid(),
+                        CaseCode = await GenerateCaseCodeAsync(db, dateTime),
+                        SubjectName = item.Command.SubjectName,
+                        CreatedByUserId = item.CallerUserId,
+                        TenantId = item.CallerTenantId,
+                        DocumentType = item.Command.DocumentType,
+                        Priority = item.Command.Priority,
+                        Notes = "",
+                        CreatedAt = dateTime.PhilippineNow,
+                        Status = Domain.Application.Cases.Status.Processing
+                    };
+
+                    try
+                    {
+                        await db.Cases.AddAsync(newCase, CancellationToken.None);
+                        await db.SaveChangesAsync(CancellationToken.None);
+
+                        item.Tcs.SetResult(Result.Success(newCase));
+                        newCase = null;
+                        break;
+                    }
+                    catch (DbUpdateException ex) when (
+                        ex.InnerException is PostgresException postgresException &&
+                        postgresException.SqlState == PostgresErrorCodes.UniqueViolation)
+                    {
+                        //db.Entry(newCase).State = EntityState.Detached;
+
+                        if (attempt == 4)
+                        {
+                            item.Tcs.SetResult(
+                                Result.Failure<Domain.Application.Cases.Case>(
+                                    new Error(
+                                        "Case.CodeGenerationFailed",
+                                        "Unable to generate a unique case code.",
+                                        ErrorType.Failure)));
+
+                            break;
+                        }
+                    }
                 }
-
-                await db.Cases.AddAsync(newCase);
-                await db.SaveChangesAsync();
-
-                item.Tcs.SetResult(Result.Success(newCase));
             }
             catch (Exception ex)
             {
@@ -112,10 +142,19 @@ internal sealed class CaseCreationQueue : ICaseCreationQueue, IDisposable
         }
     }
 
-    private string GenerateCaseCode(IApplicationDbContext db, IDateTimeProvider dateTime)
+    private static async Task<string> GenerateCaseCodeAsync(
+        IApplicationDbContext db,
+        IDateTimeProvider dateTime)
     {
-        var numofcasesToday = db.Cases.Count(c => c.CreatedAt.Date == dateTime.PhilippineNow.Date) + 1;
-        return $"CASE-{dateTime.PhilippineNow:MMddyyyy}-{numofcasesToday:D3}";
+        var today = dateTime.PhilippineNow.Date;
+
+        var numberOfCasesToday = await db.Cases
+            .IgnoreQueryFilters()
+            .CountAsync(
+                c => c.CreatedAt.Date == today,
+                CancellationToken.None);
+
+        return $"CASE-{dateTime.PhilippineNow:MMddyyyy}-{numberOfCasesToday + 1:D3}";
     }
 
     public void Dispose()

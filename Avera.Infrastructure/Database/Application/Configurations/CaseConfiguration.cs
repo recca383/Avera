@@ -16,7 +16,7 @@ namespace Avera.Infrastructure.Database.Application.Configurations
 
             builder.HasIndex(c => c.Id);
             builder.HasIndex(c => c.CreatedAt);
-            builder.HasIndex(c => c.CaseCode);
+            builder.HasIndex(c => c.CaseCode).IsUnique();
 
             builder.HasMany<CaseImage>(c => c.CaseImages)
                 .WithOne(ci => ci.Case)
@@ -38,6 +38,7 @@ namespace Avera.Infrastructure.Database.Application.Configurations
             builder.HasMany<CaseView>(c => c.CaseViews)
                 .WithOne(cv => cv.Case)
                 .HasForeignKey(cv => cv.CaseId);
+            
         }
     }
 }
