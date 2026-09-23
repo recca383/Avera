@@ -8,8 +8,7 @@ namespace Avera.Application.Authentication.ForgotPassword
 {
     public sealed class ForgotPasswordHandler
     (
-        IAuthenticationService authenticationServices,
-        IConfiguration configuration
+        IAuthenticationService authenticationServices
 
     ) : ICommandHandler<ForgotPasswordCommand, TokenExpiryResponse>
     {

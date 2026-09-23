@@ -40,7 +40,6 @@ namespace Avera.Infrastructure.Services
             IConfiguration configuration,
             IIdentityDbContext identityDbContext,
             IUserContext _userContext,
-            IMemberRequestNotifier memberRequestNotifier,
             IDateTimeProvider dateTime,
             IOptions<AppOptions> appOptions,
             IDomainEventsDispatcher domainEventsDispatcher

@@ -18,7 +18,8 @@ internal sealed class SetUserDailyLimit : IEndpoint
             var command = new SetUserDailyLimitCommand(request.UserId, request.DailyLimit);
             var result = await handler.Handle(command, cancellationToken);
             return result.Match(Results.NoContent, CustomResults.Problem);
-        });
+        })
+            .RequireAuthorization(RolePolicy.Admin);
     }
 }
 

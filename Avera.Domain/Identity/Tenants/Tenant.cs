@@ -11,6 +11,7 @@ namespace Avera.Domain.Identity.Tenants
         public TenantStatus Status { get; set; }
         public required string InviteCode { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int MemberCountLimit { get; set; } = 5;
 
         // Navigation Properties
         public List<TenantSubscription> TenantSubscriptions { get; set; } = new();

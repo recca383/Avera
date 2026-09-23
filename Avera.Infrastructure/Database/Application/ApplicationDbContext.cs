@@ -17,8 +17,7 @@ namespace Avera.Infrastructure.Database.Application
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
      IDomainEventsDispatcher domainEventsDispatcher,
-     IUserContext userContext,
-     UserManager<User> userManager)
+     IUserContext userContext)
     : DbContext(options), IApplicationDbContext
     {
         public DbSet<Case> Cases { get; set; }

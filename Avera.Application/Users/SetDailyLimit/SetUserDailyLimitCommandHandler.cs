@@ -5,7 +5,7 @@ using Avera.Application.Abstractions.Messaging;
 
 namespace Avera.Application.Users.SetDailyLimit;
 
-internal sealed class SetUserDailyLimitCommandHandler(IAdminService adminService, IUserContext userContext) : ICommandHandler<SetUserDailyLimitCommand>
+internal sealed class SetUserDailyLimitCommandHandler(IAdminService adminService) : ICommandHandler<SetUserDailyLimitCommand>
 {
     public async Task<Result> Handle(SetUserDailyLimitCommand command, CancellationToken cancellationToken)
     {

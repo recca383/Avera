@@ -391,5 +391,19 @@ namespace Avera.Infrastructure.Services
 
             return Result.Success();
         }
+
+        public async Task<Result> SetMemberCountLimit(int limit, CancellationToken cancellation = default)
+        {
+            var tenant = await _identityDbContext.Tenants.SingleOrDefaultAsync(t => t.Id == _userContext.TenantId, cancellation);
+
+            if (tenant  == null)
+                return Result.Failure(TenantErrors.TenantNotFound);
+
+            tenant.MemberCountLimit = limit;
+
+            await _identityDbContext.SaveChangesAsync(cancellation);
+
+            return Result.Success();
+        }
     }
 }

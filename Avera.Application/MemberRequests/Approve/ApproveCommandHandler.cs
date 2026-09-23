@@ -18,7 +18,6 @@ namespace Avera.Application.MemberRequests.Approve
             IIdentityDbContext identityDbContext,
             IUserContext userContext,
             UserManager<User> userManager,
-            IEmailService emailService,
             IDateTimeProvider dateTime
         ): ICommandHandler<ApproveCommand>
     {

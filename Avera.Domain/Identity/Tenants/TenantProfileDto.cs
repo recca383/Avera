@@ -9,6 +9,7 @@ namespace Avera.Domain.Identity.Tenants
         string Name,
         string InviteCode,
         int MemberCount,
-        DateTime CreatedAt
+        DateTime CreatedAt,
+        int MemberCountLimit
         );
 }

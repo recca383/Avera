@@ -20,7 +20,6 @@ namespace Avera.Application.MemberRequests.Reject
             IIdentityDbContext identityDbContext,
             IUserContext userContext,
             UserManager<User> userManager,
-            IEmailService emailService,
             IDateTimeProvider dateTime
         ) : ICommandHandler<RejectCommand>
     {

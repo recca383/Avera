@@ -20,8 +20,7 @@ namespace Avera.Infrastructure.Database.Identity
 {
     public sealed class IdentityDbContext(
         DbContextOptions<IdentityDbContext> options,
-        IDomainEventsDispatcher domainEventsDispatcher,
-        IUserContext userContext)
+        IDomainEventsDispatcher domainEventsDispatcher)
         : IdentityDbContext<User, Role, Guid>(options), IIdentityDbContext
     {
         public DbSet<Tenant> Tenants { get; set; }

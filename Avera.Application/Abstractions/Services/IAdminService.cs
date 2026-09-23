@@ -42,5 +42,9 @@ namespace Avera.Application.Abstractions.Authentication
             Guid userId,
             int? dailyLimit,
             CancellationToken cancellationToken = default);
+
+        Task<Result> SetMemberCountLimit(
+            int limit,
+            CancellationToken cancellation = default);
     }
 }

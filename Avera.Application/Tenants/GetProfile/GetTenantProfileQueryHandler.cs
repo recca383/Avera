@@ -32,7 +32,8 @@ namespace Avera.Application.Tenants.GetProfile
                     t.Name,
                     t.InviteCode,
                     t.Users.Count,
-                    t.CreatedAt))
+                    t.CreatedAt,
+                    t.MemberCountLimit))
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (profile is null)
