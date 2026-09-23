@@ -606,15 +606,8 @@ namespace Avera.Infrastructure.Services
             await _userManager.UpdateSecurityStampAsync(user);
 
             string app = string.Empty;
-            
-            if(await _userManager.IsInRoleAsync(user, "Admin"))
-            {
-                app = appOptions.Value.DeepLinkBase + "Admin/profileScreens/EditProfileScreen";
-            }
-            else
-            {
-                app = appOptions.Value.DeepLinkBase + "_User/user_profile";
-            }
+
+            app = appOptions.Value.DeepLinkBase + "_login/SignInPage";
 
             await emailService.SendEmailNotificationToNewEmail(
                     user.Email!,
