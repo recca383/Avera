@@ -204,35 +204,35 @@ namespace Avera.Infrastructure.Services
             int expiryHours,
             CancellationToken cancellationToken = default)
         {
-            //var result = await fluentEmail
-            //   .To(recipient)
-            //   .Subject("Verify Your Avera Email")
-            //   .UsingTemplateFromFile(
-            //       GetTemplatePath("verify-email.cshtml"),
-            //       new
-            //       {
-            //           Header = HEADER_REFERENCE,
-            //           FirstName = firstName,
-            //           VerificationUrl = verificationUrl,
-            //           SupportEmail = supportEmail,
-            //           CurrentYear =CURRENT_YEAR,
-            //           ExpiryHours = expiryHours
-            //       })
-            //   .Attach(GetHeader())
-            //   .SendAsync(cancellationToken);
+            var result = await fluentEmail
+               .To(recipient)
+               .Subject("Verify Your Avera Email")
+               .UsingTemplateFromFile(
+                   GetTemplatePath("verify-email.cshtml"),
+                   new
+                   {
+                       Header = HEADER_REFERENCE,
+                       FirstName = firstName,
+                       VerificationUrl = verificationUrl,
+                       SupportEmail = supportEmail,
+                       CurrentYear = CURRENT_YEAR,
+                       ExpiryHours = expiryHours
+                   })
+               .Attach(GetHeader())
+               .SendAsync(cancellationToken);
 
-            //if (!result.Successful)
-            //{
-            //    var errors = result.ErrorMessages
-            //        .Select(e => new Error(
-            //            "Email.Failure",
-            //            e,
-            //            ErrorType.Failure))
-            //        .ToArray();
+            if (!result.Successful)
+            {
+                var errors = result.ErrorMessages
+                    .Select(e => new Error(
+                        "Email.Failure",
+                        e,
+                        ErrorType.Failure))
+                    .ToArray();
 
-            //    return Result.Failure(
-            //        new ValidationError(errors));
-            //}
+                return Result.Failure(
+                    new ValidationError(errors));
+            }
 
             return Result.Success();
         }
@@ -327,33 +327,33 @@ namespace Avera.Infrastructure.Services
             string appUrl,
             CancellationToken cancellationToken = default)
         {
-            //var result = await fluentEmail
-            //   .To(recipient)
-            //   .Subject("Your Avera Email Has Been Verified")
-            //   .UsingTemplateFromFile(
-            //       GetTemplatePath("email-verified.cshtml"),
-            //       new
-            //       {
-            //           Header = HEADER_REFERENCE,
-            //           FirstName = firstName,
-            //           EmailAddress = recipient,
-            //           CurrentYear = CURRENT_YEAR,
-            //       })
-            //   .Attach(GetHeader())
-            //   .SendAsync(cancellationToken);
+            var result = await fluentEmail
+               .To(recipient)
+               .Subject("Your Avera Email Has Been Verified")
+               .UsingTemplateFromFile(
+                   GetTemplatePath("email-verified.cshtml"),
+                   new
+                   {
+                       Header = HEADER_REFERENCE,
+                       FirstName = firstName,
+                       EmailAddress = recipient,
+                       CurrentYear = CURRENT_YEAR,
+                   })
+               .Attach(GetHeader())
+               .SendAsync(cancellationToken);
 
-            //if (!result.Successful)
-            //{
-            //    var errors = result.ErrorMessages
-            //        .Select(e => new Error(
-            //            "Email.Failure",
-            //            e,
-            //            ErrorType.Failure))
-            //        .ToArray();
+            if (!result.Successful)
+            {
+                var errors = result.ErrorMessages
+                    .Select(e => new Error(
+                        "Email.Failure",
+                        e,
+                        ErrorType.Failure))
+                    .ToArray();
 
-            //    return Result.Failure(
-            //        new ValidationError(errors));
-            //}
+                return Result.Failure(
+                    new ValidationError(errors));
+            }
 
             return Result.Success();
         }
