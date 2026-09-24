@@ -1,4 +1,5 @@
 ﻿using Avera.Application.Abstractions.Messaging;
+using Avera.Application.Abstractions.Services;
 using Avera.Application.Authentication.ChangeEmail;
 using Avera.Application.Authentication.VerifyEmail;
 using Avera.Infrastructure.Services;
@@ -23,6 +24,7 @@ namespace Avera.WebApi.Endpoints.Auth
             routeBuilder.MapGet("/auth/verify-email", async (
                 [AsParameters] Request request,
                 ICommandHandler<VerifyEmailCommand, string> handler,
+                IEmailService service,
                 CancellationToken cancellationToken
             ) =>
             {
@@ -37,23 +39,12 @@ namespace Avera.WebApi.Endpoints.Auth
                     command,
                     cancellationToken);
 
-                var html = await RazorTemplateEngine.RenderAsync("ErrorPages/email-verified.cshtml");
+                var fallback = await service.SendVerifiedFallback(cancellationToken);
 
-                return result.Match(_ => Results.Redirect(result.Value), _ => Results.Content(html, "text/html"));
+                return result.Match(_ => Results.Redirect(result.Value), _ => Results.Content(fallback.Value, "text/html; charset=utf-8"));
             })
             .WithTags(Tags.Auth)
             .AllowAnonymous();
-        }
-        private static string GetTemplatePath(string templateName)
-        {
-            var assemblyLocation =
-                Path.GetDirectoryName(
-                    typeof(EmailService).Assembly.Location)!;
-
-            return Path.Combine(
-                assemblyLocation,
-                "EmailTemplates",
-                templateName);
         }
     }
 }
