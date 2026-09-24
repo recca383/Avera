@@ -25,7 +25,7 @@ namespace Avera.Domain.Application.Cases
         public DateTime? ReviewedAt { get; set; }
         public string? ReviewNote { get; set; }
         public FinalVerdict FinalVerdict { get; set; } = FinalVerdict.None;
-        public bool IsPdfExportAllowed { get; set; } = false;
+        public bool IsPdfExportAllowed { get; set; } = true;
         public MLResponse? MLResponse { get; set; }
         public bool IsFlaggedForInternalReview { get; set; } = false;
         public Guid? ToggledByUserId { get; set; }
