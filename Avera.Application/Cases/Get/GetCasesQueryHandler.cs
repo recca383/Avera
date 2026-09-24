@@ -91,6 +91,7 @@ namespace Avera.Application.Cases.Get
                     pagedCase.CaseCode,
                     pagedCase.SubjectName,
                     createdByUser_FullName,
+                    createdByUser.Id,
                     pagedCase.Priority,
                     pagedCase.CreatedAt,
                     pagedCase.Status,

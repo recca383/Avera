@@ -1,8 +1,10 @@
 ﻿using Avera.Application.Abstractions.Messaging;
 using Avera.Application.Authentication.ChangeEmail;
 using Avera.Application.Authentication.VerifyEmail;
+using Avera.Infrastructure.Services;
 using Avera.WebApi.Extensions;
 using Avera.WebApi.Infrastructure;
+using Razor.Templating.Core;
 using SharedKernel;
 
 namespace Avera.WebApi.Endpoints.Auth
@@ -35,12 +37,23 @@ namespace Avera.WebApi.Endpoints.Auth
                     command,
                     cancellationToken);
 
-                return result.Match(
-                    _ => Results.Redirect(result.Value),
-                    CustomResults.Problem);
+                var html = await RazorTemplateEngine.RenderAsync("ErrorPages/email-verified.cshtml");
+
+                return result.Match(_ => Results.Redirect(result.Value), _ => Results.Content(html, "text/html"));
             })
             .WithTags(Tags.Auth)
             .AllowAnonymous();
+        }
+        private static string GetTemplatePath(string templateName)
+        {
+            var assemblyLocation =
+                Path.GetDirectoryName(
+                    typeof(EmailService).Assembly.Location)!;
+
+            return Path.Combine(
+                assemblyLocation,
+                "EmailTemplates",
+                templateName);
         }
     }
 }

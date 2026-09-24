@@ -9,6 +9,7 @@ using Avera.Application.Authentication.Register;
 using Avera.Application.Authentication.ResetPassword;
 using Avera.Application.MemberRequests.Notifications;
 using Avera.Domain.Identity.MemberRequests;
+using Avera.Domain.Identity.Tenants;
 using Avera.Domain.Identity.Users;
 using Avera.Infrastructure.Authentication;
 using Avera.Infrastructure.Configuration;
@@ -331,6 +332,11 @@ namespace Avera.Infrastructure.Services
 
             if (tenant is null)
                 return Result.Failure(UserErrors.JoinInviteCodeFailed);
+
+            if (identityDbContext.Users.Count(u => u.TenantId == tenant.Id) >= tenant.MemberCountLimit)
+            {
+                Result.Failure(TenantErrors.TenantIsFull);
+            }
 
             var user = await _userManager.FindByIdAsync(_userContext.UserId.ToString());
 

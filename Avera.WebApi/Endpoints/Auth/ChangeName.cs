@@ -35,7 +35,7 @@ namespace Avera.Application.Cases
                     command,
                     cancellationToken);
 
-                return result.Match(
+                return result.Match( 
                     Results.NoContent,
                     CustomResults.Problem);
             })

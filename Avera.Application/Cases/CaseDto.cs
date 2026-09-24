@@ -10,6 +10,7 @@ namespace Avera.Application.Cases
         string CaseCode,
         string SubjectName,
         string Examiner,
+        Guid ExaminerId,
         Priority Priority,
         DateTime CreatedAt,
         Status CaseStatus,

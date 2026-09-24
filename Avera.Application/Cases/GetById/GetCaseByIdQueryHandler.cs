@@ -65,6 +65,7 @@ namespace Avera.Application.Cases.GetById
                 queryResult.CaseCode,
                 queryResult.SubjectName,
                 createdByUser_FullName,
+                createdByUser.Id,
                 queryResult.Priority,
                 queryResult.CreatedAt,
                 queryResult.Status,

@@ -30,6 +30,12 @@ namespace Avera.Domain.Identity.Tenants
             "User not a member of any Tenant",
             ErrorType.NotFound
         );
-         
+
+        public static TenantErrors TenantIsFull => new TenantErrors(
+            "Tenant.IsFull",
+            "Tenant Is Currently Full",
+            ErrorType.Conflict
+        );
+
     }
 }

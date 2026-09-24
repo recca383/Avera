@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RazorLight;
 using SharedKernel;
 
 namespace Avera.Infrastructure.Services
@@ -426,6 +427,14 @@ namespace Avera.Infrastructure.Services
                 IsInline = true,
                 ContentId = HEADER_REFERENCE
             };
+        }
+
+        public async Task<Result<string>> SendVerifiedFallback(CancellationToken cancellationToken = default)
+        {
+
+            string html = await File.ReadAllTextAsync(GetTemplatePath("ErrorPages\\EmailVerified.html"), cancellationToken);
+
+            return html;
         }
     }
 }

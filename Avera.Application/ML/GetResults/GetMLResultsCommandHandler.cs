@@ -38,7 +38,10 @@ namespace Avera.Application.ML.GetResults
                 return Result.Failure<GetMLResultsResponse>(CaseErrors.CaseNotFound);
             }
 
-            if (!selectedCase.IsPdfExportAllowed)
+            var IsAdmin = await userManager.IsInRoleAsync(user, "Admin");
+
+
+            if (!IsAdmin && !selectedCase.IsPdfExportAllowed)
             {
                 return Result.Failure<GetMLResultsResponse>(CaseErrors.PdfExportNotAllowed);
             }

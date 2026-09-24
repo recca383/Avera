@@ -74,5 +74,8 @@ namespace Avera.Application.Abstractions.Services
             string supportEmail,
             CancellationToken cancellationToken = default);
 
+        Task<Result<string>> SendVerifiedFallback(
+            CancellationToken cancellationToken = default);
+
     }
 }
