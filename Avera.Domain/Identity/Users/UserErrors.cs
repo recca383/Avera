@@ -66,6 +66,11 @@ namespace Avera.Domain.Identity.Users
             ErrorType.NotFound
         );
 
+        public static UserErrors ProfilePictureNotFound => new UserErrors(
+            "User.ProfilePictureNotFound",
+            "User Profile Picture is not available.",
+            ErrorType.NotFound
+        );
         // Validation Errors
         public static UserErrors InvalidPassword => new UserErrors(
             "User.InvalidPassword",
@@ -153,5 +158,6 @@ namespace Avera.Domain.Identity.Users
             "Role assignment failed",
             ErrorType.Failure
         );
+        
     }
 }

@@ -5,6 +5,7 @@ using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
+using SharedKernel;
 
 namespace Avera.Infrastructure.Storage
 {
@@ -47,6 +48,11 @@ namespace Avera.Infrastructure.Storage
 
         public async Task<Stream?> DownloadAsync(string fileUrl, CancellationToken cancellationToken = default)
         {
+            if (String.IsNullOrWhiteSpace(fileUrl))
+            {
+                throw new ApplicationException(string.Concat("Blob Error\n", "File is not provided.\n", ErrorType.Validation));
+            }
+
             var blobClient = _containerClient.GetBlobClient(fileUrl);
 
             if (!await blobClient.ExistsAsync(cancellationToken))

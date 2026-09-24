@@ -12,6 +12,7 @@ namespace Avera.Domain.Identity.Users
         // Per-user daily case creation cap. Defaults to 5 per day.
         public int DailyCaseLimit { get; set; } = 5;
         public DateTime? JoinedAt { get; set; }
+        public string ProfilePictureBlob { get; set; } = "";
 
         // Navigation 
         public List<Notification> Notifications { get; set; } = new();
