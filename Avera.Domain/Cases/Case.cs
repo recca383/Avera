@@ -30,6 +30,7 @@ namespace Avera.Domain.Application.Cases
         public bool IsFlaggedForInternalReview { get; set; } = false;
         public Guid? ToggledByUserId { get; set; }
         public DateTime? ToggledAt { get; set; }
+        public TimeSpan? TimeTakenForAnalysis { get; set; }
 
         // Navigation Properties
         public Guid CreatedByUserId { get; set; }

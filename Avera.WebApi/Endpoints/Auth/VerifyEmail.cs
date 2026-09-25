@@ -41,7 +41,14 @@ namespace Avera.WebApi.Endpoints.Auth
 
                 var fallback = await service.SendVerifiedFallback(cancellationToken);
 
-                return result.Match(_ => Results.Redirect(result.Value), _ => Results.Content(fallback.Value, "text/html; charset=utf-8"));
+                if(!result.IsSuccess)
+                {
+                    Results.Content(fallback.Value, "text/html");
+                }
+                else
+                {
+                    Results.Redirect(result.Value);
+                }
             })
             .WithTags(Tags.Auth)
             .AllowAnonymous();

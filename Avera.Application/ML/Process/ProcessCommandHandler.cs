@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
-using System.Windows.Input;
+using System.Diagnostics;
 
 namespace Avera.Application.ML.Process
 {
@@ -49,6 +49,10 @@ namespace Avera.Application.ML.Process
 
             logger.LogInformation("Selected Case with Id: {CaseId} has {NumberOfImages} images", selectedCase.Id, selectedCase.CaseImages.Count);
 
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
             // Build deterministic image lists: take latest suspected image and up to 4 reference images ordered by index
             var questionedImageUrl = selectedCase.CaseImages
                                         .Where(ci => ci.Type == ImageType.Suspected)
@@ -78,6 +82,10 @@ namespace Avera.Application.ML.Process
 
             logger.LogInformation("Sending process request for Case with Id: {CaseId}", selectedCase!.Id);  
             ProcessMLResponse? response = await mLService.ProcessAsync(processRequest, cancellationToken);
+
+            stopwatch.Stop();
+
+            selectedCase.TimeTakenForAnalysis = stopwatch.Elapsed;
 
             var MLresponse = new MLResponse()
             {
