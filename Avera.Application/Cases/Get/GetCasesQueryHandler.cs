@@ -21,7 +21,6 @@ namespace Avera.Application.Cases.Get
         : IQueryHandler<GetCasesQuery, GetCasesQueryResult>
     {
         private static readonly ILogger logger = Log.ForContext<GetCaseQueryHandler>();
-        private const bool IS_CASE_DELETED = false;
         // noop to trigger rebuild
         public async Task<Result<GetCasesQueryResult>> Handle(GetCasesQuery query, CancellationToken cancellationToken)
         {
@@ -33,7 +32,7 @@ namespace Avera.Application.Cases.Get
             if (user!.IsSuspended)
                 return Result.Failure<GetCasesQueryResult>(UserErrors.IsSuspended);
 
-            IQueryable<Case>? cases = applicationDbContext.Cases.AsQueryable();
+            IQueryable<Case>? cases = applicationDbContext.Cases.Include(c => c.CaseViews).AsQueryable();
 
             if (userContext.TenantId == null)
                 return Result.Failure<GetCasesQueryResult>(TenantErrors.NotMember);
@@ -84,7 +83,12 @@ namespace Avera.Application.Cases.Get
                     );
                 }
 
+                pagedCase.CaseViews ??= [];
+
                 // determine if the current user has viewed this case result
+                var IsViewedByCurrentUser = pagedCase
+                                            .CaseViews
+                                            .Any(u => u.UserId == userContext.UserId && u.CaseId == pagedCase.Id);
 
                 var finalCase = new CaseDto(
                     pagedCase.Id,
@@ -105,7 +109,7 @@ namespace Avera.Application.Cases.Get
                     pagedCase.FinalVerdict,
                     pagedCase.IsPdfExportAllowed,
                     pagedCase.IsFlaggedForInternalReview,
-                    pagedCase.CaseViews != null ? pagedCase.CaseViews.Any() : false,
+                    IsViewedByCurrentUser,
                     pagedCase.TimeTakenForAnalysis
                 );
 
