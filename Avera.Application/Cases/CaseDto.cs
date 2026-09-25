@@ -24,7 +24,8 @@ namespace Avera.Application.Cases
         FinalVerdict? FinalVerdict,
         bool IsPdfExportAllowed,
         bool IsFlaggedForInternalReview,
-        bool ResultViewed
+        bool ResultViewed,
+        TimeSpan? TimeElapsed
     );
 
 }

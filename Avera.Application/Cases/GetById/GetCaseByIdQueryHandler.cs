@@ -80,7 +80,8 @@ namespace Avera.Application.Cases.GetById
                 
                 queryResult.IsPdfExportAllowed,
                 queryResult.IsFlaggedForInternalReview,
-                IsCaseViewed
+                IsCaseViewed,
+                queryResult.TimeTakenForAnalysis
             );
 
             return Result.Success(new GetCaseByIdQueryResult(finalCase!));
